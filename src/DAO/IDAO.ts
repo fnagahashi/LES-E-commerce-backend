@@ -1,8 +1,6 @@
-export interface IDAO<T> {
-    salvar(entidade: T): Promise<string>;
-    alterar(entidade: T): Promise<number>;
-    consultar(entidade: Partial<T>): Promise<T[]>;
-    excluir(entidade: T): Promise<string>;
-    selecionar(id: string): Promise<T | null>;
-    status(id: string, isActive: boolean): Promise<string>;
+export default interface IDAO<entity> {
+    create(Entity:entity): Promise<entity>;
+    update(Entity:entity): Promise<entity>;
+    delete(Entity:entity): Promise<void>;
+    list(Entity:entity, operation: string): Promise<entity[]>;
 }

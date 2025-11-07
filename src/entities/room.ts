@@ -20,7 +20,7 @@ export default class Room extends entity{
         }
     }
 
-    @Column()
+    @Column({type: "enum", enum: RoomType})
     type: RoomType;
 
     @Column()

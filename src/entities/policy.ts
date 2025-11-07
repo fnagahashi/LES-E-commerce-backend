@@ -30,4 +30,4 @@ export default class Policy extends entity{
     }
 }
 
-export { Sale };
+export { Policy };

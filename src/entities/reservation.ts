@@ -33,11 +33,15 @@ export default class Reservation extends entity{
     @Column('decimal', { precision: 10, scale: 2 })
     priceTotal: number;
 
+    @Column()
+    paymentStatus: boolean;
+
     @CreateDateColumn()
     created_at!: Date;
 
     @UpdateDateColumn()
     updated_at!: Date;
+    payment: any;
 
     constructor(
         codeReservation: string,

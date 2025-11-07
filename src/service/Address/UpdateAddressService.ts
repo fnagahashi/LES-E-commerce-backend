@@ -1,5 +1,5 @@
 import { getCustomRepository } from "typeorm";
-import { IAddressRequest } from "../../DAO/Interface/IAddressInterface";
+import { IAddressRequest } from "../../DAO/Interface/AddressDAO";
 import { AddressRepositories } from "../../repository/AddressRepositories";
 
 class UpdateAddressService {
