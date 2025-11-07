@@ -1,4 +1,4 @@
-import { IAddressRequest } from "../../Interface/IAddressInterface";
+import { IAddressRequest } from "../../DAO/Interface/IAddressInterface";
 import { AddressRepositories } from "../../repository/AddressRepositories";
 import { Client } from "../../entities/guest";
 import { getCustomRepository, getRepository } from "typeorm";

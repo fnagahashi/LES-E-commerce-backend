@@ -1,5 +1,5 @@
 import { getCustomRepository } from "typeorm";
-import { IRoomRequest } from "../../Interface/IRoomInterface";
+import { IRoomRequest } from "../../DAO/Interface/IRoomInterface";
 import { RoomRepositories } from "../../repository/RoomRepositories";
 
 class CreateRoomService {

@@ -1,5 +1,5 @@
 import { getCustomRepository } from "typeorm";
-import { IGuestRequest } from "../../Interface/IGuestInterface";
+import { IGuestRequest } from "../../DAO/Interface/GuestDAO";
 import { GuestRepositories } from "../../repository/GuestRepositories";
 
 class CreateGuestService {

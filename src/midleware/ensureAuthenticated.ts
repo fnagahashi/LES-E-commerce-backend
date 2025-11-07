@@ -1,6 +1,6 @@
 import  { Request, Response, NextFunction } from 'express';
 import {verify} from "jsonwebtoken"
-import { AuthRequest } from '../Interface/AuthRequest';
+import { AuthRequest } from '../DAO/Interface/AuthRequest';
 
 interface IPayload{
     sub: string; email: string;

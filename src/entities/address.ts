@@ -1,15 +1,10 @@
-import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, UpdateDateColumn } from "typeorm";
 import{v4 as uuid} from "uuid";
-import { CreditCard} from './creditCard'
-import { Client } from "./guest";
-
-export type AddressType = "billing" |"delivery";
+import { Guest } from "./guest";
+import entity from "./entity";
 
 @Entity("address")
-class Address{
-    @PrimaryColumn()
-    readonly id!: string;
-
+export default class Address extends entity{
     @Column()
     cep!: string;
 
@@ -31,8 +26,8 @@ class Address{
     @Column({ nullable: true })
     obs!: string;
 
-    @ManyToOne(() => Client, client => client.addresses)
-    client!: Client;
+    @ManyToOne(() => Guest, guest => guest.addresses)
+    guest!: Guest;
 
     @CreateDateColumn()
     created_at!: Date;
@@ -40,10 +35,25 @@ class Address{
     @UpdateDateColumn()
     updated_at!: Date;
 
-    constructor(){
-        if(!this.id){
-            this.id = uuid();
-        }
+    constructor(
+        cep: string,
+        street: string,
+        neighborhood: string,
+        number: string,
+        city: string,
+        state: string,
+        obs: string,
+        guest: Guest
+    ) {
+        super();
+        this.cep = cep;
+        this.street = street;
+        this.neighborhood = neighborhood;
+        this.number = number;
+        this.city = city;
+        this.state = state;
+        this.obs = obs;
+        this.guest = guest;
     }
 }
 

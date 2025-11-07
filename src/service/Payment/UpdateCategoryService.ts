@@ -1,5 +1,5 @@
 import { getCustomRepository } from "typeorm";
-import { ICategoryRequest } from "../../Interface/IPaymentInterface";
+import { ICategoryRequest } from "../../DAO/Interface/IPaymentInterface";
 import { CategoryRepositories } from "../../repository/PaymentRepositories";
 
 

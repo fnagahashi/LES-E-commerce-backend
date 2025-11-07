@@ -1,5 +1,5 @@
 import { getCustomRepository } from "typeorm";
-import { IClientRequest } from "../../Interface/IGuestInterface";
+import { IClientRequest } from "../../DAO/Interface/GuestDAO";
 import { ClientRepositories } from "../../repository/GuestRepositories";
 
 class UpdateClientService {

@@ -1,25 +1,37 @@
-import { Column, CreateDateColumn, Entity, PrimaryColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryColumn, UpdateDateColumn } from "typeorm";
 import{v4 as uuid} from "uuid";
+import { Guest } from "./guest";
+import { Room } from "./room";
+import entity from "./entity";
 
 @Entity("reservation")
-class reservation{
-    @PrimaryColumn()
-    readonly id!: string;
+export default class Reservation extends entity{
+    @Column()
+    codeReservation!: string;
+
+    @ManyToOne(() => Guest)
+    guest: Guest;
+
+    @ManyToOne(() => Room)
+    room: Room;
+
+    @Column('date')
+    dateStart: Date;
+
+    @Column('date')
+    dateEnd: Date;
 
     @Column()
-    datecheckIn!: string;
+    noShow: boolean;
 
     @Column()
-    datecheckOut!: string;
+    qntAldults: number;
 
     @Column()
-    noShow!: boolean;
+    qntChildren: number;
 
-    @Column()
-    qntAdultos!: number;
-
-    @Column()
-    qntCriancas!: number;
+    @Column('decimal', { precision: 10, scale: 2 })
+    priceTotal: number;
 
     @CreateDateColumn()
     created_at!: Date;
@@ -27,11 +39,28 @@ class reservation{
     @UpdateDateColumn()
     updated_at!: Date;
 
-    constructor(){
-        if(!this.id){
-            this.id = uuid();
-        }
+    constructor(
+        codeReservation: string,
+        guest: Guest,
+        room: Room,
+        dateStart: Date,
+        dateEnd: Date,
+        noShow: boolean,
+        qntAldults: number,
+        qntChildren: number,
+        priceTotal: number
+    ){
+        super();
+        this.codeReservation = codeReservation;
+        this.guest = guest;
+        this.room = room;
+        this.dateStart = dateStart;
+        this.dateEnd = dateEnd;
+        this.noShow = noShow;
+        this.qntAldults = qntAldults;
+        this.qntChildren = qntChildren;
+        this.priceTotal = priceTotal;
     }
 }
 
-export {reservation};
+export {Reservation};

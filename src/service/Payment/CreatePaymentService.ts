@@ -1,4 +1,4 @@
-import { IPaymentRequest } from "../../Interface/IPaymentInterface";
+import { IPaymentRequest } from "../../DAO/Interface/IPaymentInterface";
 import { PaymentRepositories } from "../../repository/PaymentRepositories";
 import { getCustomRepository } from "typeorm";
 

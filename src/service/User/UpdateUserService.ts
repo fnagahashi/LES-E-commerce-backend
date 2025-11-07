@@ -1,5 +1,5 @@
 import { getCustomRepository } from "typeorm";
-import { IUserRequest } from "../../Interface/IUserinterface";
+import { IUserRequest } from "../../DAO/Interface/IUserinterface";
 import { UsersRepositories } from "../../repository/UsersRepositories";
 import { hash } from "bcryptjs";
 

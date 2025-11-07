@@ -1,9 +1,9 @@
 import{sign} from "jsonwebtoken";
 import {compare, hash} from "bcryptjs";
-import { IClientRequest } from "../../Interface/IGuestInterface";
+import { IClientRequest } from "../../DAO/Interface/GuestDAO";
 import { getCustomRepository } from "typeorm";
 import { ClientRepositories } from "../../repository/GuestRepositories";
-import { ILoginRequest } from "../../Interface/ILoginRequest";
+import { ILoginRequest } from "../../DAO/Interface/ILoginRequest";
 
 class AutenticationService {
     async execute ({email, password}: ILoginRequest){

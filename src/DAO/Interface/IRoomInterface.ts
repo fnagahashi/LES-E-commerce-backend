@@ -1,8 +1,4 @@
-enum RoomType {
-    single = "single",
-    double = "double",
-    suite = "suite",
-}
+import { RoomType } from "../../enum/RoomType";
 
 interface IRoomRequest {
     id?: string;

@@ -1,6 +1,5 @@
-import { IClientRequest } from "./IGuestInterface";
+import { IGuestRequest } from "./GuestDAO";
 
-type AddressType = 'billing' | 'delivery';
 interface IAddressRequest {
     id?: string;
     cep: string;
@@ -10,7 +9,7 @@ interface IAddressRequest {
     state: string;
     number: string;
     obs?: string;
-    clientId?: string;
+    guestId?: string;
 }
 
-export { IAddressRequest}
+export { IAddressRequest }

@@ -1,5 +1,5 @@
 import { getCustomRepository } from "typeorm";
-import { IProductRequest } from "../../Interface/IProductInterface";
+import { IProductRequest } from "../../DAO/Interface/IProductInterface";
 import { ProductRepositories } from "../../repository/RoomRepositories";
 
 class UpdateProductService {

@@ -1,11 +1,10 @@
 import { Column, CreateDateColumn, Entity, PrimaryColumn, UpdateDateColumn, BeforeInsert} from "typeorm";
 import{v4 as uuid} from "uuid";
+import { RoomType } from "../enum/RoomType";
+import entity from "./entity";
 
 @Entity("room")
-class room{
-    @PrimaryColumn()
-    readonly id!: string;
-
+export default class Room extends entity{
     @Column({ 
         type: 'varchar', 
         length: 5,
@@ -22,7 +21,7 @@ class room{
     }
 
     @Column()
-    type: string;
+    type: RoomType;
 
     @Column()
     isActive: boolean;
@@ -33,11 +32,16 @@ class room{
     @UpdateDateColumn()
     updated_at!: Date;
 
-    constructor(){
-        if(!this.id){
-            this.id = uuid();
-        }
+    constructor(
+        code: string,
+        type: RoomType,
+        isActive: boolean
+    ){
+        super();
+        this.roomCode = code;
+        this.type = type;
+        this.isActive = isActive;
     }
 }
 
-export {room};
+export {Room};

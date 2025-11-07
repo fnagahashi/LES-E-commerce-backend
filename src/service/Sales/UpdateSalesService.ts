@@ -1,5 +1,5 @@
 import { getCustomRepository } from "typeorm";
-import { ISalesRequest } from "../../Interface/ISalesInterface";
+import { ISalesRequest } from "../../DAO/Interface/IReservationInterface";
 import { SalesRepositories } from "../../repository/SalesRepositories";
 
 
