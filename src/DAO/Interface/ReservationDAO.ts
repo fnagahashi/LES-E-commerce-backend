@@ -1,4 +1,4 @@
-import { DataSource, Like, ILike, Repository } from "typeorm";
+import { DataSource, Like, ILike, Repository, Between } from "typeorm";
 import IDAO from "../IDAO";
 import Reservation from "../../entities/reservation";
 
@@ -18,39 +18,81 @@ export default class ReservationDAO implements IDAO<Reservation> {
   async list(reservation: Reservation, operation: string): Promise<Reservation[]> {
     switch (operation) {
       case "findAll":
-        return await this.repository.findAll();
+        return await this.repository.find({
+          relations: ["guest", "room"],
+        });
       case "findById":
         return await this.repository.find({
           where: {id: reservation.id}, 
         });
       case "findByFilters":
-        const type = payment.type ? ILike(`%${payment.type}%`) : ILike(`%`);
-        const status = payment.status ? ILike(`%${payment.status}%`) : ILike(`%`);
-        return await this.repository.find({
-          where: {
-            type: payment.type,
-            status: payment.status,
-          }
-        });
-    case "findByReservation":
-        if (!payment.reservation) {
-          throw new Error("reservationId é obrigatório para esta operação");
+        return await this.findByFilters(reservation);
+
+    case "findByReservationCode":
+        if (!reservation.codeReservation) {
+          throw new Error("Código da reserva é obrigatório para esta operação");
         }
       default:
         throw new Error("Operation not supported");
     }
   }
+  private async findByFilters(filters: Reservation): Promise<Reservation[]> {
+  const whereClause: any = {};
+  
+  if (filters.codeReservation) {
+    whereClause.codeReservation = ILike(`%${filters.codeReservation}%`);
+  }
+  
+  if (filters.guest && filters.guest.id) {
+    whereClause.guest = { id: filters.guest.id };
+  }
+  
+  if (filters.room && filters.room.id) {
+    whereClause.room = { id: filters.room.id };
+  }
+  
+  if (filters.paymentStatus !== undefined && filters.paymentStatus !== null) {
+    whereClause.paymentStatus = filters.paymentStatus;
+  }
+  
+  if (filters.dateStart) {
+    whereClause.dateStart = filters.dateStart;
+  }
+  
+  if (filters.dateEnd) {
+    whereClause.dateEnd = filters.dateEnd;
+  }
+  
+  if (filters.dateStart && filters.dateEnd) {
+    whereClause.dateStart = Between(filters.dateStart, filters.dateEnd);
 
-  async update(payment: Payment): Promise<Payment> {
-    const paymentExists = await this.list(payment, "findById");
-    if (!paymentExists) {
-      throw new Error("Pagamento não encontrado");
-    }
-    const updatedPayment = this.repository.merge(paymentExists[0], payment);
-    return await this.repository.save(updatedPayment);
+  }
+  
+  if (filters.noShow !== undefined && filters.noShow !== null) {
+    whereClause.noShow = filters.noShow;
   }
 
-  async delete(payment: Payment): Promise<void> {
-    await this.repository.softDelete(payment.id);
+  return await this.repository.find({
+    where: whereClause,
+    relations: ["guest", "room"],
+    order: {
+      dateStart: "ASC",
+      created_at: "DESC"
+    }
+  });
+}
+  
+
+  async update(reservation: Reservation): Promise<Reservation> {
+    const reservationExists = await this.list(reservation, "findById");
+    if (!reservationExists) {
+      throw new Error("Reserva não encontrada");
+    }
+    const updatedReservation = this.repository.merge(reservationExists[0], reservation);
+    return await this.repository.save(updatedReservation);
+  }
+
+  async delete(reservation: Reservation): Promise<void> {
+    await this.repository.softDelete(reservation.id);
   }
 }
