@@ -1,5 +1,4 @@
 import { DataSource, Like, ILike, Repository } from "typeorm";
-import entity from "../../entities/entity";
 import Guest from "../../entities/guest";
 import IDAO from "../IDAO";
 

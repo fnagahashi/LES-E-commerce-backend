@@ -7,6 +7,7 @@ import IFacade from "./IFacade";
 import PaymentDAO from "../DAO/Interface/PaymentDAO";
 import RoomDAO from "../DAO/Interface/RoomDAO";
 import IStrategy from "../strategy/IStrategy";
+import LogDAO from "../DAO/Interface/LogDAO";
 
 export default class Facade implements IFacade<entity> {
     private readonly entityDAOMap: Map<string, IDAO<entity>>;
@@ -16,7 +17,8 @@ export default class Facade implements IFacade<entity> {
         private readonly addressDAO: AddressDAO,
         private readonly reservationDAO: ReservationDAO,
         private readonly paymentDAO: PaymentDAO,
-        private readonly roomDAO: RoomDAO
+        private readonly roomDAO: RoomDAO,
+        private readonly logDAO: LogDAO
     ) {
         this.entityDAOMap = new Map<string, IDAO<entity>>;
         this.entityDAOMap.set("Guest", this.guestDAO);
@@ -24,12 +26,32 @@ export default class Facade implements IFacade<entity> {
         this.entityDAOMap.set("Reservation", this.reservationDAO);
         this.entityDAOMap.set("Payment", this.paymentDAO);
         this.entityDAOMap.set("Room", this.roomDAO);
+        this.entityDAOMap.set('Log', this.logDAO);
     };
 
-    public async create(Entity: entity, strategy: Array<IStrategy<entity>>):Promise<entity> {
+    public async create(entity: Entity, strategy: Array<IStrategy<Entity>>):Promise<Entity> {
         let msg: string = "";
 
-        for 
+        for (const s of strategy) {
+            const resultado = await s.executar(entity);
+            if (resultado) {
+                msg += resultado + " ";
+            }     
+        }
+        if (msg) {
+            throw new Error(msg);
+        }
+
+        const entidadeDAO = this.entityDAOMap.get(Entity.constructor.name);
+        if (!entidadeDAO) {
+            throw new Error('Entidade não encontrada');
+        }
+
+        const entidadeCriada = await entidadeDAO.create(Entity);
+        
+        this.gerarLog(entidadeCriada, "criado");
+
+        return entidadeCriada;
     }
 
 }

@@ -1,39 +1,26 @@
-import { Column, CreateDateColumn, Entity, PrimaryColumn, UpdateDateColumn } from "typeorm";
-import{v4 as uuid} from "uuid";
+import {Entity, Column} from "typeorm";
 import entity from "./entity";
 
-@Entity("users")
-export default class User extends entity{
-    @Column()
-    name!: string;
-
-    @Column()
+@Entity("user")
+export default class User extends entity {
+    @Column({type: "varchar"})
     email!: string;
 
-    @Column()
-    admin!: boolean;
+    @Column({type: "varchar"})
+    senha!: string;
 
-    @Column()
-    password!: string;
+    @Column({type: "varchar"})
+    senhaConfirmacao!: string;
 
-    @CreateDateColumn()
-    created_at!: Date;
+    @Column({type: "boolean", default: false})
+    isAdmin!: boolean;
 
-    @UpdateDateColumn()
-    updated_at!: Date;
-
-    constructor(
-        name: string,
-        email: string,
-        admin: boolean,
-        password: string
-    ){
+    constructor(email: string, nome: string, senha?: string, senhaConfirmacao?: string, isAdmin?: boolean) {
         super();
-        this.name = name;
         this.email = email;
-        this.admin = admin;
-        this.password = password;
+        this.senha = senha || "";
+        this.senhaConfirmacao = senhaConfirmacao || "";
+        this.isAdmin = isAdmin || false;
     }
-}
 
-export {User};
+}
