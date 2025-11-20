@@ -1,5 +1,4 @@
 import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, UpdateDateColumn } from "typeorm";
-import{v4 as uuid} from "uuid";
 import { Guest } from "./guest";
 import entity from "./entity";
 

@@ -10,14 +10,8 @@ export default class LogDAO implements IDAO<Log> {
         this.dataSource = dataSource;
         this.repository = this.dataSource.getRepository(Log);
     }
-    create(Entity: Log): Promise<Log> {
-        throw new Error("Method not implemented.");
-    }
-    delete(Entity: Log): Promise<void> {
-        throw new Error("Method not implemented.");
-    }
 
-    async salvar(log: Log): Promise<Log> {
+    async create(log: Log): Promise<Log> {
         return await this.repository.save(log);
     }
 
@@ -39,7 +33,7 @@ export default class LogDAO implements IDAO<Log> {
         }
     }
     
-    async deletar(log: Log): Promise<void> {
+    async delete(log: Log): Promise<void> {
         await this.repository.delete(log.id);
     }
 }
