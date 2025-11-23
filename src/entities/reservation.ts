@@ -1,8 +1,9 @@
 import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryColumn, UpdateDateColumn } from "typeorm";
-import{v4 as uuid} from "uuid";
 import { Guest } from "./guest";
 import { Room } from "./room";
 import entity from "./entity";
+
+type PaymentStatus = 'pending' | 'denied' | 'approved' | 'confirmed' | 'cancelled' | 'proposal';
 
 @Entity("reservation")
 export default class Reservation extends entity{
@@ -30,11 +31,14 @@ export default class Reservation extends entity{
     @Column()
     qntChildren: number;
 
+    @Column('simple-array', { nullable: true })
+    childrenAges!: number[];
+
     @Column('decimal', { precision: 10, scale: 2 })
     priceTotal: number;
 
     @Column()
-    paymentStatus: boolean;
+    paymentStatus: PaymentStatus;
 
     @CreateDateColumn()
     created_at!: Date;
@@ -52,7 +56,9 @@ export default class Reservation extends entity{
         noShow: boolean,
         qntAldults: number,
         qntChildren: number,
-        priceTotal: number
+        childrenAges: number[],
+        priceTotal: number,
+        paymentStatus: PaymentStatus='proposal'
     ){
         super();
         this.codeReservation = codeReservation;
@@ -63,8 +69,17 @@ export default class Reservation extends entity{
         this.noShow = noShow;
         this.qntAldults = qntAldults;
         this.qntChildren = qntChildren;
+        this.childrenAges = childrenAges || [];
         this.priceTotal = priceTotal;
+        this.paymentStatus = paymentStatus;
+    }
+    isPaid(): boolean {
+        return this.paymentStatus === 'approved' || this.paymentStatus === 'confirmed';
+    }
+
+    canBeConfirmed(): boolean {
+        return this.paymentStatus === 'approved';
     }
 }
 
-export {Reservation};
+export { Reservation, type PaymentStatus };

@@ -40,6 +40,7 @@ export default class Payment extends entity{
         this.reservation = reservation;
         this.type = type;
         this.price = price;
+        this.status = status;
         this.paymentDate = paymentDate;
     }
 }

@@ -9,7 +9,23 @@ import RoomDAO from "../DAO/Interface/RoomDAO";
 import IStrategy from "../strategy/IStrategy";
 import LogDAO from "../DAO/Interface/LogDAO";
 import Log from "../entities/log";
-import GuestRequiredFieldsStrategy from "../strategy/guest/ValidationRequiredFields";
+import ValidationRequiredGuestFields from "../strategy/guest/ValidationRequiredFields";
+import ValidationRequiredAddressFields from "../strategy/address/ValidationRequiredFields";
+import ValidationEmail from "../strategy/guest/ValidationEmail";
+import ValidationUniqueCPF from "../strategy/guest/ValidationCPFUniqueness";
+import ValidationCPF from "../strategy/guest/ValidationCPF";
+import ValidationRequiredRoomFields from "../strategy/room/ValidationRequiredFields";
+import ValidationAvailabilityRoom from "../strategy/reservation/ValidationAvailabilityRoom";
+import ValidationDates from "../strategy/reservation/ValidationDates";
+import ValidationCapacityRoom from "../strategy/reservation/ValidationCapacityRoom";
+import ValidationCapacity from "../strategy/reservation/ValidationCapacity";
+import ValidationMinimumStay from "../strategy/reservation/ValidationMinimumStay";
+import CancellationPolicy from "../strategy/others/CancellationPolicy";
+import ChildrenDiscountStrategy from "../strategy/others/ChildrenDiscount";
+import PromotionValidation from "../strategy/others/PromotionValidation";
+import SaleDAO from "../DAO/Interface/SaleDAO";
+import ValidationRequiredPaymentFields from "../strategy/payment/ValidationRequiredFields";
+import ValidationReservationConfirm from "../strategy/payment/ValidationReservationConfirm";
 
 export default class Facade implements IFacade<entity> {
     private readonly entityDAOMap: Map<string, IDAO<entity>>;
@@ -30,7 +46,8 @@ export default class Facade implements IFacade<entity> {
         private readonly reservationDAO: ReservationDAO,
         private readonly paymentDAO: PaymentDAO,
         private readonly roomDAO: RoomDAO,
-        private readonly logDAO: LogDAO
+        private readonly logDAO: LogDAO,
+        private readonly saleDAO: SaleDAO
     ) {
         this.entityDAOMap = new Map<string, IDAO<entity>>;
         this.entityDAOMap.set("Guest", this.guestDAO);
@@ -39,17 +56,46 @@ export default class Facade implements IFacade<entity> {
         this.entityDAOMap.set("Payment", this.paymentDAO);
         this.entityDAOMap.set("Room", this.roomDAO);
         this.entityDAOMap.set('Log', this.logDAO);
+        this.entityDAOMap.set('Sale', this.saleDAO);
         this.strategyMap = new Map<string, Array<IStrategy<entity>>>();
         this.initializeStrategies();
     }
 
     private initializeStrategies(): void {
         this.strategyMap.set("Guest", [
-            new GuestRequiredFieldsStrategy(),
-            new GuestEmailValidationStrategy(),
-            new GuestCPFUniquenessStrategy(this.guestDAO)
+            new ValidationRequiredGuestFields(),
+            new ValidationEmail(),
+            new ValidationCPF(),
+            new ValidationUniqueCPF(this.guestDAO)
         ] as Array<IStrategy<entity>>);
 
+        this.strategyMap.set("Address", [
+            new ValidationRequiredAddressFields()
+        ] as Array<IStrategy<entity>>);
+
+        this.strategyMap.set("Room", [
+            new ValidationRequiredRoomFields()
+        ] as Array<IStrategy<entity>>);
+
+        this.strategyMap.set("Reservation", [
+            new ValidationAvailabilityRoom(this.reservationDAO),
+            new ValidationMinimumStay(),
+            new ValidationCapacity(),
+            new ValidationCapacityRoom(),
+            new ValidationDates(),
+            new ValidationRequiredRoomFields(),
+            new CancellationPolicy(),
+            new ChildrenDiscountStrategy(),
+        ] as Array<IStrategy<entity>>);
+
+        this.strategyMap.set("Sale",[
+            new PromotionValidation(this.saleDAO)
+        ] as Array<IStrategy<entity>>);
+
+        this.strategyMap.set("Payment", [
+            new ValidationRequiredPaymentFields(),
+            new ValidationReservationConfirm(this.reservationDAO)
+        ] as Array<IStrategy<entity>>);
     }
 
     public async create(entity: entity, strategy: Array<IStrategy<entity>>):Promise<entity> {

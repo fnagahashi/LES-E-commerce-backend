@@ -24,6 +24,15 @@ export default class Room extends entity{
     type: RoomType;
 
     @Column()
+    qntdAdultos: number;
+
+    @Column()
+    qntdCriancas: number;
+
+    @Column('decimal', { precision: 10, scale: 2 })
+    precoBase: number;
+
+    @Column()
     isActive: boolean;
 
     @CreateDateColumn()
