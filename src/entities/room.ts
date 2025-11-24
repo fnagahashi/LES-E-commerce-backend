@@ -44,11 +44,17 @@ export default class Room extends entity{
     constructor(
         code: string,
         type: RoomType,
+        qntdAdultos: number,
+        qntdCriancas: number,
+        precoBase: number,
         isActive: boolean
     ){
         super();
         this.roomCode = code;
         this.type = type;
+        this.qntdAdultos = qntdAdultos;
+        this.qntdCriancas = qntdCriancas;
+        this.precoBase = precoBase;
         this.isActive = isActive;
     }
 }
