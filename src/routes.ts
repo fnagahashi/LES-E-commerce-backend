@@ -1,150 +1,105 @@
-import { Router } from "express";
-
-// Users
-// import { CreateUserController } from "./controller/user/CreateUserController";
-// import { ListUserController } from "./controller/user/ListUserController";
-// import { UpdateUserController } from "./controller/user/UpdateUserController";
-// import { DeleteUserController } from "./controller/user/DeleteUserController";
-// import { UpdatePasswordController } from "./controller/Password/UpdatePasswordController";
-
-// Authentication
-import { AutenticationController } from "./controller/Autentication/AutenticationController";
-
-// Sales
-// import { CreateSalesController } from "./controller/sales/CreateSalesController";
-// import { ListSalesController } from "./controller/sales/ListSalesController";
-// import { UpdateSalesController } from "./controller/sales/UpdateSalesController";
-// import { DeleteSalesController } from "./controller/sales/DeleteSalesController";
-
-// // Products (Books)
-// import { CreateProductController } from "./controller/books/CreateProductController";
-// import { ListProductController } from "./controller/books/ListProductController";
-// import { UpdateProductController } from "./controller/books/UpdateProductController";
-// import { DeleteProductController } from "./controller/books/DeleteProductController";
-
-// Guest
-import { CreateGuestController } from "./controller/guest/CreateGuestController";
-import { ListGuestController } from "./controller/guest/ListGuestController";
-import { UpdateGuestController } from "./controller/guest/UpdateGuestController";
-import { DeleteGuestController } from "./controller/guest/DeleteGuestController";
-
-// Categories
-// import { CreateCategoryController } from "./controller/category/CreateCategoryController";
-// import { ListCategoryController } from "./controller/category/ListCategoryController";
-// import { UpdateCategoryController } from "./controller/category/UpdateCategoryController";
-// import { DeleteCategoryController } from "./controller/category/DeleteCategoryController";
-
-// Addresses
-import { CreateAddressController } from "./controller/Address/CreateAddressController";
-import { ListAddressController } from "./controller/Address/ListAddressController";
-import { UpdateAddressController } from "./controller/Address/UpdateAddressController";
-import { DeleteAddressController } from "./controller/Address/DeleteAddressController";
-
-// Credit Cards
-import { CreateCreditCardController } from "./controller/creditCard/CreateCreditCardController";
-import { ListCreditCardController } from "./controller/creditCard/ListCreditCardController";
-import { UpdateCreditCardController } from "./controller/creditCard/UpdateCreditCardController";
-import { DeleteCreditCardController } from "./controller/creditCard/DeleteCreditCardController";
-
-// Middleware
-import { ensureAuthenticated } from "./midleware/ensureAuthenticated";
+// src/routes.ts
+import { Router } from 'express';
+import { GuestController } from '../src/controller/guest/GuestController';
+import { RoomController } from '../src/controller/room/RoomController';
+import { ReservationController } from '../src/controller/reservation/ReservationController';
+import { PaymentController } from '../src/controller/payment/PaymentController';
+import { SaleController } from '../src/controller/sale/SaleController';
+import { PolicyController } from '../src/controller/policy/PolicyController';
+import { ReportController } from '../src/controller/report/ReportController';
+import Facade from './facade/Facade';
 
 const router = Router();
 
-// Users
-// const createUserController = new CreateUserController();
-// const listUserController = new ListUserController();
-// const updateUserController = new UpdateUserController();
-// const deleteUserController = new DeleteUserController();
-// const updatePasswordController = new UpdatePasswordController();
+// Inicializar Facade e Controllers
+const facade = new (Facade as any)();
+const guestController = new GuestController(facade);
+const roomController = new RoomController(facade);
+const reservationController = new ReservationController(facade);
+const paymentController = new PaymentController(facade);
+const saleController = new SaleController(facade);
+const policyController = new PolicyController(facade);
+const reportController = new ReportController(facade);
 
-// Authentication
-const autenticationController = new AutenticationController();
+// ==================== ROTAS DE HÓSPEDES (RF0101-RF0104) ====================
+router.post('/guests', (req, res) => guestController.create(req, res)); // RF0101
+router.get('/guests', (req, res) => guestController.findAll(req, res)); // RF0104
+router.get('/guests/:id', (req, res) => guestController.findById(req, res)); // RF0104
+router.get('/guests/cpf/:cpf', (req, res) => guestController.findByCpf(req, res)); // RF0104
+router.put('/guests/:id', (req, res) => guestController.update(req, res)); // RF0102
+router.patch('/guests/:id/inactivate', (req, res) => guestController.inactivate(req, res)); // RF0103
 
-// Sales
-// const createSalesController = new CreateSalesController();
-// const listSalesController = new ListSalesController();
-// const updateSalesController = new UpdateSalesController();
-// const deleteSalesController = new DeleteSalesController();
+// ==================== ROTAS DE QUARTOS (RF0111-RF0114) ====================
+router.post('/rooms', (req, res) => roomController.criar(req, res)); // RF0111
+router.get('/rooms', (req, res) => roomController.buscarTodos(req, res)); // RF0114
+router.get('/rooms/disponiveis', (req, res) => roomController.buscarDisponiveis(req, res)); // RF0114
+router.get('/rooms/filtro', (req, res) => roomController.buscarPorFiltro(req, res)); // RF0114
+router.get('/rooms/:id', (req, res) => roomController.buscarPorId(req, res)); // RF0114
+router.get('/rooms/codigo/:roomCode', (req, res) => roomController.buscarPorRoomCode(req, res)); // RF0114
+router.get('/rooms/tipo/:type', (req, res) => roomController.buscarPorTipo(req, res)); // RF0114
+router.put('/rooms/:id', (req, res) => roomController.atualizar(req, res)); // RF0112
+router.patch('/rooms/:id/preco', (req, res) => roomController.atualizarPreco(req, res)); // RF0112
+router.patch('/rooms/:id/inativar', (req, res) => roomController.inativar(req, res)); // RF0113
+router.patch('/rooms/:id/ativar', (req, res) => roomController.ativar(req, res)); // RF0113
+router.get('/rooms/estatisticas/geral', (req, res) => roomController.getEstatisticas(req, res));
 
-// Products
-// const createProductController = new CreateProductController();
-// const listProductController = new ListProductController();
-// const updateProductController = new UpdateProductController();
-// const deleteProductController = new DeleteProductController();
+// ==================== ROTAS DE RESERVAS (RF0201-RF0209) ====================
+router.get('/reservations/disponibilidade', (req, res) => reservationController.consultarDisponibilidade(req, res)); // RF0201
+router.post('/reservations', (req, res) => reservationController.criarProposta(req, res)); // RF0202
+router.get('/reservations', (req, res) => reservationController.buscarPorFiltro(req, res)); // RF0206
+router.get('/reservations/:id', (req, res) => reservationController.buscarPorId(req, res)); // RF0206
+router.get('/reservations/codigo/:codeReservation', (req, res) => reservationController.buscarPorCodigo(req, res)); // RF0206
+router.get('/reservations/guest/:guestId', (req, res) => reservationController.buscarPorGuest(req, res)); // RF0206
+router.patch('/reservations/:id/confirmar', (req, res) => reservationController.confirmarReserva(req, res)); // RF0203
+router.patch('/reservations/:id/cancelar', (req, res) => reservationController.cancelarReserva(req, res)); // RF0205
+router.patch('/reservations/:id/no-show', (req, res) => reservationController.marcarNoShow(req, res)); // RF0207
+router.put('/reservations/:id', (req, res) => reservationController.atualizar(req, res)); // RF0204
+router.patch('/reservations/:id/status-pagamento', (req, res) => reservationController.atualizarStatusPagamento(req, res));
+router.get('/reservations/estatisticas/geral', (req, res) => reservationController.getEstatisticas(req, res));
 
-// Clients
-const createClientController = new CreateClientController();
-const listClientController = new ListClientController();
-const updateClientController = new UpdateClientController();
-const deleteClientController = new DeleteClientController();
+// ==================== ROTAS DE PAGAMENTOS (RF0211-RF0214) ====================
+router.post('/payments', (req, res) => paymentController.iniciarPagamento(req, res)); // RF0211
+router.get('/payments', (req, res) => paymentController.buscarPorFiltro(req, res)); // RF0214
+router.get('/payments/:id', (req, res) => paymentController.buscarPorId(req, res)); // RF0214
+router.get('/payments/reserva/:reservationId', (req, res) => paymentController.buscarPorReserva(req, res)); // RF0214
+router.get('/payments/status/:status', (req, res) => paymentController.buscarPorStatus(req, res)); // RF0214
+router.get('/payments/tipo/:type', (req, res) => paymentController.buscarPorTipo(req, res)); // RF0214
+router.patch('/payments/:id/resultado', (req, res) => paymentController.registrarResultado(req, res)); // RF0212
+router.patch('/payments/:id/estornar', (req, res) => paymentController.estornarPagamento(req, res)); // RF0213
+router.patch('/payments/:id/marcar-pago', (req, res) => paymentController.marcarComoPago(req, res));
+router.put('/payments/:id', (req, res) => paymentController.atualizar(req, res));
+router.get('/payments/estatisticas/geral', (req, res) => paymentController.getEstatisticas(req, res));
 
-// Categories
-// const createCategoryController = new CreateCategoryController();
-// const listCategoryController = new ListCategoryController();
-// const updateCategoryController = new UpdateCategoryController();
-// const deleteCategoryController = new DeleteCategoryController();
+// ==================== ROTAS DE PROMOÇÕES (RF0121-RF0124) ====================
+router.post('/sales', (req, res) => saleController.criar(req, res)); // RF0121
+router.get('/sales', (req, res) => saleController.buscarTodas(req, res)); // RF0124
+router.get('/sales/vigentes', (req, res) => saleController.buscarVigentes(req, res)); // RF0124
+router.get('/sales/filtro', (req, res) => saleController.buscarPorFiltro(req, res)); // RF0124
+router.get('/sales/:id', (req, res) => saleController.buscarPorId(req, res)); // RF0124
+router.get('/sales/codigo/:codigoSale', (req, res) => saleController.buscarPorCodigo(req, res)); // RF0124
+router.put('/sales/:id', (req, res) => saleController.atualizar(req, res)); // RF0122
+router.patch('/sales/:id/inativar', (req, res) => saleController.inativar(req, res)); // RF0123
+router.patch('/sales/:id/ativar', (req, res) => saleController.ativar(req, res)); // RF0123
+router.post('/sales/:codigoSale/calcular-desconto', (req, res) => saleController.calcularDesconto(req, res));
+router.get('/sales/:codigoSale/disponibilidade', (req, res) => saleController.verificarDisponibilidade(req, res));
+router.get('/sales/estatisticas/geral', (req, res) => saleController.getEstatisticas(req, res));
 
-// Addresses
-const createAddressController = new CreateAddressController();
-const listAddressController = new ListAddressController();
-const updateAddressController = new UpdateAddressController();
-const deleteAddressController = new DeleteAddressController();
+// ==================== ROTAS DE POLÍTICAS (RF0131-RF0134) ====================
+router.post('/policies', (req, res) => policyController.criar(req, res)); // RF0131
+router.get('/policies', (req, res) => policyController.buscarTodas(req, res)); // RF0134
+router.get('/policies/ativas', (req, res) => policyController.buscarAtivas(req, res)); // RF0134
+router.get('/policies/filtro', (req, res) => policyController.buscarPorFiltro(req, res)); // RF0134
+router.get('/policies/:id', (req, res) => policyController.buscarPorId(req, res)); // RF0134
+router.put('/policies/:id', (req, res) => policyController.atualizar(req, res)); // RF0132
+router.patch('/policies/:id/inativar', (req, res) => policyController.inativar(req, res)); // RF0133
+router.patch('/policies/:id/ativar', (req, res) => policyController.ativar(req, res)); // RF0133
+router.post('/policies/:policyId/calcular-multa', (req, res) => policyController.calcularMultaCancelamento(req, res));
+router.get('/policies/estatisticas/geral', (req, res) => policyController.getEstatisticas(req, res));
 
-// Credit Cards
-const createCreditCardController = new CreateCreditCardController();
-const listCreditCardController = new ListCreditCardController();
-const updateCreditCardController = new UpdateCreditCardController();
-const deleteCreditCardController = new DeleteCreditCardController();
+// ==================== ROTAS DE RELATÓRIOS (RF0231-RF0234) ====================
+router.get('/reports/ocupacao', (req, res) => reportController.relatorioOcupacao(req, res)); // RF0231
+router.get('/reports/financeiro', (req, res) => reportController.relatorioFinanceiro(req, res)); // RF0232
+router.get('/reports/origem-reservas', (req, res) => reportController.relatorioOrigemReservas(req, res)); // RF0233
+router.get('/reports/desempenho-promocoes', (req, res) => reportController.relatorioDesempenhoPromocoes(req, res)); // RF0234
 
-// ========================
-// Routes
-// ========================
-
-// --- Authentication ---
-router.post("/login", autenticationController.handle);
-
-// --- Users ---
-// router.post("/users", createUserController.handle);
-// router.get("/users", ensureAuthenticated, listUserController.handle);
-// router.put("/users/:id", ensureAuthenticated, updateUserController.handle);
-// router.delete("/users/:id", ensureAuthenticated, deleteUserController.handle);
-// router.patch("/users/password", ensureAuthenticated, updatePasswordController.handle);
-
-// --- Clients ---
-router.post("/clients", createClientController.handle);
-router.get("/clients", listClientController.handle);
-router.put("/clients/:id", updateClientController.handle);
-router.delete("/clients/:id", deleteClientController.handle);
-
-// --- Products ---
-// router.post("/products", ensureAuthenticated, createProductController.handle);
-// router.get("/products", listProductController.handle);
-// router.put("/products/:id", ensureAuthenticated, updateProductController.handle);
-// router.delete("/products/:id", ensureAuthenticated, deleteProductController.handle);
-
-// // --- Categories ---
-// router.post("/categories", ensureAuthenticated, createCategoryController.handle);
-// router.get("/categories", listCategoryController.handle); // leitura pública
-// router.put("/categories/:id", ensureAuthenticated, updateCategoryController.handle);
-// router.delete("/categories/:id", ensureAuthenticated, deleteCategoryController.handle);
-
-// --- Addresses ---
-router.post("/addresses", createAddressController.handle);
-router.get("/addresses", listAddressController.handle);
-router.put("/addresses/:id", updateAddressController.handle);
-router.delete("/addresses/:id", deleteAddressController.handle);
-
-// --- Credit Cards ---
-router.post("/credit-cards", createCreditCardController.handle);
-router.get("/credit-cards", listCreditCardController.handle);
-router.put("/credit-cards/:id", updateCreditCardController.handle);
-router.delete("/credit-cards/:id", deleteCreditCardController.handle);
-
-// --- Sales ---
-// router.post("/sales", ensureAuthenticated, createSalesController.handle);
-// router.get("/sales", ensureAuthenticated, listSalesController.handle);
-// router.put("/sales/:id", ensureAuthenticated, updateSalesController.handle);
-// router.delete("/sales/:id", ensureAuthenticated, deleteSalesController.handle);
-
-export { router };
+export default router;

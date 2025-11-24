@@ -4,7 +4,7 @@
    "port": 5432,
    "username": "postgres",
    "password": "nagahashi98",
-   "database": "project_LES",
+   "database": "project_ESIII",
    "schema": "public",
    "synchronize": false,
    "logging": false,

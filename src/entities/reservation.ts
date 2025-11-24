@@ -26,7 +26,7 @@ export default class Reservation extends entity{
     noShow: boolean;
 
     @Column()
-    qntAldults: number;
+    qntAdults: number;
 
     @Column()
     qntChildren: number;
@@ -54,7 +54,7 @@ export default class Reservation extends entity{
         dateStart: Date,
         dateEnd: Date,
         noShow: boolean,
-        qntAldults: number,
+        qntAdults: number,
         qntChildren: number,
         childrenAges: number[],
         priceTotal: number,
@@ -67,7 +67,7 @@ export default class Reservation extends entity{
         this.dateStart = dateStart;
         this.dateEnd = dateEnd;
         this.noShow = noShow;
-        this.qntAldults = qntAldults;
+        this.qntAdults = qntAdults;
         this.qntChildren = qntChildren;
         this.childrenAges = childrenAges || [];
         this.priceTotal = priceTotal;
