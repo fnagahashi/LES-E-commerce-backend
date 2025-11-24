@@ -98,36 +98,15 @@ export default class Facade implements IFacade<entity> {
         ] as Array<IStrategy<entity>>);
     }
 
-    public async create(entity: entity, strategy: Array<IStrategy<entity>>):Promise<entity> {
-        let msg: string = "";
-
-        for (const s of strategy) {
-            const resultado = await s.executar(entity);
-            if (resultado) {
-                msg += resultado + " ";
-            }     
-        }
-        if (msg) {
-            throw new Error(msg);
-        }
-
-        const entidadeDAO = this.entityDAOMap.get(entity.constructor.name);
-        if (!entidadeDAO) {
-            throw new Error('Entidade não encontrada');
-        }
-
-        const entidadeCriada = await entidadeDAO.create(entity);
+    public async create(entity: entity):Promise<entity> {
+        const entityName = entity.constructor.name;
         
-        this.gerarLog(entidadeCriada, "criado");
-
-        return entidadeCriada;
-    }
-
-    public async update(entity: entity, strategy: Array<IStrategy<entity>>): Promise<entity> {
+        const strategies = this.strategyMap.get(entityName) || [];
+        
         let msg: string = "";
 
-        for (const s of strategy) {
-            const resultado = await s.executar(entity);
+        for (const strategy of strategies) {
+            const resultado = await strategy.executar(entity);
             if (resultado) {
                 msg += resultado + " ";
             }     
@@ -137,16 +116,43 @@ export default class Facade implements IFacade<entity> {
             throw new Error(msg.trim());
         }
 
-        const entityName = entity.constructor.name;
         const entidadeDAO = this.entityDAOMap.get(entityName);
+        if (!entidadeDAO) {
+            throw new Error(`DAO não encontrado para entidade: ${entityName}`);
+        }
+
+        const entidadeCriada = await entidadeDAO.create(entity);
         
+        await this.gerarLog(entidadeCriada, "criado");
+
+        return entidadeCriada;
+    }
+
+    public async update(entity: entity): Promise<entity> {
+        const entityName = entity.constructor.name;
+        
+        const strategies = this.strategyMap.get(entityName) || [];
+        
+        let msg: string = "";
+
+        for (const strategy of strategies) {
+            const resultado = await strategy.executar(entity);
+            if (resultado) {
+                msg += resultado + " ";
+            }     
+        }
+        
+        if (msg) {
+            throw new Error(msg.trim());
+        }
+
+        const entidadeDAO = this.entityDAOMap.get(entityName);
         if (!entidadeDAO) {
             throw new Error(`DAO não encontrado para entidade: ${entityName}`);
         }
 
         const entidadeAtualizada = await entidadeDAO.update(entity);
-
-         await this.gerarLog(entidadeAtualizada, "atualizado");
+        await this.gerarLog(entidadeAtualizada, "atualizado");
 
         return entidadeAtualizada;
     }

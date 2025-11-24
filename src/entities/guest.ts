@@ -22,7 +22,10 @@ export default class Guest extends entity{
     @Column()
     isActive!: boolean;
 
-    @OneToMany(() => Address, address => address.guest, {cascade: true})
+    @OneToMany(() => Address, address => address.guest, { 
+        cascade: true,
+        eager: true
+    })
     addresses!: Address[];
 
     @DeleteDateColumn()

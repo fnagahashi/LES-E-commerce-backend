@@ -23,10 +23,10 @@ export default class Address extends entity{
     state!: string;
 
     @Column({ nullable: true })
-    obs!: string;
+    obs: string;
 
     @ManyToOne(() => Guest, guest => guest.addresses)
-    guest!: Guest;
+    guest: Guest;
 
     @CreateDateColumn()
     created_at!: Date;
@@ -42,7 +42,7 @@ export default class Address extends entity{
         city: string,
         state: string,
         obs: string,
-        guest: Guest
+        guest?: Guest
     ) {
         super();
         this.cep = cep;
@@ -52,7 +52,9 @@ export default class Address extends entity{
         this.city = city;
         this.state = state;
         this.obs = obs;
-        this.guest = guest;
+        if(guest) {
+            this.guest = guest;
+        }
     }
 }
 
