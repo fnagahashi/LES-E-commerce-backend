@@ -1,9 +1,9 @@
 import express, {NextFunction, Response, Request} from "express";
 import "express-async-errors";
 import "reflect-metadata";
-import "./database/index";
+import connectDatabase from "./database/index";
 
-import { router } from "./routes";
+import  router  from "./routes";
 
 const app = express();
 
@@ -22,6 +22,17 @@ app.use(
     }
 )
 
-console.log("Start at 3000")
-app.listen(3000);
- 
+const startServer = async () => {
+    try {
+        await connectDatabase();
+        console.log("✅ Banco de dados conectado com sucesso!");
+        
+        app.listen(3000);
+        
+    } catch (error) {
+        console.error("❌ Erro ao conectar com o banco:", error);
+        process.exit(1);
+    }
+}
+
+startServer();

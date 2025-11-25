@@ -6,7 +6,7 @@
    "password": "nagahashi98",
    "database": "project_ESIII",
    "schema": "public",
-   "synchronize": false,
+   "synchronize": true,
    "logging": false,
    "entities": [
       "src/entities/**/*.ts"
