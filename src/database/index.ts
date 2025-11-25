@@ -1,7 +1,7 @@
-import { DataSource } from "typeorm";
+import { createConnection, ConnectionOptions } from "typeorm";
 import path from "path";
 
-export const AppDataSource = new DataSource({
+const connectionOptions: ConnectionOptions = {
   type: "postgres",
   host: process.env.DB_HOST || "localhost",
   port: parseInt(process.env.DB_PORT || "5432"),
@@ -14,23 +14,24 @@ export const AppDataSource = new DataSource({
     path.join(__dirname, "../entities/**/*.js")
   ],
   
+
   migrations: [
     path.join(__dirname, "../migrations/**/*.ts"),
     path.join(__dirname, "../migrations/**/*.js")
   ],
-  
+
   synchronize: true,
   
   logging: process.env.NODE_ENV === "development",
-});
+};
 
 export const connectDatabase = async (): Promise<void> => {
   try {
-    await AppDataSource.initialize();
-    console.log("✅ Data Source inicializado com sucesso!");
+    const connection = await createConnection(connectionOptions);
+    console.log("✅ Conexão com PostgreSQL estabelecida com sucesso!");
     console.log("📊 Tabelas criadas/atualizadas automaticamente");
   } catch (error) {
-    console.error("❌ Erro durante a inicialização do Data Source:", error);
+    console.error("❌ Erro ao conectar com o banco de dados:", error);
     throw error;
   }
 };

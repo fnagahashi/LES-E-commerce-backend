@@ -7,7 +7,7 @@ export default class ValidationCapacityRoom implements IStrategy<Reservation> {
         const room = reservation.room;
 
         if (this.isQuartoPadrao(room.type)) {
-            if (reservation.qntAldults > 2) {
+            if (reservation.qntAdults > 2) {
                 errors.push("Quartos padrão suportam no máximo 2 adultos");
             }
             if (reservation.qntChildren > 2) {
@@ -15,7 +15,7 @@ export default class ValidationCapacityRoom implements IStrategy<Reservation> {
             }
         }
 
-        if (this.isSuite(room.type) && reservation.qntAldults > 4) {
+        if (this.isSuite(room.type) && reservation.qntAdults > 4) {
             errors.push("Suítes suportam no máximo 4 adultos");
         }
 
