@@ -1,13 +1,12 @@
-import { DataSource, Like, ILike, Repository } from "typeorm";
+import { Connection, Like, Repository } from "typeorm";
 import Guest from "../../entities/guest";
 import IDAO from "../IDAO";
 
 export default class GuestDAO implements IDAO<Guest> {
-  private dataSource: DataSource;
+  private dataSource: Connection;
   private repository: Repository<Guest>;
 
-  constructor(dataSource: DataSource) {      
-    this.dataSource = dataSource;
+  constructor(connection: Connection) {      
     this.repository = this.dataSource.getRepository(Guest);
   }
 
@@ -26,10 +25,10 @@ export default class GuestDAO implements IDAO<Guest> {
           where: {id: guest.id}, 
         });
       case "findByFilters":
-        const cpf = guest.cpf ? ILike(`%${guest.cpf}%`) : ILike(`%`);
-        const email = guest.email ? ILike(`%${guest.email}%`) : ILike(`%`);
-        const name = guest.name ? ILike(`%${guest.name}%`) : ILike(`%`);
-        const phone = guest.phone ? ILike(`%${guest.phone}%`) : ILike(`%`);
+        const cpf = guest.cpf ? Like(`%${guest.cpf}%`) : Like(`%`);
+        const email = guest.email ? Like(`%${guest.email}%`) : Like(`%`);
+        const name = guest.name ? Like(`%${guest.name}%`) : Like(`%`);
+        const phone = guest.phone ? Like(`%${guest.phone}%`) : Like(`%`);
         return await this.repository.find({
           where: {
             cpf,

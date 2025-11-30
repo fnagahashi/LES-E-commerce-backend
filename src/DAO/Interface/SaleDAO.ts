@@ -1,11 +1,11 @@
 import IDAO from "../IDAO";
-import { DataSource, Repository } from "typeorm";
+import { Connection, Repository } from "typeorm";
 import Sale from "../../entities/sale";
 
 export default class SaleDAO implements IDAO<Sale> {
     private repository: Repository<Sale>;
 
-    constructor(dataSource: DataSource) {
+    constructor(dataSource: Connection) {
         this.repository = dataSource.getRepository(Sale);
     }
 

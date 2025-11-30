@@ -1,13 +1,13 @@
-import { DataSource, Like, ILike, Repository } from "typeorm";
+import { Connection, Like, Repository } from "typeorm";
 import entity from "../../entities/entity";
 import IDAO from "../IDAO";
 import Room from "../../entities/room";
 
 export default class RoomDAO implements IDAO<Room> {
-  private dataSource: DataSource;
+  private dataSource: Connection;
   private repository: Repository<Room>;
 
-  constructor(dataSource: DataSource) {      
+  constructor(dataSource: Connection) {      
     this.dataSource = dataSource;
     this.repository = this.dataSource.getRepository(Room);
   }
@@ -27,8 +27,8 @@ export default class RoomDAO implements IDAO<Room> {
           where: {id: room.id}, 
         });
       case "findByFilters":
-        const code = room.roomCode ? ILike(`%${room.roomCode}%`) : ILike(`%`);
-        const type = room.type ? ILike(`%${room.type}%`) : ILike(`%`);
+        const code = room.roomCode ? Like(`%${room.roomCode}%`) : Like(`%`);
+        const type = room.type ? Like(`%${room.type}%`) : Like(`%`);
         return await this.repository.find({
           where: {
             roomCode: code,

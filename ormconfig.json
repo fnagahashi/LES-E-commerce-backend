@@ -1,13 +1,13 @@
 {
    "type": "postgres",
    "host": "localhost",
-   "port": 5432,
+   "port": 5433,
    "username": "postgres",
    "password": "nagahashi98",
    "database": "project_ESIII",
    "schema": "public",
    "synchronize": true,
-   "logging": false,
+   "logging": true,
    "entities": [
       "src/entities/**/*.ts"
    ],

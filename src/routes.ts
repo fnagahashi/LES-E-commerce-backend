@@ -7,12 +7,39 @@ import { PaymentController } from '../src/controller/payment/PaymentController';
 import { SaleController } from '../src/controller/sale/SaleController';
 import { PolicyController } from '../src/controller/policy/PolicyController';
 import { ReportController } from '../src/controller/report/ReportController';
+import { connectDatabase }  from './database';
 import Facade from './facade/Facade';
+import Guest from './entities/guest';
+import GuestDAO from './DAO/Interface/GuestDAO';
+import AddressDAO from './DAO/Interface/AddressDAO';
+import { Reservation } from './entities/reservation';
+import ReservationDAO from './DAO/Interface/ReservationDAO';
+import PaymentDAO from './DAO/Interface/PaymentDAO';
+import RoomDAO from './DAO/Interface/RoomDAO';
+import LogDAO from './DAO/Interface/LogDAO';
+import SaleDAO from './DAO/Interface/SaleDAO';
+import { Address } from './entities/address';
+import { Payment } from './entities/payment';
+import { Room } from './entities/room';
+import Log from './entities/log';
+import { Sale } from './entities/sale';
 
 const router = Router();
 
+const startApp = async () => {
+const connection = await connectDatabase();
 // Inicializar Facade e Controllers
-const facade = new (Facade as any)();
+const facade = new Facade(
+    new GuestDAO(connection.getRepository(Guest)),
+    new AddressDAO(connection.getRepository(Address)),
+    new ReservationDAO(connection.getRepository(Reservation)),
+    new PaymentDAO(connection.getRepository(Payment)),
+    new RoomDAO(connection.getRepository(Room)),
+    new LogDAO(connection.getRepository(Log)),
+    new SaleDAO(connection.getRepository(Sale))
+  );
+
+
 const guestController = new GuestController(facade);
 const roomController = new RoomController(facade);
 const reservationController = new ReservationController(facade);
@@ -101,5 +128,34 @@ router.get('/reports/ocupacao', (req, res) => reportController.relatorioOcupacao
 router.get('/reports/financeiro', (req, res) => reportController.relatorioFinanceiro(req, res)); // RF0232
 router.get('/reports/origem-reservas', (req, res) => reportController.relatorioOrigemReservas(req, res)); // RF0233
 router.get('/reports/desempenho-promocoes', (req, res) => reportController.relatorioDesempenhoPromocoes(req, res)); // RF0234
+
+router.get('/health', (req, res) => {
+  res.json({
+    success: true,
+    message: 'API Hotel - Servidor rodando',
+    timestamp: new Date().toISOString(),
+    version: '1.0.0',
+    endpoints: {
+      guests: '/api/guests',
+      rooms: '/api/rooms',
+      reservations: '/api/reservations',
+      payments: '/api/payments',
+      sales: '/api/sales',
+      policies: '/api/policies',
+      reports: '/api/reports'
+    }
+  });
+});
+
+router.get('/', (req, res) => {
+  res.json({
+    message: 'Bem-vindo à API do Sistema de Hotel',
+    documentation: 'Consulte /api/health para lista completa de endpoints',
+    version: '1.0.0'
+  });
+});
+};
+
+startApp();
 
 export default router;

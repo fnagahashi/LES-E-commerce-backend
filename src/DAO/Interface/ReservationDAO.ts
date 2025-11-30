@@ -1,12 +1,12 @@
-import { DataSource, Like, ILike, Repository, Between } from "typeorm";
+import { Connection, Like, Repository, Between } from "typeorm";
 import IDAO from "../IDAO";
 import Reservation from "../../entities/reservation";
 
 export default class ReservationDAO implements IDAO<Reservation> {
-  private dataSource: DataSource;
+  private dataSource: Connection;
   private repository: Repository<Reservation>;
 
-  constructor(dataSource: DataSource) {
+  constructor(dataSource: Connection) {
     this.dataSource = dataSource;
     this.repository = this.dataSource.getRepository(Reservation);
   }
@@ -40,7 +40,7 @@ export default class ReservationDAO implements IDAO<Reservation> {
   const whereClause: any = {};
   
   if (filters.codeReservation) {
-    whereClause.codeReservation = ILike(`%${filters.codeReservation}%`);
+    whereClause.codeReservation = Like(`%${filters.codeReservation}%`);
   }
   
   if (filters.guest && filters.guest.id) {

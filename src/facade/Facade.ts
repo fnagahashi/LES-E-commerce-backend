@@ -66,7 +66,7 @@ export default class Facade implements IFacade<entity> {
             new ValidationRequiredGuestFields(),
             new ValidationEmail(),
             new ValidationCPF(),
-            new ValidationUniqueCPF(this.guestDAO)
+            // new ValidationUniqueCPF(this.guestDAO)
         ] as Array<IStrategy<entity>>);
 
         this.strategyMap.set("Address", [

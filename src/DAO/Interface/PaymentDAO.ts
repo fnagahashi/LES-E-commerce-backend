@@ -1,12 +1,12 @@
-import { DataSource, Like, ILike, Repository } from "typeorm";
+import { Connection, Like, Repository } from "typeorm";
 import IDAO from "../IDAO";
 import Payment from "../../entities/payment";
 
 export default class PaymentDAO implements IDAO<Payment> {
-  private dataSource: DataSource;
+  private dataSource: Connection;
   private repository: Repository<Payment>;
 
-  constructor(dataSource: DataSource) {      
+  constructor(dataSource: Connection) {      
     this.dataSource = dataSource;
     this.repository = this.dataSource.getRepository(Payment);
   }
@@ -26,8 +26,8 @@ export default class PaymentDAO implements IDAO<Payment> {
           where: {id: payment.id}, 
         });
       case "findByFilters":
-        const type = payment.type ? ILike(`%${payment.type}%`) : ILike(`%`);
-        const status = payment.status ? ILike(`%${payment.status}%`) : ILike(`%`);
+        const type = payment.type ? Like(`%${payment.type}%`) : Like(`%`);
+        const status = payment.status ? Like (`%${payment.status}%`) : Like(`%`);
         return await this.repository.find({
           where: {
             type: payment.type,
