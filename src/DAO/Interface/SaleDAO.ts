@@ -5,8 +5,8 @@ import Sale from "../../entities/sale";
 export default class SaleDAO implements IDAO<Sale> {
     private repository: Repository<Sale>;
 
-    constructor(dataSource: DataSource) {
-        this.repository = dataSource.getRepository(Sale);
+    constructor(connection: DataSource) {
+        this.repository = connection.getRepository(Sale);
     }
 
     async create(sale: Sale): Promise<Sale> {

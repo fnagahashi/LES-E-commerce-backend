@@ -3,12 +3,10 @@ import { DataSource, Repository } from "typeorm";
 import Log from "../../entities/log";
 
 export default class LogDAO implements IDAO<Log> {
-    private dataSource: DataSource;
     private repository: Repository<Log>;
 
-    constructor(dataSource: DataSource) {
-        this.dataSource = dataSource;
-        this.repository = this.dataSource.getRepository(Log);
+    constructor(connection: DataSource) {
+        this.repository = connection.getRepository(Log);
     }
 
     async create(log: Log): Promise<Log> {

@@ -3,12 +3,10 @@ import IDAO from "../IDAO";
 import Payment from "../../entities/payment";
 
 export default class PaymentDAO implements IDAO<Payment> {
-  private dataSource: DataSource;
   private repository: Repository<Payment>;
 
-  constructor(dataSource: DataSource) {      
-    this.dataSource = dataSource;
-    this.repository = this.dataSource.getRepository(Payment);
+  constructor(connection: DataSource) {      
+    this.repository = connection.getRepository(Payment);
   }
 
   async create(payment: Payment): Promise<Payment> {

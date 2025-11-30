@@ -3,12 +3,10 @@ import IDAO from "../IDAO";
 import { Address } from "../../entities/address";
 
 export default class AddressDAO implements IDAO<Address> {
-    private dataSource: DataSource;
     private repository: Repository<Address>;
 
-    constructor(dataSource: DataSource) {      
-        this.dataSource = dataSource;
-        this.repository = this.dataSource.getRepository(Address);
+    constructor(connection: DataSource) {      
+        this.repository = connection.getRepository(Address);
     }
 
     async create (address: Address): Promise<Address> {

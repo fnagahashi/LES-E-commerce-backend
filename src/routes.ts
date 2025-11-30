@@ -7,7 +7,7 @@ import { PaymentController } from '../src/controller/payment/PaymentController';
 import { SaleController } from '../src/controller/sale/SaleController';
 import { PolicyController } from '../src/controller/policy/PolicyController';
 import { ReportController } from '../src/controller/report/ReportController';
-import { connectDatabase }  from './database';
+import { connectDatabase, AppDataSource }  from './database';
 import Facade from './facade/Facade';
 import Guest from './entities/guest';
 import GuestDAO from './DAO/Interface/GuestDAO';
@@ -30,13 +30,13 @@ const startApp = async () => {
 const connection = await connectDatabase();
 // Inicializar Facade e Controllers
 const facade = new Facade(
-    new GuestDAO(connection.getRepository(Guest)),
-    new AddressDAO(connection.getRepository(Address)),
-    new ReservationDAO(connection.getRepository(Reservation)),
-    new PaymentDAO(connection.getRepository(Payment)),
-    new RoomDAO(connection.getRepository(Room)),
-    new LogDAO(connection.getRepository(Log)),
-    new SaleDAO(connection.getRepository(Sale))
+    new GuestDAO(AppDataSource.getRepository(Guest)), 
+    new AddressDAO(AppDataSource.getRepository(Address)),
+    new ReservationDAO(AppDataSource.getRepository(Reservation)),
+    new PaymentDAO(AppDataSource.getRepository(Payment)),
+    new RoomDAO(AppDataSource.getRepository(Room)),
+    new LogDAO(AppDataSource.getRepository(Log)),
+    new SaleDAO(AppDataSource.getRepository(Sale))
   );
 
 

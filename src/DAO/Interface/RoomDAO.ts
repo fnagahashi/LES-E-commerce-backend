@@ -4,12 +4,10 @@ import IDAO from "../IDAO";
 import Room from "../../entities/room";
 
 export default class RoomDAO implements IDAO<Room> {
-  private dataSource: DataSource;
   private repository: Repository<Room>;
 
-  constructor(dataSource: DataSource) {      
-    this.dataSource = dataSource;
-    this.repository = this.dataSource.getRepository(Room);
+  constructor(connection: DataSource) {      
+    this.repository = connection.getRepository(Room);
   }
 
   async create(room: Room): Promise<Room> {

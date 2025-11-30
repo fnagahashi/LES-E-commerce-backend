@@ -3,12 +3,10 @@ import IDAO from "../IDAO";
 import Reservation from "../../entities/reservation";
 
 export default class ReservationDAO implements IDAO<Reservation> {
-  private dataSource: DataSource;
   private repository: Repository<Reservation>;
 
-  constructor(dataSource: DataSource) {
-    this.dataSource = dataSource;
-    this.repository = this.dataSource.getRepository(Reservation);
+  constructor(connection: DataSource) {
+    this.repository = connection.getRepository(Reservation);
   }
 
   async create(reservation: Reservation): Promise<Reservation> {
