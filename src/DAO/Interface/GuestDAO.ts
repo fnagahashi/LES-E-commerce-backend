@@ -1,12 +1,12 @@
-import { Connection, Like, Repository } from "typeorm";
+import { DataSource, Like, Repository } from "typeorm";
 import Guest from "../../entities/guest";
 import IDAO from "../IDAO";
 
 export default class GuestDAO implements IDAO<Guest> {
-  private dataSource: Connection;
+  private dataSource: DataSource;
   private repository: Repository<Guest>;
 
-  constructor(connection: Connection) {      
+  constructor(connection: DataSource) {      
     this.repository = this.dataSource.getRepository(Guest);
   }
 

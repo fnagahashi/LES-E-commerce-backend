@@ -1,12 +1,12 @@
-import { Connection, Like, Repository, Between } from "typeorm";
+import { DataSource, Like, Repository, Between } from "typeorm";
 import IDAO from "../IDAO";
 import Reservation from "../../entities/reservation";
 
 export default class ReservationDAO implements IDAO<Reservation> {
-  private dataSource: Connection;
+  private dataSource: DataSource;
   private repository: Repository<Reservation>;
 
-  constructor(dataSource: Connection) {
+  constructor(dataSource: DataSource) {
     this.dataSource = dataSource;
     this.repository = this.dataSource.getRepository(Reservation);
   }

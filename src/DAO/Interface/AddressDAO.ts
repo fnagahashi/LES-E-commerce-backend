@@ -1,12 +1,12 @@
-import { Connection, Repository } from "typeorm";
+import { DataSource, Repository } from "typeorm";
 import IDAO from "../IDAO";
 import { Address } from "../../entities/address";
 
 export default class AddressDAO implements IDAO<Address> {
-    private dataSource: Connection;
+    private dataSource: DataSource;
     private repository: Repository<Address>;
 
-    constructor(dataSource: Connection) {      
+    constructor(dataSource: DataSource) {      
         this.dataSource = dataSource;
         this.repository = this.dataSource.getRepository(Address);
     }

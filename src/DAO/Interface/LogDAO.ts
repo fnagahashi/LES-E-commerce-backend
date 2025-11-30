@@ -1,12 +1,12 @@
 import IDAO from "../IDAO";
-import { Connection, Repository } from "typeorm";
+import { DataSource, Repository } from "typeorm";
 import Log from "../../entities/log";
 
 export default class LogDAO implements IDAO<Log> {
-    private dataSource: Connection;
+    private dataSource: DataSource;
     private repository: Repository<Log>;
 
-    constructor(dataSource: Connection) {
+    constructor(dataSource: DataSource) {
         this.dataSource = dataSource;
         this.repository = this.dataSource.getRepository(Log);
     }

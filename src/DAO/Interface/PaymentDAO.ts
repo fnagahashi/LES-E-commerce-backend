@@ -1,12 +1,12 @@
-import { Connection, Like, Repository } from "typeorm";
+import { DataSource, Like, Repository } from "typeorm";
 import IDAO from "../IDAO";
 import Payment from "../../entities/payment";
 
 export default class PaymentDAO implements IDAO<Payment> {
-  private dataSource: Connection;
+  private dataSource: DataSource;
   private repository: Repository<Payment>;
 
-  constructor(dataSource: Connection) {      
+  constructor(dataSource: DataSource) {      
     this.dataSource = dataSource;
     this.repository = this.dataSource.getRepository(Payment);
   }
