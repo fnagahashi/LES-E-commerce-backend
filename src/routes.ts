@@ -30,13 +30,13 @@ const startApp = async () => {
 const connection = await connectDatabase();
 // Inicializar Facade e Controllers
 const facade = new Facade(
-    new GuestDAO(AppDataSource.getRepository(Guest)), 
-    new AddressDAO(AppDataSource.getRepository(Address)),
-    new ReservationDAO(AppDataSource.getRepository(Reservation)),
-    new PaymentDAO(AppDataSource.getRepository(Payment)),
-    new RoomDAO(AppDataSource.getRepository(Room)),
-    new LogDAO(AppDataSource.getRepository(Log)),
-    new SaleDAO(AppDataSource.getRepository(Sale))
+    new GuestDAO(AppDataSource), 
+    new AddressDAO(AppDataSource),
+    new ReservationDAO(AppDataSource),
+    new PaymentDAO(AppDataSource),
+    new RoomDAO(AppDataSource),
+    new LogDAO(AppDataSource),
+    new SaleDAO(AppDataSource)
   );
 
 
