@@ -1,12 +1,11 @@
 import { DataSource, Like, Repository } from "typeorm";
-import entity from "../../entities/entity";
 import IDAO from "../IDAO";
 import Room from "../../entities/room";
 
 export default class RoomDAO implements IDAO<Room> {
   private repository: Repository<Room>;
 
-  constructor(connection: DataSource) {      
+  constructor(connection: DataSource) {
     this.repository = connection.getRepository(Room);
   }
 
@@ -18,11 +17,11 @@ export default class RoomDAO implements IDAO<Room> {
     switch (operation) {
       case "findAll":
         return await this.repository.find({
-          where: {isActive: true}, 
+          where: { isActive: true },
         });
       case "findById":
         return await this.repository.find({
-          where: {id: room.id}, 
+          where: { id: room.id },
         });
       case "findByFilters":
         const code = room.roomCode ? Like(`%${room.roomCode}%`) : Like(`%`);
@@ -30,10 +29,10 @@ export default class RoomDAO implements IDAO<Room> {
         return await this.repository.find({
           where: {
             roomCode: code,
-            type: room.type
-          }
+            type: room.type,
+          },
         });
-      
+
       default:
         throw new Error("Operation not supported");
     }

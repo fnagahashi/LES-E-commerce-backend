@@ -28,166 +28,165 @@ import ValidationRequiredPaymentFields from "../strategy/payment/ValidationRequi
 import ValidationReservationConfirm from "../strategy/payment/ValidationReservationConfirm";
 
 export default class Facade implements IFacade<entity> {
-    private readonly entityDAOMap: Map<string, IDAO<entity>>;
-    private readonly strategyMap: Map<string, Array<IStrategy<entity>>>;
+  private readonly entityDAOMap: Map<string, IDAO<entity>>;
+  private readonly strategyMap: Map<string, Array<IStrategy<entity>>>;
 
-    private async gerarLog(entity: entity, acao: string): Promise<void> {
-        const logDAO = this.entityDAOMap.get('Log') as IDAO<Log>;
-        if (logDAO) {
-            const mensagem = `${entity.constructor.name} ${acao}: ${JSON.stringify(entity)}`;
-            const logEntry = new Log(mensagem);
-            await logDAO.create(logEntry);
-        }
+  private async gerarLog(entity: entity, acao: string): Promise<void> {
+    const logDAO = this.entityDAOMap.get("Log") as IDAO<Log>;
+    if (logDAO) {
+      const mensagem = `${entity.constructor.name} ${acao}: ${JSON.stringify(entity)}`;
+      const logEntry = new Log(mensagem);
+      await logDAO.create(logEntry);
+    }
+  }
+
+  constructor(
+    private readonly guestDAO: GuestDAO,
+    private readonly addressDAO: AddressDAO,
+    private readonly reservationDAO: ReservationDAO,
+    private readonly paymentDAO: PaymentDAO,
+    private readonly roomDAO: RoomDAO,
+    private readonly logDAO: LogDAO,
+    private readonly saleDAO: SaleDAO
+  ) {
+    this.entityDAOMap = new Map<string, IDAO<entity>>();
+    this.entityDAOMap.set("Guest", this.guestDAO);
+    this.entityDAOMap.set("Address", this.addressDAO);
+    this.entityDAOMap.set("Reservation", this.reservationDAO);
+    this.entityDAOMap.set("Payment", this.paymentDAO);
+    this.entityDAOMap.set("Room", this.roomDAO);
+    this.entityDAOMap.set("Log", this.logDAO);
+    this.entityDAOMap.set("Sale", this.saleDAO);
+    this.strategyMap = new Map<string, Array<IStrategy<entity>>>();
+    this.initializeStrategies();
+  }
+
+  private initializeStrategies(): void {
+    this.strategyMap.set("Guest", [
+      new ValidationRequiredGuestFields(),
+      new ValidationEmail(),
+      new ValidationCPF(),
+      // new ValidationUniqueCPF(this.guestDAO)
+    ] as Array<IStrategy<entity>>);
+
+    this.strategyMap.set("Address", [
+      new ValidationRequiredAddressFields(),
+    ] as Array<IStrategy<entity>>);
+
+    this.strategyMap.set("Room", [new ValidationRequiredRoomFields()] as Array<
+      IStrategy<entity>
+    >);
+
+    this.strategyMap.set("Reservation", [
+      new ValidationAvailabilityRoom(this.reservationDAO),
+      new ValidationMinimumStay(),
+      new ValidationCapacity(),
+      new ValidationCapacityRoom(),
+      new ValidationDates(),
+      new ValidationRequiredRoomFields(),
+      new CancellationPolicy(),
+      new ChildrenDiscountStrategy(),
+    ] as Array<IStrategy<entity>>);
+
+    this.strategyMap.set("Sale", [
+      new PromotionValidation(this.saleDAO),
+    ] as Array<IStrategy<entity>>);
+
+    this.strategyMap.set("Payment", [
+      new ValidationRequiredPaymentFields(),
+      new ValidationReservationConfirm(this.reservationDAO),
+    ] as Array<IStrategy<entity>>);
+  }
+
+  public async create(entity: entity): Promise<entity> {
+    const entityName = entity.constructor.name;
+
+    const strategies = this.strategyMap.get(entityName) || [];
+
+    let msg: string = "";
+
+    for (const strategy of strategies) {
+      const resultado = await strategy.executar(entity);
+      if (resultado) {
+        msg += resultado + " ";
+      }
     }
 
-    constructor(
-        private readonly guestDAO: GuestDAO,
-        private readonly addressDAO: AddressDAO,
-        private readonly reservationDAO: ReservationDAO,
-        private readonly paymentDAO: PaymentDAO,
-        private readonly roomDAO: RoomDAO,
-        private readonly logDAO: LogDAO,
-        private readonly saleDAO: SaleDAO
-    ) {
-        this.entityDAOMap = new Map<string, IDAO<entity>>;
-        this.entityDAOMap.set("Guest", this.guestDAO);
-        this.entityDAOMap.set("Address", this.addressDAO);
-        this.entityDAOMap.set("Reservation", this.reservationDAO);
-        this.entityDAOMap.set("Payment", this.paymentDAO);
-        this.entityDAOMap.set("Room", this.roomDAO);
-        this.entityDAOMap.set('Log', this.logDAO);
-        this.entityDAOMap.set('Sale', this.saleDAO);
-        this.strategyMap = new Map<string, Array<IStrategy<entity>>>();
-        this.initializeStrategies();
+    if (msg) {
+      throw new Error(msg.trim());
     }
 
-    private initializeStrategies(): void {
-        this.strategyMap.set("Guest", [
-            new ValidationRequiredGuestFields(),
-            new ValidationEmail(),
-            new ValidationCPF(),
-            // new ValidationUniqueCPF(this.guestDAO)
-        ] as Array<IStrategy<entity>>);
-
-        this.strategyMap.set("Address", [
-            new ValidationRequiredAddressFields()
-        ] as Array<IStrategy<entity>>);
-
-        this.strategyMap.set("Room", [
-            new ValidationRequiredRoomFields()
-        ] as Array<IStrategy<entity>>);
-
-        this.strategyMap.set("Reservation", [
-            new ValidationAvailabilityRoom(this.reservationDAO),
-            new ValidationMinimumStay(),
-            new ValidationCapacity(),
-            new ValidationCapacityRoom(),
-            new ValidationDates(),
-            new ValidationRequiredRoomFields(),
-            new CancellationPolicy(),
-            new ChildrenDiscountStrategy(),
-        ] as Array<IStrategy<entity>>);
-
-        this.strategyMap.set("Sale",[
-            new PromotionValidation(this.saleDAO)
-        ] as Array<IStrategy<entity>>);
-
-        this.strategyMap.set("Payment", [
-            new ValidationRequiredPaymentFields(),
-            new ValidationReservationConfirm(this.reservationDAO)
-        ] as Array<IStrategy<entity>>);
+    const entidadeDAO = this.entityDAOMap.get(entityName);
+    if (!entidadeDAO) {
+      throw new Error(`DAO não encontrado para entidade: ${entityName}`);
     }
 
-    public async create(entity: entity):Promise<entity> {
-        const entityName = entity.constructor.name;
-        
-        const strategies = this.strategyMap.get(entityName) || [];
-        
-        let msg: string = "";
+    const entidadeCriada = await entidadeDAO.create(entity);
 
-        for (const strategy of strategies) {
-            const resultado = await strategy.executar(entity);
-            if (resultado) {
-                msg += resultado + " ";
-            }     
-        }
-        
-        if (msg) {
-            throw new Error(msg.trim());
-        }
+    await this.gerarLog(entidadeCriada, "criado");
 
-        const entidadeDAO = this.entityDAOMap.get(entityName);
-        if (!entidadeDAO) {
-            throw new Error(`DAO não encontrado para entidade: ${entityName}`);
-        }
+    return entidadeCriada;
+  }
 
-        const entidadeCriada = await entidadeDAO.create(entity);
-        
-        await this.gerarLog(entidadeCriada, "criado");
+  public async update(entity: entity): Promise<entity> {
+    const entityName = entity.constructor.name;
 
-        return entidadeCriada;
+    const strategies = this.strategyMap.get(entityName) || [];
+
+    let msg: string = "";
+
+    for (const strategy of strategies) {
+      const resultado = await strategy.executar(entity);
+      if (resultado) {
+        msg += resultado + " ";
+      }
     }
 
-    public async update(entity: entity): Promise<entity> {
-        const entityName = entity.constructor.name;
-        
-        const strategies = this.strategyMap.get(entityName) || [];
-        
-        let msg: string = "";
-
-        for (const strategy of strategies) {
-            const resultado = await strategy.executar(entity);
-            if (resultado) {
-                msg += resultado + " ";
-            }     
-        }
-        
-        if (msg) {
-            throw new Error(msg.trim());
-        }
-
-        const entidadeDAO = this.entityDAOMap.get(entityName);
-        if (!entidadeDAO) {
-            throw new Error(`DAO não encontrado para entidade: ${entityName}`);
-        }
-
-        const entidadeAtualizada = await entidadeDAO.update(entity);
-        await this.gerarLog(entidadeAtualizada, "atualizado");
-
-        return entidadeAtualizada;
+    if (msg) {
+      throw new Error(msg.trim());
     }
 
-    public async delete(entity: entity): Promise<entity> {
-        const entityName = entity.constructor.name;
-        const entidadeDAO = this.entityDAOMap.get(entityName);
-        
-        if (!entidadeDAO) {
-            throw new Error(`DAO não encontrado para entidade: ${entityName}`);
-        }
-
-        const entidadeParaDeletar = { ...entity };
-        
-        await entidadeDAO.delete(entity);
-        await this.gerarLog(entidadeParaDeletar, "deletado");
-
-        return entidadeParaDeletar;
+    const entidadeDAO = this.entityDAOMap.get(entityName);
+    if (!entidadeDAO) {
+      throw new Error(`DAO não encontrado para entidade: ${entityName}`);
     }
 
-    public async list(entity: entity, operation: string): Promise<entity[]> {
-        const entityName = entity.constructor.name;
-        const entidadeDAO = this.entityDAOMap.get(entityName);
-        
-        if (!entidadeDAO) {
-            throw new Error(`DAO não encontrado para entidade: ${entityName}`);
-        }
+    const entidadeAtualizada = await entidadeDAO.update(entity);
+    await this.gerarLog(entidadeAtualizada, "atualizado");
 
-        const entidades = await entidadeDAO.list(entity, operation);
-        
-        if (entidades.length > 0) {
-            await this.gerarLog(entity, `listado - operação: ${operation}`);
-        }
+    return entidadeAtualizada;
+  }
 
-        return entidades;
+  public async delete(entity: entity): Promise<entity> {
+    const entityName = entity.constructor.name;
+    const entidadeDAO = this.entityDAOMap.get(entityName);
+
+    if (!entidadeDAO) {
+      throw new Error(`DAO não encontrado para entidade: ${entityName}`);
     }
 
+    const entidadeParaDeletar = { ...entity };
+
+    await entidadeDAO.delete(entity);
+    await this.gerarLog(entidadeParaDeletar, "deletado");
+
+    return entidadeParaDeletar;
+  }
+
+  public async list(entity: entity, operation: string): Promise<entity[]> {
+    const entityName = entity.constructor.name;
+    const entidadeDAO = this.entityDAOMap.get(entityName);
+
+    if (!entidadeDAO) {
+      throw new Error(`DAO não encontrado para entidade: ${entityName}`);
+    }
+
+    const entidades = await entidadeDAO.list(entity, operation);
+
+    if (entidades.length > 0) {
+      await this.gerarLog(entity, `listado - operação: ${operation}`);
+    }
+
+    return entidades;
+  }
 }
