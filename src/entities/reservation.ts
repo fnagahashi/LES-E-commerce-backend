@@ -3,12 +3,13 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
-  PrimaryColumn,
+  OneToOne,
   UpdateDateColumn,
 } from "typeorm";
 import Guest from "./guest";
 import Room from "./room";
 import entity from "./entity";
+import Sale from "./sale";
 
 export type PaymentStatus =
   | "pending"
@@ -52,6 +53,9 @@ export default class Reservation extends entity {
 
   @Column()
   paymentStatus: PaymentStatus;
+
+  @OneToOne(() => Sale, (sale) => sale.id)
+  sale: Sale;
 
   @CreateDateColumn()
   created_at!: Date;

@@ -3,13 +3,11 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  OneToMany,
-  PrimaryColumn,
+  OneToOne,
   UpdateDateColumn,
 } from "typeorm";
-import { v4 as uuid } from "uuid";
-import Address from "./address";
 import entity from "./entity";
+import Reservation from "./reservation";
 
 @Entity("policy")
 export default class Policy extends entity {
@@ -18,6 +16,9 @@ export default class Policy extends entity {
 
   @Column()
   percentual: number;
+
+  @OneToOne(() => Reservation, (reservation) => reservation.id)
+  reservation: Reservation;
 
   @DeleteDateColumn()
   deletedAt?: Date;
