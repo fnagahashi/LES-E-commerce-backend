@@ -22,8 +22,7 @@ export class RoomController {
     } catch (error) {
       const err = error as Error;
       res.status(400).json({
-        success: false,
-        error: err.message,
+        message: err.message,
       });
     }
   }
@@ -93,7 +92,7 @@ export class RoomController {
   public async buscarTodos(req: Request, res: Response): Promise<void> {
     try {
       const rooms = await this.facade.list(
-        new Room("", RoomType.single, 0, 0, 0, true),
+        new Room("", RoomType.single, 0, 0, 0, false),
         "findAll"
       );
 
@@ -166,8 +165,9 @@ export class RoomController {
     try {
       const { id } = req.params;
 
-      // Usar 'findById' que é o nome da operação no DAO
-      const rooms = await this.facade.list({ id } as Room, "findById");
+      const roomFiltro = new Room("", RoomType.single, 0, 0, 0, true);
+      roomFiltro.id = id;
+      const rooms = await this.facade.list(roomFiltro, "findById");
 
       if (rooms.length === 0) {
         res.status(404).json({
@@ -193,11 +193,9 @@ export class RoomController {
   public async buscarPorRoomCode(req: Request, res: Response): Promise<void> {
     try {
       const { roomCode } = req.params;
-      // Usar 'findByFilters' para buscar por código
-      const rooms = await this.facade.list(
-        { roomCode } as Room,
-        "findByFilters"
-      );
+      const roomFiltro = new Room("", RoomType.single, 0, 0, 0, true);
+      roomFiltro.roomCode = roomCode;
+      const rooms = await this.facade.list(roomFiltro, "findByFilters");
 
       if (rooms.length === 0) {
         res.status(404).json({
@@ -223,11 +221,9 @@ export class RoomController {
   public async buscarPorTipo(req: Request, res: Response): Promise<void> {
     try {
       const { type } = req.params;
-      // Usar 'findByFilters' para buscar por tipo
-      const rooms = await this.facade.list(
-        { type: type as RoomType } as Room,
-        "findByFilters"
-      );
+      const roomFiltro = new Room("", RoomType.single, 0, 0, 0, true);
+      roomFiltro.type = type as RoomType;
+      const rooms = await this.facade.list(roomFiltro, "findByFilters");
 
       res.status(200).json({
         success: true,
@@ -247,8 +243,9 @@ export class RoomController {
     try {
       const { id } = req.params;
 
-      // Buscar o quarto atual primeiro
-      const rooms = await this.facade.list({ id } as Room, "findById");
+      const roomFiltro = new Room("", RoomType.single, 0, 0, 0, true);
+      roomFiltro.id = id;
+      const rooms = await this.facade.list(roomFiltro, "findById");
 
       if (rooms.length === 0) {
         res.status(404).json({
@@ -276,7 +273,7 @@ export class RoomController {
       const err = error as Error;
       res.status(400).json({
         success: false,
-        error: err.message,
+        message: err.message,
       });
     }
   }
@@ -286,11 +283,9 @@ export class RoomController {
       const { id } = req.params;
       const { precoBase } = req.body;
 
-      // Buscar o quarto atual
-      const rooms = (await this.facade.list(
-        { id } as Room,
-        "findById"
-      )) as Room[];
+      const roomFiltro = new Room("", RoomType.single, 0, 0, 0, true);
+      roomFiltro.id = id;
+      const rooms = (await this.facade.list(roomFiltro, "findById")) as Room[];
 
       if (rooms.length === 0) {
         res.status(404).json({
@@ -323,13 +318,15 @@ export class RoomController {
     try {
       const { id } = req.params;
 
-      // Buscar o quarto atual
-      const rooms = await this.facade.list({ id } as Room, "findById");
+      const roomFiltro = new Room("", RoomType.single, 0, 0, 0, true);
+      roomFiltro.id = id;
+      const rooms = await this.facade.list(roomFiltro, "findById");
+      console.log(rooms);
 
       if (rooms.length === 0) {
         res.status(404).json({
           success: false,
-          error: "Quarto não encontrado",
+          message: "Quarto não encontrado",
         });
         return;
       }
@@ -348,7 +345,7 @@ export class RoomController {
       const err = error as Error;
       res.status(400).json({
         success: false,
-        error: err.message,
+        message: err.message,
       });
     }
   }
@@ -357,8 +354,10 @@ export class RoomController {
     try {
       const { id } = req.params;
 
-      // Buscar o quarto atual
-      const rooms = await this.facade.list({ id } as Room, "findById");
+      const roomFiltro = new Room("", RoomType.single, 0, 0, 0, true);
+      roomFiltro.id = id;
+      const rooms = await this.facade.list(roomFiltro, "findById");
+      console.log(rooms);
 
       if (rooms.length === 0) {
         res.status(404).json({
@@ -382,7 +381,7 @@ export class RoomController {
       const err = error as Error;
       res.status(400).json({
         success: false,
-        error: err.message,
+        message: err.message,
       });
     }
   }
@@ -437,5 +436,37 @@ export class RoomController {
     if (rooms.length === 0) return 0;
     const totalPreco = rooms.reduce((sum, room) => sum + room.precoBase, 0);
     return Number((totalPreco / rooms.length).toFixed(2));
+  }
+
+  public async deletar(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const roomFiltro = new Room("", RoomType.single, 0, 0, 0, true);
+      roomFiltro.id = id;
+      const rooms = await this.facade.list(roomFiltro, "findById");
+
+      if (rooms.length === 0) {
+        res.status(404).json({
+          success: false,
+          error: "Quarto não encontrado",
+        });
+        return;
+      }
+
+      const roomAtual = rooms[0];
+
+      await this.facade.delete(roomAtual);
+
+      res.status(200).json({
+        success: true,
+        message: "Quarto deletado com sucesso",
+      });
+    } catch (error) {
+      const err = error as Error;
+      res.status(400).json({
+        success: false,
+        error: err.message,
+      });
+    }
   }
 }

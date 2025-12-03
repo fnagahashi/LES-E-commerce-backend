@@ -87,6 +87,7 @@ const startApp = async () => {
   router.get("/rooms/estatisticas/geral", (req, res) =>
     roomController.getEstatisticas(req, res)
   );
+  router.delete("/rooms/:id", (req, res) => roomController.deletar(req, res));
 
   // ==================== ROTAS DE RESERVAS (RF0201-RF0209) ====================
   router.get("/reservations/disponibilidade", (req, res) =>

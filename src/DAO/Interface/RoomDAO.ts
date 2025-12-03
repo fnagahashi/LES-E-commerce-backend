@@ -16,9 +16,7 @@ export default class RoomDAO implements IDAO<Room> {
   async list(room: Room, operation: string): Promise<Room[]> {
     switch (operation) {
       case "findAll":
-        return await this.repository.find({
-          where: { isActive: true },
-        });
+        return await this.repository.find();
       case "findById":
         return await this.repository.find({
           where: { id: room.id },
@@ -48,6 +46,6 @@ export default class RoomDAO implements IDAO<Room> {
   }
 
   async delete(room: Room): Promise<void> {
-    await this.repository.softDelete(room.id);
+    await this.repository.delete(room.id);
   }
 }
