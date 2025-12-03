@@ -3,17 +3,29 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
   OneToMany,
+  OneToOne,
   UpdateDateColumn,
 } from "typeorm";
 import entity from "./entity";
 import Reservation from "./reservation";
 import { PaymentMethod } from "../enum/PaymentMethod";
 
+export type PaymentStatus =
+  | "pending"
+  | "denied"
+  | "approved"
+  | "confirmed"
+  | "cancelled"
+  | "proposal";
+
+
 @Entity("payment")
 export default class Payment extends entity {
-  @OneToMany(() => Reservation, (reservation) => reservation.payment)
-  reservation!: Reservation;
+  @OneToOne(() => Reservation, (reservation) => reservation.payment)
+  @JoinColumn()
+reservation!: Reservation;
 
   @Column({ type: "enum", enum: PaymentMethod })
   type!: PaymentMethod;
@@ -25,7 +37,7 @@ export default class Payment extends entity {
   paymentDate!: Date;
 
   @Column()
-  status!: string;
+  status!: PaymentStatus;
 
   @DeleteDateColumn()
   deletedAt?: Date;
@@ -41,7 +53,7 @@ export default class Payment extends entity {
     type: PaymentMethod,
     price: number,
     paymentDate: Date,
-    status: string
+    status: PaymentStatus
   ) {
     super();
     this.reservation = reservation;
@@ -49,5 +61,15 @@ export default class Payment extends entity {
     this.price = price;
     this.status = status;
     this.paymentDate = paymentDate;
+  }
+
+  isPaid(): boolean {
+    return (
+      this.status === "approved" || this.status === "confirmed"
+    );
+  }
+
+  canBeConfirmed(): boolean {
+    return this.status === "approved";
   }
 }

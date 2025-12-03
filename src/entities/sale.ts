@@ -3,11 +3,14 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
   OneToMany,
+  OneToOne,
   PrimaryColumn,
   UpdateDateColumn,
 } from "typeorm";
 import entity from "./entity";
+import Reservation from "./reservation";
 
 export type TipoPromocao = "percentual" | "valor_fixo" | "diaria_gratis";
 @Entity("sale")

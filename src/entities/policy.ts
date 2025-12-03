@@ -17,7 +17,7 @@ export default class Policy extends entity {
   @Column()
   percentual: number;
 
-  @OneToOne(() => Reservation, (reservation) => reservation.id)
+  @OneToOne(() => Reservation, (reservation) => reservation.policy)
   reservation: Reservation;
 
   @DeleteDateColumn()

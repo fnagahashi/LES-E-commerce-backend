@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToOne,
   UpdateDateColumn,
@@ -10,14 +11,9 @@ import Guest from "./guest";
 import Room from "./room";
 import entity from "./entity";
 import Sale from "./sale";
+import Policy from "./policy";
+import Payment from "./payment";
 
-export type PaymentStatus =
-  | "pending"
-  | "denied"
-  | "approved"
-  | "confirmed"
-  | "cancelled"
-  | "proposal";
 
 @Entity("reservation")
 export default class Reservation extends entity {
@@ -48,21 +44,26 @@ export default class Reservation extends entity {
   @Column("simple-array", { nullable: true })
   childrenAges!: number[];
 
-  @Column("decimal", { precision: 10, scale: 2 })
-  priceTotal: number;
-
-  @Column()
-  paymentStatus: PaymentStatus;
-
-  @OneToOne(() => Sale, (sale) => sale.id)
+  @OneToOne(() => Sale)
+  @JoinColumn()
   sale: Sale;
+
+  @OneToOne(() => Policy, { 
+    nullable: true,
+    cascade: true,
+    onDelete: "CASCADE",
+  })
+  @JoinColumn()
+  policy: Policy;   
+  
+  @OneToOne(() => Payment, (payment) => payment.reservation)
+  payment: Payment;
 
   @CreateDateColumn()
   created_at!: Date;
 
   @UpdateDateColumn()
   updated_at!: Date;
-  payment: any;
 
   constructor(
     codeReservation: string,
@@ -74,8 +75,6 @@ export default class Reservation extends entity {
     qntAdults: number,
     qntChildren: number,
     childrenAges: number[],
-    priceTotal: number,
-    paymentStatus: PaymentStatus = "proposal"
   ) {
     super();
     this.codeReservation = codeReservation;
@@ -87,16 +86,6 @@ export default class Reservation extends entity {
     this.qntAdults = qntAdults;
     this.qntChildren = qntChildren;
     this.childrenAges = childrenAges || [];
-    this.priceTotal = priceTotal;
-    this.paymentStatus = paymentStatus;
   }
-  isPaid(): boolean {
-    return (
-      this.paymentStatus === "approved" || this.paymentStatus === "confirmed"
-    );
-  }
-
-  canBeConfirmed(): boolean {
-    return this.paymentStatus === "approved";
-  }
+  
 }
