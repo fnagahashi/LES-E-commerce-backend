@@ -6,7 +6,6 @@ import { ReservationController } from "../src/controller/reservation/Reservation
 import { PaymentController } from "../src/controller/payment/PaymentController";
 import { SaleController } from "../src/controller/sale/SaleController";
 import { PolicyController } from "../src/controller/policy/PolicyController";
-import { ReportController } from "../src/controller/report/ReportController";
 import { AppDataSource } from "./database";
 import Facade from "./facade/Facade";
 import Guest from "./entities/guest";
@@ -44,7 +43,6 @@ const startApp = async () => {
   const paymentController = new PaymentController(facade);
   const saleController = new SaleController(facade);
   const policyController = new PolicyController(facade);
-  const reportController = new ReportController(facade);
 
   // ==================== ROTAS DE HÓSPEDES (RF0101-RF0104) ====================
   router.post("/guests", (req, res) => guestController.create(req, res)); // RF0101
@@ -219,20 +217,6 @@ const startApp = async () => {
   router.get("/policies/estatisticas/geral", (req, res) =>
     policyController.getEstatisticas(req, res)
   );
-
-  // ==================== ROTAS DE RELATÓRIOS (RF0231-RF0234) ====================
-  router.get("/reports/ocupacao", (req, res) =>
-    reportController.relatorioOcupacao(req, res)
-  ); // RF0231
-  router.get("/reports/financeiro", (req, res) =>
-    reportController.relatorioFinanceiro(req, res)
-  ); // RF0232
-  router.get("/reports/origem-reservas", (req, res) =>
-    reportController.relatorioOrigemReservas(req, res)
-  ); // RF0233
-  router.get("/reports/desempenho-promocoes", (req, res) =>
-    reportController.relatorioDesempenhoPromocoes(req, res)
-  ); // RF0234
 
   router.get("/health", (req, res) => {
     res.json({

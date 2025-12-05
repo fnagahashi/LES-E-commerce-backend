@@ -12,8 +12,6 @@ import Room from "./room";
 import entity from "./entity";
 import Sale from "./sale";
 import Policy from "./policy";
-import Payment from "./payment";
-
 
 @Entity("reservation")
 export default class Reservation extends entity {
@@ -48,17 +46,6 @@ export default class Reservation extends entity {
   @JoinColumn()
   sale: Sale;
 
-  @OneToOne(() => Policy, { 
-    nullable: true,
-    cascade: true,
-    onDelete: "CASCADE",
-  })
-  @JoinColumn()
-  policy: Policy;   
-  
-  @OneToOne(() => Payment, (payment) => payment.reservation)
-  payment: Payment;
-
   @CreateDateColumn()
   created_at!: Date;
 
@@ -74,7 +61,7 @@ export default class Reservation extends entity {
     noShow: boolean,
     qntAdults: number,
     qntChildren: number,
-    childrenAges: number[],
+    childrenAges: number[]
   ) {
     super();
     this.codeReservation = codeReservation;
@@ -87,5 +74,4 @@ export default class Reservation extends entity {
     this.qntChildren = qntChildren;
     this.childrenAges = childrenAges || [];
   }
-  
 }

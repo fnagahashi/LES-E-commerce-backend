@@ -26,6 +26,7 @@ import PromotionValidation from "../strategy/others/PromotionValidation";
 import SaleDAO from "../DAO/Interface/SaleDAO";
 import ValidationRequiredPaymentFields from "../strategy/payment/ValidationRequiredFields";
 import ValidationReservationConfirm from "../strategy/payment/ValidationReservationConfirm";
+import CalcularValorTotal from "../strategy/payment/CalcularValorTotal";
 
 export default class Facade implements IFacade<entity> {
   private readonly entityDAOMap: Map<string, IDAO<entity>>;
@@ -86,6 +87,7 @@ export default class Facade implements IFacade<entity> {
       new ValidationRequiredRoomFields(),
       new CancellationPolicy(),
       new ChildrenDiscountStrategy(),
+      new CalcularValorTotal(),
     ] as Array<IStrategy<entity>>);
 
     this.strategyMap.set("Sale", [

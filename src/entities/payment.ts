@@ -20,12 +20,11 @@ export type PaymentStatus =
   | "cancelled"
   | "proposal";
 
-
 @Entity("payment")
 export default class Payment extends entity {
-  @OneToOne(() => Reservation, (reservation) => reservation.payment)
+  @OneToOne(() => Reservation, (reservation) => reservation.id)
   @JoinColumn()
-reservation!: Reservation;
+  reservation!: Reservation;
 
   @Column({ type: "enum", enum: PaymentMethod })
   type!: PaymentMethod;
@@ -64,9 +63,7 @@ reservation!: Reservation;
   }
 
   isPaid(): boolean {
-    return (
-      this.status === "approved" || this.status === "confirmed"
-    );
+    return this.status === "approved" || this.status === "confirmed";
   }
 
   canBeConfirmed(): boolean {

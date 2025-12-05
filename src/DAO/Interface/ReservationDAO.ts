@@ -13,7 +13,10 @@ export default class ReservationDAO implements IDAO<Reservation> {
     return await this.repository.save(reservation);
   }
 
-  async list(reservation: Reservation, operation: string): Promise<Reservation[]> {
+  async list(
+    reservation: Reservation,
+    operation: string
+  ): Promise<Reservation[]> {
     switch (operation) {
       case "findAll":
         return await this.repository.find({
@@ -21,12 +24,12 @@ export default class ReservationDAO implements IDAO<Reservation> {
         });
       case "findById":
         return await this.repository.find({
-          where: {id: reservation.id}, 
+          where: { id: reservation.id },
         });
       case "findByFilters":
         return await this.findByFilters(reservation);
 
-    case "findByReservationCode":
+      case "findByReservationCode":
         if (!reservation.codeReservation) {
           throw new Error("Código da reserva é obrigatório para esta operação");
         }
@@ -35,58 +38,55 @@ export default class ReservationDAO implements IDAO<Reservation> {
     }
   }
   private async findByFilters(filters: Reservation): Promise<Reservation[]> {
-  const whereClause: any = {};
-  
-  if (filters.codeReservation) {
-    whereClause.codeReservation = Like(`%${filters.codeReservation}%`);
-  }
-  
-  if (filters.guest && filters.guest.id) {
-    whereClause.guest = { id: filters.guest.id };
-  }
-  
-  if (filters.room && filters.room.id) {
-    whereClause.room = { id: filters.room.id };
-  }
-  
-  if (filters.paymentStatus !== undefined && filters.paymentStatus !== null) {
-    whereClause.paymentStatus = filters.paymentStatus;
-  }
-  
-  if (filters.dateStart) {
-    whereClause.dateStart = filters.dateStart;
-  }
-  
-  if (filters.dateEnd) {
-    whereClause.dateEnd = filters.dateEnd;
-  }
-  
-  if (filters.dateStart && filters.dateEnd) {
-    whereClause.dateStart = Between(filters.dateStart, filters.dateEnd);
+    const whereClause: any = {};
 
-  }
-  
-  if (filters.noShow !== undefined && filters.noShow !== null) {
-    whereClause.noShow = filters.noShow;
-  }
-
-  return await this.repository.find({
-    where: whereClause,
-    relations: ["guest", "room"],
-    order: {
-      dateStart: "ASC",
-      created_at: "DESC"
+    if (filters.codeReservation) {
+      whereClause.codeReservation = Like(`%${filters.codeReservation}%`);
     }
-  });
-}
-  
+
+    if (filters.guest && filters.guest.id) {
+      whereClause.guest = { id: filters.guest.id };
+    }
+
+    if (filters.room && filters.room.id) {
+      whereClause.room = { id: filters.room.id };
+    }
+
+    if (filters.dateStart) {
+      whereClause.dateStart = filters.dateStart;
+    }
+
+    if (filters.dateEnd) {
+      whereClause.dateEnd = filters.dateEnd;
+    }
+
+    if (filters.dateStart && filters.dateEnd) {
+      whereClause.dateStart = Between(filters.dateStart, filters.dateEnd);
+    }
+
+    if (filters.noShow !== undefined && filters.noShow !== null) {
+      whereClause.noShow = filters.noShow;
+    }
+
+    return await this.repository.find({
+      where: whereClause,
+      relations: ["guest", "room"],
+      order: {
+        dateStart: "ASC",
+        created_at: "DESC",
+      },
+    });
+  }
 
   async update(reservation: Reservation): Promise<Reservation> {
     const reservationExists = await this.list(reservation, "findById");
     if (!reservationExists) {
       throw new Error("Reserva não encontrada");
     }
-    const updatedReservation = this.repository.merge(reservationExists[0], reservation);
+    const updatedReservation = this.repository.merge(
+      reservationExists[0],
+      reservation
+    );
     return await this.repository.save(updatedReservation);
   }
 

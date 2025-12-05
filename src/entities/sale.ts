@@ -32,7 +32,7 @@ export default class Sale extends entity {
   tipo!: TipoPromocao;
 
   @Column("decimal", { precision: 10, scale: 2 })
-  valor!: number;
+  valor: number;
 
   @Column()
   validoAte!: Date;
@@ -83,7 +83,7 @@ export default class Sale extends entity {
         return this.valor;
 
       case "diaria_gratis":
-        return valorDiaria * this.valor;
+        return valorTotal - valorDiaria;
 
       default:
         return 0;
