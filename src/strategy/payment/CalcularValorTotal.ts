@@ -2,14 +2,15 @@ import IStrategy from "../IStrategy";
 import Reservation from "../../entities/reservation";
 import Payment from "../../entities/payment";
 import Room from "../../entities/room";
+import Sale from "../../entities/sale";
 
-export default class CalcularValorTotal implements IStrategy<Reservation> {
-  async executar(reservation: Reservation): Promise<string | undefined> {
+export default class CalcularValorTotal implements IStrategy<Payment> {
+  async executar(payment: Payment): Promise<string | undefined> {
+    const reservation = payment.reservation;
     if (!reservation) {
       return "Reserva é necessária para calcular o valor total";
     }
     const reserva = reservation as Reservation;
-    const payment = reserva.payment as Payment;
 
     if (!reserva.dateStart || !reserva.dateEnd) {
       return "Datas de início e fim da reserva são necessárias para calcular o valor total";
@@ -27,9 +28,12 @@ export default class CalcularValorTotal implements IStrategy<Reservation> {
     const precoDiaria = room.precoBase;
     const valorTotal = precoDiaria * diferencaDias;
 
-    const promocao = reserva.sale;
+    const promocao = reserva.sale as Sale;
 
     if (promocao) {
+      if (!promocao.promoAtiva?.()) {
+          return `Promoção "${promocao.codigoSale}" não está ativa`;
+      }
       const desconto = promocao.calcularDesconto(valorTotal, diferencaDias);
       payment.price = valorTotal - desconto;
       return (valorTotal - desconto).toString();

@@ -5,7 +5,7 @@ import Reservation from "../../entities/reservation";
 export default class RefundCalculationStrategy implements IStrategy<Payment> {
     async executar(payment: Payment): Promise<string | undefined> {
         
-        if (payment.status !== 'refunded') {
+        if (payment.status !== 'cancelled') {
             return undefined;
         }
 

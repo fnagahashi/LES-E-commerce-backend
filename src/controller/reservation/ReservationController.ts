@@ -88,7 +88,6 @@ export class ReservationController {
       const { dateStart, dateEnd, roomType, qntAdults, qntChildren } =
         req.query;
 
-      // Criar um objeto Room vazio para a busca
       const roomSearch = new Room("", roomType as any, 0, 0, 0, true);
 
       const searchCriteria = {

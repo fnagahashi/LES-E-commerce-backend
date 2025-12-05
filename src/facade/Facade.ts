@@ -87,16 +87,16 @@ export default class Facade implements IFacade<entity> {
       new ValidationRequiredRoomFields(),
       new CancellationPolicy(),
       new ChildrenDiscountStrategy(),
-      new CalcularValorTotal(),
     ] as Array<IStrategy<entity>>);
 
     this.strategyMap.set("Sale", [
-      new PromotionValidation(this.saleDAO),
+      new PromotionValidation(this.saleDAO, this.paymentDAO),
     ] as Array<IStrategy<entity>>);
 
     this.strategyMap.set("Payment", [
       new ValidationRequiredPaymentFields(),
       new ValidationReservationConfirm(this.reservationDAO),
+      new CalcularValorTotal(),
     ] as Array<IStrategy<entity>>);
   }
 

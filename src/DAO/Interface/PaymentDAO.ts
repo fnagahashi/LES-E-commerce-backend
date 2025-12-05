@@ -36,6 +36,9 @@ export default class PaymentDAO implements IDAO<Payment> {
         if (!payment.reservation) {
           throw new Error("reservationId é obrigatório para esta operação");
         }
+        return await this.repository.find({
+          where: { reservation: { id: payment.reservation.id } },
+        });
       default:
         throw new Error("Operation not supported");
     }
