@@ -23,7 +23,7 @@ export default class CalcularValorTotal implements IStrategy<Payment> {
       return "A data de fim da reserva deve ser posterior à data de início";
     }
 
-    const room = reserva.room as Room;
+    const room = reserva.roomId as any;
 
     const precoDiaria = room.precoBase;
     const valorTotal = precoDiaria * diferencaDias;
@@ -32,7 +32,7 @@ export default class CalcularValorTotal implements IStrategy<Payment> {
 
     if (promocao) {
       if (!promocao.promoAtiva?.()) {
-          return `Promoção "${promocao.codigoSale}" não está ativa`;
+        return `Promoção "${promocao.codigoSale}" não está ativa`;
       }
       const desconto = promocao.calcularDesconto(valorTotal, diferencaDias);
       payment.price = valorTotal - desconto;

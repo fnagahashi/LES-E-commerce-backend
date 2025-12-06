@@ -5,11 +5,12 @@ import Reservation from "../../entities/reservation";
 import Guest from "../../entities/guest";
 import Room from "../../entities/room";
 import Payment from "../../entities/payment";
+import { RoomType } from "../../enum/RoomType";
 
 export class ReservationController {
   constructor(private readonly facade: Facade) {}
 
-  public async criarProposta(req: Request, res: Response): Promise<void> {
+  public async create(req: Request, res: Response): Promise<void> {
     try {
       // RF0202: Criar reserva (proposta)
       const reservation = await this.definirReservationCriar(req);
@@ -32,7 +33,6 @@ export class ReservationController {
 
   private async definirReservationCriar(req: Request): Promise<Reservation> {
     const {
-      codeReservation,
       guestId,
       roomId,
       dateStart,
@@ -41,19 +41,28 @@ export class ReservationController {
       qntAdults,
       qntChildren,
       childrenAges,
-      saleId,
-      policyId,
     } = req.body;
-
+    console.log("Definindo dados da reserva a criar...");
+    console.log(req.body);
+    console.log(`Datas: ${dateStart} a ${dateEnd}`);
+    console.log(`Quantidade adultos: ${qntAdults}, crianças: ${qntChildren}`);
+    console.log("Criando instância de Reservation...");
     // Buscar guest e room para instanciar a Reservation
+    const guestInstance = new Guest("", "", "", "", "", true, []);
+    (guestInstance as any).id = guestId;
+    console.log("Guest param definido:", guestInstance);
+
+    const roomParam = new Room("", RoomType.single, 0, 0, 0, true);
+    (roomParam as any).id = roomId;
+    console.log("Room param definido:", roomParam);
+
     const guests = (await this.facade.list(
-      { id: guestId } as Guest,
+      guestInstance,
       "findById"
     )) as Guest[];
-    const rooms = (await this.facade.list(
-      { id: roomId } as Room,
-      "findById"
-    )) as Room[];
+    console.log("Guest encontrado:", guests);
+    const rooms = (await this.facade.list(roomParam, "findById")) as Room[];
+    console.log("Room encontrado:", rooms);
 
     if (guests.length === 0) {
       throw new Error("Hóspede não encontrado");
@@ -66,10 +75,21 @@ export class ReservationController {
     const guest = guests[0];
     const room = rooms[0];
 
-    return new Reservation(
-      codeReservation,
+    console.log("Instância de Reservation criada:", {
       guest,
       room,
+      dateStart,
+      dateEnd,
+      noShow,
+      qntAdults,
+      qntChildren,
+      childrenAges,
+    });
+    console.log("Definindo nova reserva...");
+
+    return new Reservation(
+      guestId,
+      roomId,
       new Date(dateStart),
       new Date(dateEnd),
       noShow,
@@ -192,9 +212,8 @@ export class ReservationController {
       const reservation = reservations[0];
 
       const reservationAtualizada = new Reservation(
-        reservation.codeReservation,
-        reservation.guest,
-        reservation.room,
+        reservation.guestId,
+        reservation.roomId,
         reservation.dateStart,
         reservation.dateEnd,
         reservation.noShow,
@@ -240,9 +259,8 @@ export class ReservationController {
       const reservation = reservations[0];
 
       const reservationAtualizada = new Reservation(
-        reservation.codeReservation,
-        reservation.guest,
-        reservation.room,
+        reservation.guestId,
+        reservation.roomId,
         reservation.dateStart,
         reservation.dateEnd,
         true,
@@ -292,9 +310,8 @@ export class ReservationController {
 
       // Mesclar os dados mantendo o ID
       const reservationAtualizada = new Reservation(
-        dadosAtualizacao.codeReservation || reservationAtual.codeReservation,
-        dadosAtualizacao.guest || reservationAtual.guest,
-        dadosAtualizacao.room || reservationAtual.room,
+        dadosAtualizacao.guestId || reservationAtual.guestId,
+        dadosAtualizacao.roomId || reservationAtual.roomId,
         dadosAtualizacao.dateStart || reservationAtual.dateStart,
         dadosAtualizacao.dateEnd || reservationAtual.dateEnd,
         dadosAtualizacao.noShow ?? reservationAtual.noShow,
@@ -347,7 +364,7 @@ export class ReservationController {
         "findById"
       )) as Guest[];
       if (guests.length === 0) throw new Error("Hóspede não encontrado");
-      updateData.guest = guests[0];
+      updateData.guestId = guests[0].id;
     }
 
     if (roomId) {
@@ -356,7 +373,7 @@ export class ReservationController {
         "findById"
       )) as Room[];
       if (rooms.length === 0) throw new Error("Quarto não encontrado");
-      updateData.room = rooms[0];
+      updateData.roomId = rooms[0].id;
     }
 
     if (dateStart) updateData.dateStart = new Date(dateStart);
@@ -393,9 +410,8 @@ export class ReservationController {
       const reservation = reservations[0];
 
       const reservationAtualizada = new Reservation(
-        reservation.codeReservation,
-        reservation.guest,
-        reservation.room,
+        reservation.guestId,
+        reservation.roomId,
         reservation.dateStart,
         reservation.dateEnd,
         reservation.noShow,
@@ -448,7 +464,6 @@ export class ReservationController {
     req: Request
   ): Promise<Partial<Reservation>> {
     const {
-      codeReservation,
       guestId,
       roomId,
       dateStart,
@@ -461,20 +476,19 @@ export class ReservationController {
     // Criar uma Reservation parcial para os filtros
     const filters: Partial<Reservation> = {};
 
-    if (codeReservation) filters.codeReservation = codeReservation as string;
     if (guestId) {
       const guests = (await this.facade.list(
         { id: guestId } as Guest,
         "findById"
       )) as Guest[];
-      if (guests.length > 0) filters.guest = guests[0];
+      if (guests.length > 0) filters.guestId = guests[0].id;
     }
     if (roomId) {
       const rooms = (await this.facade.list(
         { id: roomId } as Room,
         "findById"
       )) as Room[];
-      if (rooms.length > 0) filters.room = rooms[0];
+      if (rooms.length > 0) filters.roomId = rooms[0].id;
     }
     if (dateStart) filters.dateStart = new Date(dateStart as string);
     if (dateEnd) filters.dateEnd = new Date(dateEnd as string);
@@ -489,36 +503,6 @@ export class ReservationController {
       const reservations = (await this.facade.list(
         { id } as Reservation,
         "findById"
-      )) as Reservation[];
-
-      if (reservations.length === 0) {
-        res.status(404).json({
-          success: false,
-          error: "Reserva não encontrada",
-        });
-        return;
-      }
-
-      res.status(200).json({
-        success: true,
-        reservation: reservations[0],
-      });
-    } catch (error) {
-      const err = error as Error;
-      res.status(400).json({
-        success: false,
-        error: err.message,
-      });
-    }
-  }
-
-  public async buscarPorCodigo(req: Request, res: Response): Promise<void> {
-    try {
-      const { codeReservation } = req.params;
-
-      const reservations = (await this.facade.list(
-        { codeReservation } as Reservation,
-        "findByFilters"
       )) as Reservation[];
 
       if (reservations.length === 0) {
@@ -559,7 +543,7 @@ export class ReservationController {
       }
 
       const reservations = (await this.facade.list(
-        { guest: guests[0] } as Reservation,
+        { guestId: guests[0].id } as Reservation,
         "findByFilters"
       )) as Reservation[];
 

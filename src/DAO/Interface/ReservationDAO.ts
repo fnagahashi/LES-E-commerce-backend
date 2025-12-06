@@ -44,12 +44,12 @@ export default class ReservationDAO implements IDAO<Reservation> {
       whereClause.codeReservation = Like(`%${filters.codeReservation}%`);
     }
 
-    if (filters.guest && filters.guest.id) {
-      whereClause.guest = { id: filters.guest.id };
+    if (filters.guestId) {
+      whereClause.guestId = filters.guestId;
     }
 
-    if (filters.room && filters.room.id) {
-      whereClause.room = { id: filters.room.id };
+    if (filters.roomId) {
+      whereClause.roomId = filters.roomId;
     }
 
     if (filters.dateStart) {

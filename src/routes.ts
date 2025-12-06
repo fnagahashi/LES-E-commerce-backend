@@ -55,6 +55,7 @@ const startApp = async () => {
   router.patch("/guests/:id/inactivate", (req, res) =>
     guestController.inactivate(req, res)
   ); // RF0103
+  router.delete("/guests/:id", (req, res) => guestController.delete(req, res));
 
   // ==================== ROTAS DE QUARTOS (RF0111-RF0114) ====================
   router.post("/rooms", (req, res) => roomController.criar(req, res)); // RF0111
@@ -92,16 +93,13 @@ const startApp = async () => {
     reservationController.consultarDisponibilidade(req, res)
   ); // RF0201
   router.post("/reservations", (req, res) =>
-    reservationController.criarProposta(req, res)
+    reservationController.create(req, res)
   ); // RF0202
   router.get("/reservations", (req, res) =>
     reservationController.buscarPorFiltro(req, res)
   ); // RF0206
   router.get("/reservations/:id", (req, res) =>
     reservationController.buscarPorId(req, res)
-  ); // RF0206
-  router.get("/reservations/codigo/:codeReservation", (req, res) =>
-    reservationController.buscarPorCodigo(req, res)
   ); // RF0206
   router.get("/reservations/guest/:guestId", (req, res) =>
     reservationController.buscarPorGuest(req, res)

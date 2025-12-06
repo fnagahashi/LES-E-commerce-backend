@@ -20,13 +20,12 @@ import ValidationDates from "../strategy/reservation/ValidationDates";
 import ValidationCapacityRoom from "../strategy/reservation/ValidationCapacityRoom";
 import ValidationCapacity from "../strategy/reservation/ValidationCapacity";
 import ValidationMinimumStay from "../strategy/reservation/ValidationMinimumStay";
-import CancellationPolicy from "../strategy/others/CancellationPolicy";
-import ChildrenDiscountStrategy from "../strategy/others/ChildrenDiscount";
 import PromotionValidation from "../strategy/others/PromotionValidation";
 import SaleDAO from "../DAO/Interface/SaleDAO";
 import ValidationRequiredPaymentFields from "../strategy/payment/ValidationRequiredFields";
 import ValidationReservationConfirm from "../strategy/payment/ValidationReservationConfirm";
 import CalcularValorTotal from "../strategy/payment/CalcularValorTotal";
+import ValidationRequiredReservationFields from "../strategy/reservation/ValidationRequiredFields";
 
 export default class Facade implements IFacade<entity> {
   private readonly entityDAOMap: Map<string, IDAO<entity>>;
@@ -81,12 +80,10 @@ export default class Facade implements IFacade<entity> {
     this.strategyMap.set("Reservation", [
       new ValidationAvailabilityRoom(this.reservationDAO),
       new ValidationMinimumStay(),
-      new ValidationCapacity(),
+      new ValidationCapacity(this.roomDAO),
       new ValidationCapacityRoom(),
       new ValidationDates(),
-      new ValidationRequiredRoomFields(),
-      new CancellationPolicy(),
-      new ChildrenDiscountStrategy(),
+      new ValidationRequiredReservationFields(),
     ] as Array<IStrategy<entity>>);
 
     this.strategyMap.set("Sale", [
@@ -95,7 +92,7 @@ export default class Facade implements IFacade<entity> {
 
     this.strategyMap.set("Payment", [
       new ValidationRequiredPaymentFields(),
-      new ValidationReservationConfirm(this.reservationDAO),
+      new ValidationReservationConfirm(this.reservationDAO, this.paymentDAO),
       new CalcularValorTotal(),
     ] as Array<IStrategy<entity>>);
   }
@@ -178,6 +175,8 @@ export default class Facade implements IFacade<entity> {
   public async list(entity: entity, operation: string): Promise<entity[]> {
     const entityName = entity.constructor.name;
     const entidadeDAO = this.entityDAOMap.get(entityName);
+    console.log("Entity Name:", entityName);
+    console.log("Entidade DAO:", entidadeDAO);
 
     if (!entidadeDAO) {
       throw new Error(`DAO não encontrado para entidade: ${entityName}`);

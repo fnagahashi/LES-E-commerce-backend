@@ -1,4 +1,5 @@
 import {
+  BeforeInsert,
   Column,
   CreateDateColumn,
   Entity,
@@ -16,13 +17,28 @@ import Policy from "./policy";
 @Entity("reservation")
 export default class Reservation extends entity {
   @Column()
-  codeReservation!: string;
+  codeReservation: string;
+  @BeforeInsert()
+  generateCodeReservation() {
+    this.codeReservation = Math.random()
+      .toString(36)
+      .substring(2, 10)
+      .toUpperCase();
+  }
 
   @ManyToOne(() => Guest)
+  @JoinColumn({ name: "guestId" })
   guest: Guest;
 
+  @Column()
+  guestId: string;
+
   @ManyToOne(() => Room)
+  @JoinColumn({ name: "roomId" })
   room: Room;
+
+  @Column()
+  roomId: string;
 
   @Column("date")
   dateStart: Date;
@@ -30,7 +46,7 @@ export default class Reservation extends entity {
   @Column("date")
   dateEnd: Date;
 
-  @Column()
+  @Column({ nullable: true, default: false })
   noShow: boolean;
 
   @Column()
@@ -40,7 +56,7 @@ export default class Reservation extends entity {
   qntChildren: number;
 
   @Column("simple-array", { nullable: true })
-  childrenAges!: number[];
+  childrenAges: number[];
 
   @OneToOne(() => Sale)
   @JoinColumn()
@@ -53,9 +69,8 @@ export default class Reservation extends entity {
   updated_at!: Date;
 
   constructor(
-    codeReservation: string,
-    guest: Guest,
-    room: Room,
+    guestId: string,
+    roomId: string,
     dateStart: Date,
     dateEnd: Date,
     noShow: boolean,
@@ -64,9 +79,8 @@ export default class Reservation extends entity {
     childrenAges: number[]
   ) {
     super();
-    this.codeReservation = codeReservation;
-    this.guest = guest;
-    this.room = room;
+    this.guestId = guestId;
+    this.roomId = roomId;
     this.dateStart = dateStart;
     this.dateEnd = dateEnd;
     this.noShow = noShow;
