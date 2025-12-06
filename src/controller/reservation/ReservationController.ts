@@ -442,8 +442,17 @@ export class ReservationController {
       // RF0206: Consultar reservas por filtros
       const filters = await this.definirFiltrosReserva(req);
       const reservations = (await this.facade.list(
-        filters as Reservation,
-        "findByFilters"
+        new Reservation(
+          "",
+          "",
+          new Date(),
+          new Date(),
+          false,
+          0,
+          0,
+          [] as number[]
+        ),
+        "findAll"
       )) as Reservation[];
 
       res.status(200).json({

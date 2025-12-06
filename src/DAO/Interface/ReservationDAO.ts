@@ -19,9 +19,7 @@ export default class ReservationDAO implements IDAO<Reservation> {
   ): Promise<Reservation[]> {
     switch (operation) {
       case "findAll":
-        return await this.repository.find({
-          relations: ["guest", "room"],
-        });
+        return await this.repository.find();
       case "findById":
         return await this.repository.find({
           where: { id: reservation.id },
