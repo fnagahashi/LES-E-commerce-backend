@@ -202,6 +202,36 @@ export class GuestController {
     }
   }
 
+  async activate(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+
+      const guestInstance = new Guest("", "", "", "", "", false, []);
+      (guestInstance as any).id = id;
+      const guests = await this.facade.list(guestInstance, "findById");
+
+      if (guests.length === 0) {
+        res.status(404).json({ error: "Hóspede não encontrado" });
+        return;
+      }
+
+      const guest = guests[0];
+      guest.isActive = true;
+      const guestUpdated = await this.facade.update(guest);
+
+      res.json({
+        success: true,
+        message: "Hóspede ativado com sucesso",
+        guest: guestUpdated,
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        success: false,
+        error: error.message,
+      });
+    }
+  }
+
   async delete(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;

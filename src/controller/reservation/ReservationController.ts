@@ -6,6 +6,7 @@ import Guest from "../../entities/guest";
 import Room from "../../entities/room";
 import Payment from "../../entities/payment";
 import { RoomType } from "../../enum/RoomType";
+import { PaymentMethod } from "../../enum/PaymentMethod";
 
 export class ReservationController {
   constructor(private readonly facade: Facade) {}
@@ -621,6 +622,7 @@ export class ReservationController {
         return;
       }
       const reservation = reservations[0];
+
       await this.facade.delete(reservation);
 
       res.json({

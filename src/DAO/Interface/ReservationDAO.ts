@@ -89,6 +89,6 @@ export default class ReservationDAO implements IDAO<Reservation> {
   }
 
   async delete(reservation: Reservation): Promise<void> {
-    await this.repository.softDelete(reservation.id);
+    await this.repository.delete(reservation.id);
   }
 }

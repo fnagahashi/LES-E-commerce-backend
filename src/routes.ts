@@ -55,6 +55,9 @@ const startApp = async () => {
   router.patch("/guests/:id/inactivate", (req, res) =>
     guestController.inactivate(req, res)
   ); // RF0103
+  router.patch("/guests/:id/activate", (req, res) =>
+    guestController.activate(req, res)
+  ); // RF0103
   router.delete("/guests/:id", (req, res) => guestController.delete(req, res));
 
   // ==================== ROTAS DE QUARTOS (RF0111-RF0114) ====================

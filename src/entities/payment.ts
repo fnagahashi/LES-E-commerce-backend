@@ -22,7 +22,7 @@ export type PaymentStatus =
 
 @Entity("payment")
 export default class Payment extends entity {
-  @OneToOne(() => Reservation)
+  @OneToOne(() => Reservation, { onDelete: "CASCADE" })
   @JoinColumn({ name: "reservationId" })
   reservation!: Reservation;
 

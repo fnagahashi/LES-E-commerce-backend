@@ -5,7 +5,7 @@ import IDAO from "../IDAO";
 export default class GuestDAO implements IDAO<Guest> {
   private repository: Repository<Guest>;
 
-  constructor(connection: DataSource) {      
+  constructor(connection: DataSource) {
     this.repository = connection.getRepository(Guest);
   }
 
@@ -13,15 +13,13 @@ export default class GuestDAO implements IDAO<Guest> {
     return await this.repository.save(guest);
   }
 
-  async list(guest:Guest, operation: string): Promise<Guest[]> {
+  async list(guest: Guest, operation: string): Promise<Guest[]> {
     switch (operation) {
       case "findAll":
-        return await this.repository.find({
-          where: {isActive: true}, 
-        });
+        return await this.repository.find();
       case "findById":
         return await this.repository.find({
-          where: {id: guest.id}, 
+          where: { id: guest.id },
         });
       case "findByFilters":
         const cpf = guest.cpf ? Like(`%${guest.cpf}%`) : Like(`%`);
@@ -33,18 +31,18 @@ export default class GuestDAO implements IDAO<Guest> {
             cpf,
             email,
             name,
-            phone
-          }
+            phone,
+          },
         });
       case "findByEmail":
         return await this.repository.find({
-          where: {email: guest.email},
+          where: { email: guest.email },
         });
       default:
         throw new Error("Operation not supported");
     }
   }
-    
+
   async update(guest: Guest): Promise<Guest> {
     const clientExists = await this.list(guest, "findById");
     if (!clientExists) {
