@@ -22,12 +22,12 @@ export type PaymentStatus =
 
 @Entity("payment")
 export default class Payment extends entity {
-  @OneToOne(() => Reservation, (reservation) => reservation.id)
-  @JoinColumn()
+  @OneToOne(() => Reservation)
+  @JoinColumn({ name: "reservationId" })
   reservation!: Reservation;
 
   @Column({ type: "enum", enum: PaymentMethod })
-  type!: PaymentMethod;
+  type: PaymentMethod;
 
   @Column()
   price!: number;

@@ -1,10 +1,13 @@
 import IStrategy from "../IStrategy";
 import Reservation from "../../entities/reservation";
-import Payment from "../../entities/payment";
-import Room from "../../entities/room";
 import Sale from "../../entities/sale";
+import Payment from "../../entities/payment";
+import RoomDAO from "../../DAO/Interface/RoomDAO";
+import Room from "../../entities/room";
+import { RoomType } from "../../enum/RoomType";
 
 export default class CalcularValorTotal implements IStrategy<Payment> {
+  constructor(private readonly roomDAO: RoomDAO) {}
   async executar(payment: Payment): Promise<string | undefined> {
     const reservation = payment.reservation;
     if (!reservation) {
@@ -23,10 +26,14 @@ export default class CalcularValorTotal implements IStrategy<Payment> {
       return "A data de fim da reserva deve ser posterior à data de início";
     }
 
-    const room = reserva.roomId as any;
+    const roomParam = new Room("", RoomType.single, 0, 0, 0, true);
+    (roomParam as any).id = reservation.roomId;
 
-    const precoDiaria = room.precoBase;
-    const valorTotal = precoDiaria * diferencaDias;
+    const rooms = await this.roomDAO.list(roomParam, "findById");
+    const room = rooms[0];
+
+    const valorTotal = room.precoBase * diferencaDias;
+    payment.price = valorTotal;
 
     const promocao = reserva.sale as Sale;
 
@@ -35,11 +42,10 @@ export default class CalcularValorTotal implements IStrategy<Payment> {
         return `Promoção "${promocao.codigoSale}" não está ativa`;
       }
       const desconto = promocao.calcularDesconto(valorTotal, diferencaDias);
-      payment.price = valorTotal - desconto;
-      return (valorTotal - desconto).toString();
+      const valorComDesconto = valorTotal - desconto;
+      payment.price = valorComDesconto;
+      return valorComDesconto.toString();
     }
-
-    payment.price = valorTotal;
-    return valorTotal.toString();
+    return undefined;
   }
 }

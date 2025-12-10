@@ -60,9 +60,19 @@ export default class ValidationReservationConfirm
     reservaId: string
   ): Promise<Reservation | null> {
     try {
+      const reservationInstance = new Reservation(
+        reservaId,
+        "",
+        new Date(),
+        new Date(),
+        false,
+        0,
+        0,
+        []
+      );
       const reservas = await this.reservationDAO.list(
-        { id: reservaId } as Reservation,
-        "findByReservation"
+        reservationInstance,
+        "findById"
       );
       return reservas[0] || null;
     } catch (error) {

@@ -91,9 +91,9 @@ export default class Facade implements IFacade<entity> {
     ] as Array<IStrategy<entity>>);
 
     this.strategyMap.set("Payment", [
+      new CalcularValorTotal(this.roomDAO),
       new ValidationRequiredPaymentFields(),
       new ValidationReservationConfirm(this.reservationDAO, this.paymentDAO),
-      new CalcularValorTotal(),
     ] as Array<IStrategy<entity>>);
   }
 

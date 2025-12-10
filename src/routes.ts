@@ -122,6 +122,9 @@ const startApp = async () => {
   router.get("/reservations/estatisticas/geral", (req, res) =>
     reservationController.getEstatisticas(req, res)
   );
+  router.delete("/reservations/:id", (req, res) =>
+    reservationController.delete(req, res)
+  );
 
   // ==================== ROTAS DE PAGAMENTOS (RF0211-RF0214) ====================
   router.post("/payments", (req, res) =>

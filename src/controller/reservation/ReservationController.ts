@@ -597,4 +597,41 @@ export class ReservationController {
       });
     }
   }
+  async delete(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const reservationInstance = new Reservation(
+        "",
+        "",
+        new Date(),
+        new Date(),
+        false,
+        0,
+        0,
+        []
+      );
+      (reservationInstance as any).id = id;
+      const reservations = await this.facade.list(
+        reservationInstance,
+        "findById"
+      );
+
+      if (reservations.length === 0) {
+        res.status(404).json({ error: "Reserva não encontrada" });
+        return;
+      }
+      const reservation = reservations[0];
+      await this.facade.delete(reservation);
+
+      res.json({
+        success: true,
+        message: "Reserva deletada com sucesso",
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        success: false,
+        error: "Delete falhou: " + error.message,
+      });
+    }
+  }
 }

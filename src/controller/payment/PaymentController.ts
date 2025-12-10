@@ -4,6 +4,9 @@ import Facade from "../../facade/Facade";
 import Payment, { PaymentStatus } from "../../entities/payment";
 import Reservation from "../../entities/reservation";
 import { PaymentMethod } from "../../enum/PaymentMethod";
+import CalcularValorTotal from "../../strategy/payment/CalcularValorTotal";
+import Room from "../../entities/room";
+import { RoomType } from "../../enum/RoomType";
 
 export class PaymentController {
   constructor(private readonly facade: Facade) {}
@@ -72,11 +75,15 @@ export class PaymentController {
   }
 
   public async iniciarPagamento(req: Request, res: Response): Promise<void> {
+    console.log("Iniciando pagamento - corpo da requisição:", req.body);
     try {
+      console.log("Definindo Payment para criação");
       // RF0211: Iniciar pagamento
       const payment = await this.definirPaymentCriar(req);
+      console.log("Payment definido:", payment);
 
       const paymentSalvo = await this.facade.create(payment);
+      console.log("Payment salvo:", paymentSalvo);
 
       res.status(201).json({
         success: true,
@@ -93,32 +100,64 @@ export class PaymentController {
   }
 
   private async definirPaymentCriar(req: Request): Promise<Payment> {
+    console.log("Definindo Payment - corpo da requisição:", req.body);
     const {
       reservationId,
-      type,
+      type = PaymentMethod.creditCard,
       price,
       paymentDate,
       status = "pending",
     } = req.body;
 
     // Buscar a reserva
+    console.log("Definindo Payment - reservationId:", reservationId);
+    const reservationParam = new Reservation(
+      "",
+      "",
+      new Date(),
+      new Date(),
+      false,
+      0,
+      0,
+      []
+    );
+    reservationParam.id = reservationId;
+
     const reservations = (await this.facade.list(
-      { id: reservationId } as Reservation,
+      reservationParam,
       "findById"
     )) as Reservation[];
 
-    if (reservations.length === 0) {
+    if (reservations.length === 0 || reservationId === undefined) {
       throw new Error("Reserva não encontrada");
     }
+    console.log("Reserva encontrada:", reservations[0]);
 
     const reservation = reservations[0];
+
+    const roomParam = new Room("", RoomType.single, 0, 0, 0, true);
+    (roomParam as any).id = reservation.roomId;
+    const rooms = (await this.facade.list(roomParam, "findById")) as Room[];
+    console.log("Room encontrado para a reserva:", rooms[0]);
+    const precoBase = rooms[0]?.precoBase;
+
+    const pagamento = new Payment(
+      reservation,
+      type as PaymentMethod,
+      0,
+      new Date(),
+      reservationId ? status : "pending"
+    );
+
+    const calcularValorTotal = new CalcularValorTotal(this.facade["roomDAO"]);
+    const resultadoCalculo = await calcularValorTotal.executar(pagamento);
 
     return new Payment(
       reservation,
       type as PaymentMethod,
-      parseFloat(price),
+      pagamento.price,
       paymentDate ? new Date(paymentDate) : new Date(),
-      status
+      reservationId ? status : "pending"
     );
   }
 
