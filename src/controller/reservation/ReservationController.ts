@@ -2,7 +2,7 @@
 import { Request, Response } from "express";
 import Facade from "../../facade/Facade";
 import Reservation from "../../entities/reservation";
-import Guest from "../../entities/guest";
+import Guest from "../../entities/client";
 import Room from "../../entities/room";
 import Payment from "../../entities/payment";
 import { RoomType } from "../../enum/RoomType";
@@ -59,7 +59,7 @@ export class ReservationController {
 
     const guests = (await this.facade.list(
       guestInstance,
-      "findById"
+      "findById",
     )) as Guest[];
     console.log("Guest encontrado:", guests);
     const rooms = (await this.facade.list(roomParam, "findById")) as Room[];
@@ -96,13 +96,13 @@ export class ReservationController {
       noShow,
       qntAdults,
       qntChildren,
-      childrenAges || []
+      childrenAges || [],
     );
   }
 
   public async consultarDisponibilidade(
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<void> {
     try {
       // RF0201: Consultar disponibilidade
@@ -120,7 +120,7 @@ export class ReservationController {
 
       const roomsDisponiveis = (await this.facade.list(
         { ...roomSearch, ...searchCriteria } as any,
-        "findAvailableRooms"
+        "findAvailableRooms",
       )) as Room[];
 
       res.status(200).json({
@@ -143,7 +143,7 @@ export class ReservationController {
 
       const reservas = (await this.facade.list(
         { id } as Reservation,
-        "findById"
+        "findById",
       )) as Reservation[];
 
       if (reservas.length === 0) {
@@ -158,7 +158,7 @@ export class ReservationController {
 
       const pagamentos = (await this.facade.list(
         { reservation: reserva } as Payment,
-        "findByReservation"
+        "findByReservation",
       )) as Payment[];
 
       if (pagamentos.length === 0) {
@@ -199,7 +199,7 @@ export class ReservationController {
 
       const reservations = (await this.facade.list(
         { id } as Reservation,
-        "findById"
+        "findById",
       )) as Reservation[];
 
       if (reservations.length === 0) {
@@ -220,7 +220,7 @@ export class ReservationController {
         reservation.noShow,
         reservation.qntAdults,
         reservation.qntChildren,
-        reservation.childrenAges
+        reservation.childrenAges,
       );
       reservationAtualizada.id = reservation.id;
 
@@ -246,7 +246,7 @@ export class ReservationController {
 
       const reservations = (await this.facade.list(
         { id } as Reservation,
-        "findById"
+        "findById",
       )) as Reservation[];
 
       if (reservations.length === 0) {
@@ -267,7 +267,7 @@ export class ReservationController {
         true,
         reservation.qntAdults,
         reservation.qntChildren,
-        reservation.childrenAges
+        reservation.childrenAges,
       );
       reservationAtualizada.id = reservation.id;
 
@@ -295,7 +295,7 @@ export class ReservationController {
       // Buscar a reserva atual
       const reservations = (await this.facade.list(
         { id } as Reservation,
-        "findById"
+        "findById",
       )) as Reservation[];
 
       if (reservations.length === 0) {
@@ -318,7 +318,7 @@ export class ReservationController {
         dadosAtualizacao.noShow ?? reservationAtual.noShow,
         dadosAtualizacao.qntAdults ?? reservationAtual.qntAdults,
         dadosAtualizacao.qntChildren ?? reservationAtual.qntChildren,
-        dadosAtualizacao.childrenAges || reservationAtual.childrenAges
+        dadosAtualizacao.childrenAges || reservationAtual.childrenAges,
       );
       reservationAtualizada.id = reservationAtual.id;
 
@@ -339,7 +339,7 @@ export class ReservationController {
   }
 
   private async definirReservationAtualizar(
-    req: Request
+    req: Request,
   ): Promise<Partial<Reservation>> {
     const {
       codeReservation,
@@ -362,7 +362,7 @@ export class ReservationController {
     if (guestId) {
       const guests = (await this.facade.list(
         { id: guestId } as Guest,
-        "findById"
+        "findById",
       )) as Guest[];
       if (guests.length === 0) throw new Error("Hóspede não encontrado");
       updateData.guestId = guests[0].id;
@@ -371,7 +371,7 @@ export class ReservationController {
     if (roomId) {
       const rooms = (await this.facade.list(
         { id: roomId } as Room,
-        "findById"
+        "findById",
       )) as Room[];
       if (rooms.length === 0) throw new Error("Quarto não encontrado");
       updateData.roomId = rooms[0].id;
@@ -389,7 +389,7 @@ export class ReservationController {
 
   public async atualizarStatusPagamento(
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<void> {
     try {
       const { id } = req.params;
@@ -397,7 +397,7 @@ export class ReservationController {
 
       const reservations = (await this.facade.list(
         { id } as Reservation,
-        "findById"
+        "findById",
       )) as Reservation[];
 
       if (reservations.length === 0) {
@@ -418,7 +418,7 @@ export class ReservationController {
         reservation.noShow,
         reservation.qntAdults,
         reservation.qntChildren,
-        reservation.childrenAges
+        reservation.childrenAges,
       );
       reservationAtualizada.id = reservation.id;
 
@@ -451,9 +451,9 @@ export class ReservationController {
           false,
           0,
           0,
-          [] as number[]
+          [] as number[],
         ),
-        "findAll"
+        "findAll",
       )) as Reservation[];
 
       res.status(200).json({
@@ -471,7 +471,7 @@ export class ReservationController {
   }
 
   private async definirFiltrosReserva(
-    req: Request
+    req: Request,
   ): Promise<Partial<Reservation>> {
     const {
       guestId,
@@ -489,14 +489,14 @@ export class ReservationController {
     if (guestId) {
       const guests = (await this.facade.list(
         { id: guestId } as Guest,
-        "findById"
+        "findById",
       )) as Guest[];
       if (guests.length > 0) filters.guestId = guests[0].id;
     }
     if (roomId) {
       const rooms = (await this.facade.list(
         { id: roomId } as Room,
-        "findById"
+        "findById",
       )) as Room[];
       if (rooms.length > 0) filters.roomId = rooms[0].id;
     }
@@ -512,7 +512,7 @@ export class ReservationController {
 
       const reservations = (await this.facade.list(
         { id } as Reservation,
-        "findById"
+        "findById",
       )) as Reservation[];
 
       if (reservations.length === 0) {
@@ -542,7 +542,7 @@ export class ReservationController {
 
       const guests = (await this.facade.list(
         { id: guestId } as Guest,
-        "findById"
+        "findById",
       )) as Guest[];
       if (guests.length === 0) {
         res.status(404).json({
@@ -554,7 +554,7 @@ export class ReservationController {
 
       const reservations = (await this.facade.list(
         { guestId: guests[0].id } as Reservation,
-        "findByFilters"
+        "findByFilters",
       )) as Reservation[];
 
       res.status(200).json({
@@ -578,7 +578,7 @@ export class ReservationController {
       // Buscar todas as reservas para estatísticas
       const reservations = (await this.facade.list(
         {} as Reservation,
-        "findAll"
+        "findAll",
       )) as Reservation[];
 
       const stats = {
@@ -609,12 +609,12 @@ export class ReservationController {
         false,
         0,
         0,
-        []
+        [],
       );
       (reservationInstance as any).id = id;
       const reservations = await this.facade.list(
         reservationInstance,
-        "findById"
+        "findById",
       );
 
       if (reservations.length === 0) {

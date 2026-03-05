@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import Facade from "../../facade/Facade";
-import Guest from "../../entities/guest";
+import Guest from "../../entities/client";
 import Address from "../../entities/address";
 
 export class GuestController {
@@ -29,8 +29,8 @@ export class GuestController {
             addr.number,
             addr.city,
             addr.state,
-            addr.obs
-          )
+            addr.obs,
+          ),
       );
 
       const guest = new Guest(
@@ -40,7 +40,7 @@ export class GuestController {
         phone,
         email,
         isActive,
-        guestAddresses
+        guestAddresses,
       );
 
       const guestCreated = await this.facade.create(guest);
@@ -151,8 +151,8 @@ export class GuestController {
               addr.number,
               addr.city,
               addr.state,
-              addr.obs
-            )
+              addr.obs,
+            ),
         );
       }
 

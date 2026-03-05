@@ -1,5 +1,5 @@
 import { DataSource, Like, Repository } from "typeorm";
-import Guest from "../../entities/guest";
+import Guest from "../../entities/client";
 import IDAO from "../IDAO";
 
 export default class GuestDAO implements IDAO<Guest> {
