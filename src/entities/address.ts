@@ -41,7 +41,7 @@ export default class Address extends entity {
   @Column({ nullable: true })
   obs: string;
 
-  @ManyToOne(() => Client, (guest) => guest.addresses)
+  @ManyToOne(() => Client, (client) => client.addresses)
   client: Client;
 
   @CreateDateColumn()

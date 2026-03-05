@@ -24,9 +24,31 @@ export default class CreditCard extends entity {
   @Column()
   securityCode!: string;
 
+  @ManyToOne(() => Client, (client) => client.creditCard)
+  client: Client; 
+
   @CreateDateColumn()
   created_at!: Date;
 
   @UpdateDateColumn()
   updated_at!: Date;
+
+  constructor(
+      cardName: string,
+      cardNumber: string,
+      cardFlag: CardsFlags,
+      securityCode: string,
+      client?: Client,
+    ) {
+      super();
+      this.cardName = cardName;
+      this.cardNumber = cardNumber;
+      if(cardFlag) {
+        this.cardFlag = cardFlag
+      }
+      this.securityCode = securityCode;
+      if (client) {
+        this.client = client;
+      }
+    }
 }

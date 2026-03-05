@@ -3,6 +3,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  ManyToOne,
   OneToMany,
   PrimaryColumn,
   UpdateDateColumn,
@@ -10,6 +11,7 @@ import {
 import Address from "./address";
 import entity from "./entity";
 import Phone from "./phone";
+import CreditCard from "./creditCard";
 
 @Entity("client")
 export default class Client extends entity {
@@ -26,7 +28,7 @@ export default class Client extends entity {
     cascade: true,
     eager: true,
   })
-  phones!: Phone;
+  phones!: Phone[];
 
   @Column({ unique: true })
   email!: string;
@@ -43,6 +45,12 @@ export default class Client extends entity {
   })
   addresses!: Address[];
 
+  @OneToMany(() => CreditCard, (creditCard) => creditCard.client, {
+    cascade: true,
+    eager: true,
+  })
+  creditCard!: CreditCard[];
+
   @DeleteDateColumn()
   deletedAt?: Date;
 
@@ -58,7 +66,8 @@ export default class Client extends entity {
     cpf: string,
     phones: Phone[],
     email: string,
-    addresses: Address[]
+    addresses: Address[],
+    creditCard: CreditCard[]
   ) {
     super();
     this.name = name;
@@ -67,5 +76,6 @@ export default class Client extends entity {
     this.phones = phones;
     this.email = email;
     this.addresses = addresses;
+    this.creditCard = creditCard;
   }
 }
