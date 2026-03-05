@@ -9,9 +9,10 @@ import {
 } from "typeorm";
 import Address from "./address";
 import entity from "./entity";
+import Phone from "./phone";
 
-@Entity("guest")
-export default class Guest extends entity {
+@Entity("client")
+export default class Client extends entity {
   @Column()
   name!: string;
 
@@ -21,16 +22,22 @@ export default class Guest extends entity {
   @Column({ unique: true })
   cpf!: string;
 
-  @Column()
-  phone!: string;
+  @OneToMany(() => Phone, (phone) => phone.client, {
+    cascade: true,
+    eager: true,
+  })
+  phones!: Phone;
 
   @Column({ unique: true })
   email!: string;
 
-  @Column()
-  isActive!: boolean;
+  @Column({unique: true})
+  password!: string;
 
-  @OneToMany(() => Address, (address) => address.guest, {
+  @Column()
+  confirmPassword!: string;
+
+  @OneToMany(() => Address, (address) => address.client, {
     cascade: true,
     eager: true,
   })
@@ -49,18 +56,16 @@ export default class Guest extends entity {
     name: string,
     dateBirth: string,
     cpf: string,
-    phone: string,
+    phones: Phone[],
     email: string,
-    isActive: boolean,
     addresses: Address[]
   ) {
     super();
     this.name = name;
     this.dateBirth = dateBirth;
     this.cpf = cpf;
-    this.phone = phone;
+    this.phones = phones;
     this.email = email;
-    this.isActive = isActive;
     this.addresses = addresses;
   }
 }

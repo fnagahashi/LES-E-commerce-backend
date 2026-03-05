@@ -8,7 +8,7 @@ import {
   OneToOne,
   UpdateDateColumn,
 } from "typeorm";
-import Guest from "./guest";
+import Guest from "./client";
 import Room from "./room";
 import entity from "./entity";
 import Sale from "./sale";
@@ -76,7 +76,7 @@ export default class Reservation extends entity {
     noShow: boolean,
     qntAdults: number,
     qntChildren: number,
-    childrenAges: number[]
+    childrenAges: number[],
   ) {
     super();
     this.guestId = guestId;

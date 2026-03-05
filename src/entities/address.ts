@@ -6,11 +6,17 @@ import {
   OneToMany,
   UpdateDateColumn,
 } from "typeorm";
-import Guest from "./guest";
+import Client from "./client";
 import entity from "./entity";
 
 @Entity("address")
 export default class Address extends entity {
+  @Column()
+  typeResidence!: string;
+
+  @Column()
+  typeStreet!: string;
+
   @Column()
   cep!: string;
 
@@ -29,11 +35,14 @@ export default class Address extends entity {
   @Column()
   state!: string;
 
+  @Column()
+  country!: string;
+
   @Column({ nullable: true })
   obs: string;
 
-  @ManyToOne(() => Guest, (guest) => guest.addresses)
-  guest: Guest;
+  @ManyToOne(() => Client, (guest) => guest.addresses)
+  client: Client;
 
   @CreateDateColumn()
   created_at!: Date;
@@ -49,7 +58,7 @@ export default class Address extends entity {
     city: string,
     state: string,
     obs: string,
-    guest?: Guest
+    client?: Client,
   ) {
     super();
     this.cep = cep;
@@ -59,8 +68,8 @@ export default class Address extends entity {
     this.city = city;
     this.state = state;
     this.obs = obs;
-    if (guest) {
-      this.guest = guest;
+    if (client) {
+      this.client = client;
     }
   }
 }
