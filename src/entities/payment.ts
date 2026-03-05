@@ -13,12 +13,12 @@ import Reservation from "./reservation";
 import { PaymentMethod } from "../enum/PaymentMethod";
 
 export type PaymentStatus =
-  | "pending"
+  | "inTransport"
   | "denied"
   | "approved"
-  | "confirmed"
-  | "cancelled"
-  | "proposal";
+  | "delivered"
+  | "inReturn"
+  | "exchanged";
 
 @Entity("payment")
 export default class Payment extends entity {
@@ -63,7 +63,7 @@ export default class Payment extends entity {
   }
 
   isPaid(): boolean {
-    return this.status === "approved" || this.status === "confirmed";
+    return this.status === "approved";
   }
 
   canBeConfirmed(): boolean {
