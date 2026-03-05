@@ -9,7 +9,7 @@ import {
   UpdateDateColumn,
 } from "typeorm";
 import entity from "./entity";
-import Reservation from "./reservation";
+import Sale from "./sale";
 import { PaymentMethod } from "../enum/PaymentMethod";
 
 export type PaymentStatus =
@@ -22,9 +22,9 @@ export type PaymentStatus =
 
 @Entity("payment")
 export default class Payment extends entity {
-  @OneToOne(() => Reservation, { onDelete: "CASCADE" })
-  @JoinColumn({ name: "reservationId" })
-  reservation!: Reservation;
+  @OneToOne(() => Sale, { onDelete: "CASCADE" })
+  @JoinColumn({ name: "saleId" })
+  sale!: Sale;
 
   @Column({ type: "enum", enum: PaymentMethod })
   type: PaymentMethod;
@@ -48,14 +48,14 @@ export default class Payment extends entity {
   updated_at!: Date;
 
   constructor(
-    reservation: Reservation,
+    sale: Sale,
     type: PaymentMethod,
     price: number,
     paymentDate: Date,
     status: PaymentStatus
   ) {
     super();
-    this.reservation = reservation;
+    this.sale = sale;
     this.type = type;
     this.price = price;
     this.status = status;
