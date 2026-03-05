@@ -20,27 +20,21 @@ export default class Phone extends entity {
   @Column()
   phoneNumber!: string;
 
-  @ManyToOne(() => Client, (client) => client.phones)
-  client: Client;
-
   @CreateDateColumn()
   created_at!: Date;
 
   @UpdateDateColumn()
   updated_at!: Date;
+  client: any;
 
   constructor(
     type: string,
     ddd: string,
     phoneNumber: string,
-    client: Client,
   ) {
     super();
     this.type = type,
     this.ddd = ddd,
     this.phoneNumber = phoneNumber
-    if (client) {
-      this.client = client;
-    }
   }
 }
