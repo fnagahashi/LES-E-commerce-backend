@@ -51,22 +51,28 @@ export default class Address extends entity {
   updated_at!: Date;
 
   constructor(
+    typeResidence: string,
+    typeStreet: string,
     cep: string,
     street: string,
     neighborhood: string,
     number: string,
     city: string,
     state: string,
+    country: string,
     obs: string,
     client?: Client,
   ) {
     super();
+    this.typeResidence = typeResidence;
+    this.typeStreet = typeStreet;
     this.cep = cep;
     this.street = street;
     this.neighborhood = neighborhood;
     this.number = number;
     this.city = city;
     this.state = state;
+    this.country = country;
     this.obs = obs;
     if (client) {
       this.client = client;

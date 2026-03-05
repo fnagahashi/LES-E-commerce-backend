@@ -1,6 +1,6 @@
 // src/routes.ts
 import { Router } from "express";
-import { GuestController } from "../src/controller/guest/GuestController";
+import { GuestController } from "./controller/client/ClientController";
 import { RoomController } from "../src/controller/room/RoomController";
 import { ReservationController } from "../src/controller/reservation/ReservationController";
 import { PaymentController } from "../src/controller/payment/PaymentController";

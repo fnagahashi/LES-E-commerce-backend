@@ -12,6 +12,7 @@ import Address from "./address";
 import entity from "./entity";
 import Phone from "./phone";
 import CreditCard from "./creditCard";
+import { Gender } from "../enum/Gender";
 
 @Entity("client")
 export default class Client extends entity {
@@ -23,6 +24,9 @@ export default class Client extends entity {
 
   @Column({ unique: true })
   cpf!: string;
+
+  @Column()
+  gender!: Gender;
 
   @OneToMany(() => Phone, (phone) => phone.client, {
     cascade: true,
@@ -64,8 +68,11 @@ export default class Client extends entity {
     name: string,
     dateBirth: string,
     cpf: string,
+    gender: Gender,
     phones: Phone[],
     email: string,
+    password,
+    confirmPassword,
     addresses: Address[],
     creditCard: CreditCard[]
   ) {
@@ -73,8 +80,11 @@ export default class Client extends entity {
     this.name = name;
     this.dateBirth = dateBirth;
     this.cpf = cpf;
+    this.gender = gender;
     this.phones = phones;
     this.email = email;
+    this.password = password;
+    this.confirmPassword = confirmPassword;
     this.addresses = addresses;
     this.creditCard = creditCard;
   }

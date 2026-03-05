@@ -1,9 +1,11 @@
 import { Request, Response } from "express";
 import Facade from "../../facade/Facade";
-import Guest from "../../entities/client";
+import Client from "../../entities/client";
 import Address from "../../entities/address";
+import Phone from "../../entities/phone";
+import CreditCard from "../../entities/creditCard";
 
-export class GuestController {
+export class ClientController {
   constructor(private readonly facade: Facade) {}
 
   async create(req: Request, res: Response): Promise<void> {
@@ -12,43 +14,70 @@ export class GuestController {
         name,
         dateBirth,
         cpf,
-        phone,
+        gender,
+        phone = [],
         email,
-        isActive = true,
+        password,
+        confirmPassword,
         addresses = [],
+        creditCard = [],
       } = req.body;
 
       console.log(`👤 Criando hóspede: ${name}`);
 
-      const guestAddresses = addresses.map(
+      const clientAddresses = addresses.map(
         (addr: any) =>
           new Address(
+            addr.typeResidence,
+            addr.typeStreet,
             addr.cep,
             addr.street,
             addr.neighborhood,
             addr.number,
             addr.city,
             addr.state,
+            addr.country,
             addr.obs,
           ),
       );
 
-      const guest = new Guest(
+      const clientPhones = phone.map(
+        (p: any) => 
+          new Phone(
+            p.type,
+            p.ddd,
+            p.phoneNumber,
+          ),
+      );
+
+      const clientCreditCard = creditCard.map(
+        (card: any) => new CreditCard (
+          card.cardName,
+          card.cardNumber,
+          card.cardFlag,
+          card.securityCode,
+        ),
+      );
+
+      const client = new Client(
         name,
         dateBirth,
         cpf,
-        phone,
+        clientPhones,
+        gender,
         email,
-        isActive,
-        guestAddresses,
+        password,
+        confirmPassword,
+        clientAddresses,
+        clientCreditCard,
       );
 
-      const guestCreated = await this.facade.create(guest);
+      const clientCreated = await this.facade.create(client);
 
       res.status(201).json({
         success: true,
         message: "Hóspede criado com sucesso",
-        guest: guestCreated,
+        client: clientCreated,
       });
     } catch (error: any) {
       console.error("❌ Erro ao criar hóspede:", error);
@@ -61,7 +90,7 @@ export class GuestController {
 
   async findAll(req: Request, res: Response): Promise<void> {
     try {
-      const guestInstance = new Guest("", "", "", "", "", true, []);
+      const clientInstance = new Client("", "", "", "", [], "", "","",[],[]);
       const guests = await this.facade.list(guestInstance, "findAll");
 
       res.json({
