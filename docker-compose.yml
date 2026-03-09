@@ -3,7 +3,7 @@ services:
   postgres:
     image: postgres:13
     environment:
-      POSTGRES_DB: hotel_db
+      POSTGRES_DB: booklovers_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: nagahashi98
     ports:

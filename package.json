@@ -1,6 +1,7 @@
 {
-  "name": "api",
+  "name": "e-commerce-livros-backend",
   "version": "1.0.0",
+  "description": "Backend E-commerce de Livros - LES 2026",
   "main": "index.js",
   "license": "MIT",
   "devDependencies": {

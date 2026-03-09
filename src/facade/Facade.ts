@@ -1,4 +1,4 @@
-import GuestDAO from "../DAO/Interface/GuestDAO";
+import GuestDAO from "../DAO/Interface/ClientDAO";
 import AddressDAO from "../DAO/Interface/AddressDAO";
 import ReservationDAO from "../DAO/Interface/ReservationDAO";
 import entity from "../entities/entity";
@@ -47,7 +47,7 @@ export default class Facade implements IFacade<entity> {
     private readonly paymentDAO: PaymentDAO,
     private readonly roomDAO: RoomDAO,
     private readonly logDAO: LogDAO,
-    private readonly saleDAO: SaleDAO
+    private readonly saleDAO: SaleDAO,
   ) {
     this.entityDAOMap = new Map<string, IDAO<entity>>();
     this.entityDAOMap.set("Guest", this.guestDAO);

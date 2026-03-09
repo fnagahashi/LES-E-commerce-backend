@@ -4,7 +4,7 @@
   "port": 5433,
   "username": "postgres",
   "password": "nagahashi98",
-  "database": "hotel_db",
+  "database": "booklovers_db",
   "schema": "public",
   "synchronize": false,
   "logging": true,

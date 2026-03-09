@@ -1,6 +1,6 @@
 import IStrategy from "../IStrategy";
 import Guest from "../../entities/client";
-import GuestDAO from "../../DAO/Interface/GuestDAO";
+import GuestDAO from "../../DAO/Interface/ClientDAO";
 
 export default class ValidationUniqueCPF implements IStrategy<Guest> {
   constructor(private readonly guestDAO: GuestDAO) {}

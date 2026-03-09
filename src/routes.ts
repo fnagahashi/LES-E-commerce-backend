@@ -9,7 +9,7 @@ import { PolicyController } from "../src/controller/policy/PolicyController";
 import { AppDataSource } from "./database";
 import Facade from "./facade/Facade";
 import Guest from "./entities/client";
-import GuestDAO from "./DAO/Interface/GuestDAO";
+import GuestDAO from "./DAO/Interface/ClientDAO";
 import AddressDAO from "./DAO/Interface/AddressDAO";
 import Reservation from "./entities/reservation";
 import ReservationDAO from "./DAO/Interface/ReservationDAO";
