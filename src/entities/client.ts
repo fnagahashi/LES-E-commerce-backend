@@ -10,7 +10,6 @@ import {
 } from "typeorm";
 import Address from "./address";
 import entity from "./entity";
-import Phone from "./phone";
 import CreditCard from "./creditCard";
 import { Gender } from "../enum/Gender";
 
@@ -28,11 +27,14 @@ export default class Client extends entity {
   @Column()
   gender!: Gender;
 
-  @OneToMany(() => Phone, (phone) => phone.client, {
-    cascade: true,
-    eager: true,
-  })
-  phones!: Phone[];
+  @Column()
+  phoneDDD!: string;
+
+  @Column()
+  phoneNumber!: string;
+
+  @Column()
+  phoneType!: string;
 
   @Column({ unique: true })
   email!: string;
@@ -55,6 +57,9 @@ export default class Client extends entity {
   })
   creditCard!: CreditCard[];
 
+  @Column({ type: 'boolean', default: true })
+  isActive: boolean;
+
   @DeleteDateColumn()
   deletedAt?: Date;
 
@@ -69,7 +74,9 @@ export default class Client extends entity {
     dateBirth: string,
     cpf: string,
     gender: Gender,
-    phones: Phone[],
+    phoneDDD: string,
+    phoneNumber: string,
+    phoneType: string,
     email: string,
     password,
     confirmPassword,
@@ -81,7 +88,9 @@ export default class Client extends entity {
     this.dateBirth = dateBirth;
     this.cpf = cpf;
     this.gender = gender;
-    this.phones = phones;
+    this.phoneDDD = phoneDDD;
+    this.phoneNumber;
+    this.phoneType = phoneType;
     this.email = email;
     this.password = password;
     this.confirmPassword = confirmPassword;
