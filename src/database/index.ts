@@ -1,6 +1,5 @@
-import { DataSource, DataSourceOptions } from "typeorm";
-import path from "path";
+import { DataSource } from "typeorm";
 
 export const AppDataSource = new DataSource(
-  require("../../ormconfig") as DataSourceOptions
+  require("../../ormconfig")
 );
