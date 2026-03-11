@@ -21,18 +21,17 @@ export default class AddressDAO implements IDAO<Address> {
     return await this.repository.save(Entity);
   }
 
-  async list(address: Address, operation: string): Promise<Address[]> {
-    switch (operation) {
-      case "findAll":
-        return await this.repository.find({
-          where: { isActive: true },
-        });
-      case "findById":
-        return await this.repository.find({
-          where: { id: address.id },
-        });
-      default:
-        throw new Error("Não foi possível realizar a operação");
-    }
+  async findAll(): Promise<Address[]> {
+    return this.repository.find();
+  }
+
+  async findById(id: string): Promise<Address | null> {
+    return this.repository.findOne({
+      where:{id},
+    });
+  }
+
+  async findByFilters(filters: Partial<Address>): Promise<Address[]> {
+    return this.repository.find();
   }
 }

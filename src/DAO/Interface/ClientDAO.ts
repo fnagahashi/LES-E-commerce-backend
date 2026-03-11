@@ -17,7 +17,7 @@ export default class ClientDAO implements IDAO<Client> {
     return this.repository.find();
   }
 
-  async findById(id: string): Promise<Client> {
+  async findById(id: string): Promise<Client | null> {
     return this.repository.findOne({
       where:{id},
     });
