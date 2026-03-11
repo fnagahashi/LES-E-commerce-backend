@@ -1,4 +1,3 @@
-import GuestDAO from "../DAO/Interface/ClientDAO";
 import AddressDAO from "../DAO/Interface/AddressDAO";
 import ReservationDAO from "../DAO/Interface/ReservationDAO";
 import entity from "../entities/entity";
@@ -9,11 +8,11 @@ import RoomDAO from "../DAO/Interface/RoomDAO";
 import IStrategy from "../strategy/IStrategy";
 import LogDAO from "../DAO/Interface/LogDAO";
 import Log from "../entities/log";
-import ValidationRequiredGuestFields from "../strategy/guest/ValidationRequiredFields";
+import ValidationRequiredGuestFields from "../strategy/client/ValidationRequiredFields";
 import ValidationRequiredAddressFields from "../strategy/address/ValidationRequiredFields";
-import ValidationEmail from "../strategy/guest/ValidationEmail";
-import ValidationUniqueCPF from "../strategy/guest/ValidationCPFUniqueness";
-import ValidationCPF from "../strategy/guest/ValidationCPF";
+import ValidationEmail from "../strategy/client/ValidationEmail";
+import ValidationUniqueCPF from "../strategy/client/ValidationCPFUniqueness";
+import ValidationCPF from "../strategy/client/ValidationCEP";
 import ValidationRequiredRoomFields from "../strategy/room/ValidationRequiredFields";
 import ValidationAvailabilityRoom from "../strategy/reservation/ValidationAvailabilityRoom";
 import ValidationDates from "../strategy/reservation/ValidationDates";
@@ -26,6 +25,7 @@ import ValidationRequiredPaymentFields from "../strategy/payment/ValidationRequi
 import ValidationReservationConfirm from "../strategy/payment/ValidationReservationConfirm";
 import CalcularValorTotal from "../strategy/payment/CalcularValorTotal";
 import ValidationRequiredReservationFields from "../strategy/reservation/ValidationRequiredFields";
+import ClientDAO from "../DAO/Interface/ClientDAO";
 
 export default class Facade implements IFacade<entity> {
   private readonly entityDAOMap: Map<string, IDAO<entity>>;
@@ -41,7 +41,7 @@ export default class Facade implements IFacade<entity> {
   }
 
   constructor(
-    private readonly guestDAO: GuestDAO,
+    private readonly clientDAO: ClientDAO,
     private readonly addressDAO: AddressDAO,
     private readonly reservationDAO: ReservationDAO,
     private readonly paymentDAO: PaymentDAO,
@@ -50,23 +50,22 @@ export default class Facade implements IFacade<entity> {
     private readonly saleDAO: SaleDAO,
   ) {
     this.entityDAOMap = new Map<string, IDAO<entity>>();
-    this.entityDAOMap.set("Guest", this.guestDAO);
+    this.entityDAOMap.set("Client", this.clientDAO);
     this.entityDAOMap.set("Address", this.addressDAO);
-    this.entityDAOMap.set("Reservation", this.reservationDAO);
-    this.entityDAOMap.set("Payment", this.paymentDAO);
-    this.entityDAOMap.set("Room", this.roomDAO);
+    // this.entityDAOMap.set("Reservation", this.reservationDAO);
+    // this.entityDAOMap.set("Payment", this.paymentDAO);
+    // this.entityDAOMap.set("Room", this.roomDAO);
     this.entityDAOMap.set("Log", this.logDAO);
-    this.entityDAOMap.set("Sale", this.saleDAO);
+    // this.entityDAOMap.set("Sale", this.saleDAO);
     this.strategyMap = new Map<string, Array<IStrategy<entity>>>();
     this.initializeStrategies();
   }
 
   private initializeStrategies(): void {
-    this.strategyMap.set("Guest", [
+    this.strategyMap.set("Client", [
       new ValidationRequiredGuestFields(),
       new ValidationEmail(),
       new ValidationCPF(),
-      // new ValidationUniqueCPF(this.guestDAO)
     ] as Array<IStrategy<entity>>);
 
     this.strategyMap.set("Address", [
@@ -172,21 +171,52 @@ export default class Facade implements IFacade<entity> {
     return entidadeParaDeletar;
   }
 
-  public async list(entity: entity, operation: string): Promise<entity[]> {
-    const entityName = entity.constructor.name;
+  public async findAll(entityName: string): Promise<entity[]> {
     const entidadeDAO = this.entityDAOMap.get(entityName);
-    console.log("Entity Name:", entityName);
-    console.log("Entidade DAO:", entidadeDAO);
 
     if (!entidadeDAO) {
       throw new Error(`DAO não encontrado para entidade: ${entityName}`);
     }
 
-    const entidades = await entidadeDAO.list(entity, operation);
+    const entidades = await entidadeDAO.findAll();
 
     if (entidades.length > 0) {
-      await this.gerarLog(entity, `listado - operação: ${operation}`);
+      await this.gerarLog(entidades[0], "listado");
     }
+
+    return entidades;
+  }
+
+  public async findById(
+    entityName: string,
+    id: string,
+  ): Promise<entity | null> {
+    const entidadeDAO = this.entityDAOMap.get(entityName);
+
+    if (!entidadeDAO) {
+      throw new Error(`DAO não encontrado para entidade: ${entityName}`);
+    }
+
+    const entidade = await entidadeDAO.findById(id);
+
+    if (entidade) {
+      await this.gerarLog(entidade, "consultado por ID");
+    }
+
+    return entidade;
+  }
+
+  public async findByFilters(
+    entityName: string,
+    filters: Partial<entity>,
+  ): Promise<entity[]> {
+    const entidadeDAO = this.entityDAOMap.get(entityName);
+
+    if (!entidadeDAO) {
+      throw new Error(`DAO não encontrado para entidade: ${entityName}`);
+    }
+
+    const entidades = await entidadeDAO.findByFilters(filters);
 
     return entidades;
   }

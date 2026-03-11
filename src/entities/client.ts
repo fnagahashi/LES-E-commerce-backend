@@ -78,10 +78,11 @@ export default class Client extends entity {
     phoneNumber: string,
     phoneType: string,
     email: string,
-    password,
-    confirmPassword,
+    password : string,
+    confirmPassword: string,
     addresses: Address[],
-    creditCard: CreditCard[]
+    creditCard: CreditCard[],
+    isActive: boolean,
   ) {
     super();
     this.name = name;
@@ -89,12 +90,13 @@ export default class Client extends entity {
     this.cpf = cpf;
     this.gender = gender;
     this.phoneDDD = phoneDDD;
-    this.phoneNumber;
+    this.phoneNumber = phoneNumber;
     this.phoneType = phoneType;
     this.email = email;
     this.password = password;
     this.confirmPassword = confirmPassword;
     this.addresses = addresses;
     this.creditCard = creditCard;
+    this.isActive = isActive;
   }
 }

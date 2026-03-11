@@ -2,8 +2,8 @@ import { Request, Response } from "express";
 import Facade from "../../facade/Facade";
 import Client from "../../entities/client";
 import Address from "../../entities/address";
-import Phone from "../../entities/phone";
 import CreditCard from "../../entities/creditCard";
+import { Gender } from "../../enum/Gender";
 
 export class ClientController {
   constructor(private readonly facade: Facade) {}
@@ -14,13 +14,16 @@ export class ClientController {
         name,
         dateBirth,
         cpf,
-        gender,
-        phone = [],
+        gender = Gender,
+        phoneDDD,
+        phoneNumber,
+        phoneType,
         email,
         password,
         confirmPassword,
         addresses = [],
         creditCard = [],
+        isActive = true,
       } = req.body;
 
       console.log(`👤 Criando hóspede: ${name}`);
@@ -41,42 +44,37 @@ export class ClientController {
           ),
       );
 
-      const clientPhones = phone.map(
-        (p: any) => 
-          new Phone(
-            p.type,
-            p.ddd,
-            p.phoneNumber,
-          ),
-      );
-
       const clientCreditCard = creditCard.map(
-        (card: any) => new CreditCard (
-          card.cardName,
-          card.cardNumber,
-          card.cardFlag,
-          card.securityCode,
-        ),
+        (card: any) =>
+          new CreditCard(
+            card.cardName,
+            card.cardNumber,
+            card.cardFlag,
+            card.securityCode,
+          ),
       );
 
       const client = new Client(
         name,
         dateBirth,
         cpf,
-        clientPhones,
+        phoneDDD,
+        phoneNumber,
+        phoneType,
         gender,
         email,
         password,
         confirmPassword,
         clientAddresses,
         clientCreditCard,
+        isActive,
       );
 
       const clientCreated = await this.facade.create(client);
 
       res.status(201).json({
         success: true,
-        message: "Hóspede criado com sucesso",
+        message: "Cliente cadastrado com sucesso",
         client: clientCreated,
       });
     } catch (error: any) {
@@ -90,13 +88,12 @@ export class ClientController {
 
   async findAll(req: Request, res: Response): Promise<void> {
     try {
-      const clientInstance = new Client("", "", "", "", [], "", "","",[],[]);
-      const guests = await this.facade.list(guestInstance, "findAll");
+      const clients = await this.facade.findAll("Client");
 
       res.json({
         success: true,
-        count: guests.length,
-        guests,
+        count: clients.length,
+        clients,
       });
     } catch (error: any) {
       res.status(400).json({
@@ -110,19 +107,19 @@ export class ClientController {
     try {
       const { id } = req.params;
 
-      const guestInstance = new Guest("", "", "", "", "", true, []);
-      (guestInstance as any).id = id;
+      const client = await this.facade.findById("Client", id);
 
-      const guests = await this.facade.list(guestInstance, "findById");
-
-      if (guests.length === 0) {
-        res.status(404).json({ error: "Hóspede não encontrado" });
+      if (!client) {
+        res.status(404).json({
+          success: false,
+          message: "Cliente não encontrado",
+        });
         return;
       }
 
       res.json({
         success: true,
-        guest: guests[0],
+        client,
       });
     } catch (error: any) {
       res.status(400).json({
@@ -132,20 +129,16 @@ export class ClientController {
     }
   }
 
-  async findByCpf(req: Request, res: Response): Promise<void> {
+  async findByFilters(req: Request, res: Response): Promise<void> {
     try {
-      const { cpf } = req.params;
-      const guestInstance = new Guest("", "", cpf, "", "", true, []);
-      const guests = await this.facade.list(guestInstance, "findByCpf");
+      const filters = req.query;
 
-      if (guests.length === 0) {
-        res.status(404).json({ error: "Hóspede não encontrado" });
-        return;
-      }
+      const clients = await this.facade.findByFilters("Client", filters);
 
       res.json({
         success: true,
-        guest: guests[0],
+        count: clients.length,
+        clients,
       });
     } catch (error: any) {
       res.status(400).json({
@@ -160,38 +153,38 @@ export class ClientController {
       const { id } = req.params;
       const updateData = req.body;
 
-      const guestInstance = new Guest("", "", "", "", "", true, []);
-      (guestInstance as any).id = id;
-      const guests = await this.facade.list(guestInstance, "findById");
+      const client = await this.facade.findById("Client", id);
 
-      if (guests.length === 0) {
+      if (client === null) {
         res.status(404).json({ error: "Hóspede não encontrado" });
         return;
       }
 
-      const guest = guests[0];
       if (updateData.addresses && Array.isArray(updateData.addresses)) {
         updateData.addresses = updateData.addresses.map(
           (addr: any) =>
-            new Address(
-              addr.cep,
-              addr.street,
-              addr.neighborhood,
-              addr.number,
-              addr.city,
-              addr.state,
-              addr.obs,
-            ),
-        );
+          new Address(
+            addr.typeResidence,
+            addr.typeStreet,
+            addr.cep,
+            addr.street,
+            addr.neighborhood,
+            addr.number,
+            addr.city,
+            addr.state,
+            addr.country,
+            addr.obs,
+          ),
+        )
       }
 
-      Object.assign(guest, updateData);
-      const guestUpdated = await this.facade.update(guest);
+      Object.assign(client, updateData);
+      const clientUpdated = await this.facade.update(client);
 
       res.json({
         success: true,
         message: "Hóspede atualizado com sucesso",
-        guest: guestUpdated,
+        client: clientUpdated,
       });
     } catch (error: any) {
       res.status(400).json({
