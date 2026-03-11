@@ -1,6 +1,6 @@
 // src/routes.ts
 import { Router } from "express";
-import { GuestController } from "./controller/client/ClientController";
+import { ClientController } from "./controller/client/ClientController";
 import { RoomController } from "../src/controller/room/RoomController";
 import { ReservationController } from "../src/controller/reservation/ReservationController";
 import { PaymentController } from "../src/controller/payment/PaymentController";
@@ -26,7 +26,6 @@ import Sale from "./entities/sale";
 const router = Router();
 
 const startApp = async () => {
-  // Inicializar Facade e Controllers
   const facade = new Facade(
     new GuestDAO(AppDataSource),
     new AddressDAO(AppDataSource),
@@ -37,28 +36,24 @@ const startApp = async () => {
     new SaleDAO(AppDataSource),
   );
 
-  const guestController = new GuestController(facade);
+  const clientController = new ClientController(facade);
   const roomController = new RoomController(facade);
   const reservationController = new ReservationController(facade);
   const paymentController = new PaymentController(facade);
   const saleController = new SaleController(facade);
   const policyController = new PolicyController(facade);
 
-  // ==================== ROTAS DE HÓSPEDES (RF0101-RF0104) ====================
-  router.post("/guests", (req, res) => guestController.create(req, res)); // RF0101
-  router.get("/guests", (req, res) => guestController.findAll(req, res)); // RF0104
-  router.get("/guests/:id", (req, res) => guestController.findById(req, res)); // RF0104
-  router.get("/guests/cpf/:cpf", (req, res) =>
-    guestController.findByCpf(req, res),
-  ); // RF0104
+  router.post("/clients", (req, res) => clientController.create(req, res));
+  router.get("/clients", (req, res) => clientController.findAll(req, res));
+  router.get("/clients/:id", (req, res) => clientController.findById(req, res));
   router.put("/guests/:id", (req, res) => guestController.update(req, res)); // RF0102
   router.patch("/guests/:id/inactivate", (req, res) =>
     guestController.inactivate(req, res),
   ); // RF0103
   router.patch("/guests/:id/activate", (req, res) =>
-    guestController.activate(req, res),
-  ); // RF0103
-  router.delete("/guests/:id", (req, res) => guestController.delete(req, res));
+    clientController.activate(req, res),
+  );
+  router.delete("/clients/:id", (req, res) => clientController.delete(req, res));
 
   // ==================== ROTAS DE QUARTOS (RF0111-RF0114) ====================
   router.post("/rooms", (req, res) => roomController.criar(req, res)); // RF0111
