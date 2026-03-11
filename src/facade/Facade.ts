@@ -70,28 +70,6 @@ export default class Facade implements IFacade<entity> {
       new ValidationRequiredAddressFields(),
     ] as Array<IStrategy<entity>>);
 
-    this.strategyMap.set("Room", [new ValidationRequiredRoomFields()] as Array<
-      IStrategy<entity>
-    >);
-
-    this.strategyMap.set("Reservation", [
-      new ValidationAvailabilityRoom(this.reservationDAO),
-      new ValidationMinimumStay(),
-      new ValidationCapacity(this.roomDAO),
-      new ValidationCapacityRoom(),
-      new ValidationDates(),
-      new ValidationRequiredReservationFields(),
-    ] as Array<IStrategy<entity>>);
-
-    this.strategyMap.set("Sale", [
-      new PromotionValidation(this.saleDAO, this.paymentDAO),
-    ] as Array<IStrategy<entity>>);
-
-    this.strategyMap.set("Payment", [
-      new CalcularValorTotal(this.roomDAO),
-      new ValidationRequiredPaymentFields(),
-      new ValidationReservationConfirm(this.reservationDAO, this.paymentDAO),
-    ] as Array<IStrategy<entity>>);
   }
 
   public async create(entity: entity): Promise<entity> {

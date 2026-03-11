@@ -6,6 +6,7 @@ export default class ValidationRequiredAddressFields implements IStrategy<Addres
         const errors: string[] = [];
 
         if(!address.typeResidence?.trim()) errors.push("Tipo de Residência é obrigatório")
+        if (!address.typeStreet?.trim()) errors.push("Tipo de rua é obrigatório")
         if (!address.cep?.trim()) errors.push("CEP é obrigatório");
         if (!address.street?.trim()) errors.push("Rua é obrigatória");
         if (!address.neighborhood?.trim()) errors.push("Bairro é obrigatório");
