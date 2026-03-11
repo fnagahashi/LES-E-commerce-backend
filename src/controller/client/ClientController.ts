@@ -26,7 +26,7 @@ export class ClientController {
         isActive = true,
       } = req.body;
 
-      console.log(`👤 Criando hóspede: ${name}`);
+      console.log(`👤 Criando Cliente: ${name}`);
 
       const clientAddresses = addresses.map(
         (addr: any) =>
@@ -78,7 +78,7 @@ export class ClientController {
         client: clientCreated,
       });
     } catch (error: any) {
-      console.error("❌ Erro ao criar hóspede:", error);
+      console.error("❌ Erro ao criar Cliente:", error);
       res.status(400).json({
         success: false,
         error: error.message,
@@ -155,8 +155,8 @@ export class ClientController {
 
       const client = await this.facade.findById("Client", id);
 
-      if (client === null) {
-        res.status(404).json({ error: "Hóspede não encontrado" });
+      if (!client) {
+        res.status(404).json({ error: "Cliente não encontrado" });
         return;
       }
 
@@ -183,7 +183,7 @@ export class ClientController {
 
       res.json({
         success: true,
-        message: "Hóspede atualizado com sucesso",
+        message: "Cliente atualizado com sucesso",
         client: clientUpdated,
       });
     } catch (error: any) {
@@ -198,23 +198,20 @@ export class ClientController {
     try {
       const { id } = req.params;
 
-      const guestInstance = new Guest("", "", "", "", "", true, []);
-      (guestInstance as any).id = id;
-      const guests = await this.facade.list(guestInstance, "findById");
+      const client = await this.facade.findById("Client", id) as Client;
 
-      if (guests.length === 0) {
-        res.status(404).json({ error: "Hóspede não encontrado" });
+      if (!client) {
+        res.status(404).json({ error: "Cliente não encontrado" });
         return;
       }
-
-      const guest = guests[0];
-      guest.isActive = false;
-      const guestUpdated = await this.facade.update(guest);
+      client.isActive = false;
+      
+      const clientUpdated = await this.facade.update(client);
 
       res.json({
         success: true,
-        message: "Hóspede inativado com sucesso",
-        guest: guestUpdated,
+        message: "Cliente inativado com sucesso",
+        client: clientUpdated,
       });
     } catch (error: any) {
       res.status(400).json({
@@ -228,23 +225,20 @@ export class ClientController {
     try {
       const { id } = req.params;
 
-      const guestInstance = new Guest("", "", "", "", "", false, []);
-      (guestInstance as any).id = id;
-      const guests = await this.facade.list(guestInstance, "findById");
+      const client = await this.facade.findById("Client", id) as Client;
 
-      if (guests.length === 0) {
-        res.status(404).json({ error: "Hóspede não encontrado" });
+      if (!client) {
+        res.status(404).json({ error: "Cliente não encontrado" });
         return;
       }
 
-      const guest = guests[0];
-      guest.isActive = true;
-      const guestUpdated = await this.facade.update(guest);
+      client.isActive = true;
+      const clientUpdated = await this.facade.update(client);
 
       res.json({
         success: true,
-        message: "Hóspede ativado com sucesso",
-        guest: guestUpdated,
+        message: "Cliente ativado com sucesso",
+        client: clientUpdated,
       });
     } catch (error: any) {
       res.status(400).json({
@@ -257,20 +251,19 @@ export class ClientController {
   async delete(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const guestInstance = new Guest("", "", "", "", "", true, []);
-      (guestInstance as any).id = id;
-      const guests = await this.facade.list(guestInstance, "findById");
 
-      if (guests.length === 0) {
-        res.status(404).json({ error: "Hóspede não encontrado" });
+      const client = await this.facade.findById("Client", id) as Client;
+
+      if (!client) {
+        res.status(404).json({ error: "Cliente não encontrado" });
         return;
       }
-      const guest = guests[0];
-      await this.facade.delete(guest);
+
+      await this.facade.delete(client);
 
       res.json({
         success: true,
-        message: "Hóspede deletado com sucesso",
+        message: "Cliente deletado com sucesso",
       });
     } catch (error: any) {
       res.status(400).json({

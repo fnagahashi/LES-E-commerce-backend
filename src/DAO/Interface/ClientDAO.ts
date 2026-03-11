@@ -19,7 +19,7 @@ export default class ClientDAO implements IDAO<Client> {
 
   async findById(id: string): Promise<Client | null> {
     return this.repository.findOne({
-      where:{id},
+      where: { id },
     });
   }
 
@@ -37,13 +37,18 @@ export default class ClientDAO implements IDAO<Client> {
   }
 
   async findByFilters(filters: Partial<Client>): Promise<Client[]> {
-    const query = this.repository.createQueryBuilder("client");
+    const query = this.repository
+      .createQueryBuilder("client")
+      .leftJoinAndSelect("client.addresses", "address")
+      .leftJoinAndSelect("client.creditCard", "creditCard");
 
-    if ( filters.cpf) {
-      query.andWhere("client.cpf LIKE :cpf", {cpf: `%${filters.cpf}%`});
+    if (filters.cpf) {
+      query.andWhere("client.cpf LIKE :cpf", { cpf: `%${filters.cpf}%` });
     }
     if (filters.email) {
-      query.andWhere("client.email LIKE :email", { email: `%${filters.email}%` });
+      query.andWhere("client.email LIKE :email", {
+        email: `%${filters.email}%`,
+      });
     }
 
     if (filters.name) {
@@ -51,13 +56,21 @@ export default class ClientDAO implements IDAO<Client> {
     }
 
     if (filters.phoneNumber) {
-      query.andWhere("client.phones LIKE :phones", {
-        phone: `%${filters.phoneNumber}%`,
+      query.andWhere("client.phoneNumber LIKE :phoneNumber", {
+        phoneNumber: `%${filters.phoneNumber}%`,
       });
     }
 
-    if (filters.isActive) {
-      query.andWhere("client")
+    if (filters.phoneDDD) {
+      query.andWhere("client.phoneDDD = :phoneDDD", {
+        phoneDDD: filters.phoneDDD,
+      });
+    }
+
+    if (filters.isActive !== undefined) {
+      query.andWhere("client.isActive = :isActive", {
+        isActive: filters.isActive,
+      });
     }
     return query.getMany();
   }

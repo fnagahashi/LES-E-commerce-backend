@@ -12,7 +12,6 @@ import ValidationRequiredGuestFields from "../strategy/client/ValidationRequired
 import ValidationRequiredAddressFields from "../strategy/address/ValidationRequiredFields";
 import ValidationEmail from "../strategy/client/ValidationEmail";
 import ValidationUniqueCPF from "../strategy/client/ValidationCPFUniqueness";
-import ValidationCPF from "../strategy/client/ValidationCEP";
 import ValidationRequiredRoomFields from "../strategy/room/ValidationRequiredFields";
 import ValidationAvailabilityRoom from "../strategy/reservation/ValidationAvailabilityRoom";
 import ValidationDates from "../strategy/reservation/ValidationDates";
@@ -65,7 +64,6 @@ export default class Facade implements IFacade<entity> {
     this.strategyMap.set("Client", [
       new ValidationRequiredGuestFields(),
       new ValidationEmail(),
-      new ValidationCPF(),
     ] as Array<IStrategy<entity>>);
 
     this.strategyMap.set("Address", [
