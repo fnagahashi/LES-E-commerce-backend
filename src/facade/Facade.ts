@@ -25,6 +25,7 @@ import ValidationReservationConfirm from "../strategy/payment/ValidationReservat
 import CalcularValorTotal from "../strategy/payment/CalcularValorTotal";
 import ValidationRequiredReservationFields from "../strategy/reservation/ValidationRequiredFields";
 import ClientDAO from "../DAO/Interface/ClientDAO";
+import ValidationCEP from "../strategy/address/ValidateCEP";
 
 export default class Facade implements IFacade<entity> {
   private readonly entityDAOMap: Map<string, IDAO<entity>>;
@@ -68,6 +69,7 @@ export default class Facade implements IFacade<entity> {
 
     this.strategyMap.set("Address", [
       new ValidationRequiredAddressFields(),
+      new ValidationCEP(),
     ] as Array<IStrategy<entity>>);
 
   }

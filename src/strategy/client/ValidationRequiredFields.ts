@@ -43,7 +43,7 @@ export default class ValidationRequiredClientFields implements IStrategy<Client>
     }
 
     if (!client.creditCard || client.creditCard.length === 0) {
-      errors.push("Pelo menos um cartão de crédito deve ser vinculado")
+      errors.push("Pelo menos um cartão de crédito é obrigatório");
     }
 
     return errors.length > 0 ? errors.join(", ") : undefined;

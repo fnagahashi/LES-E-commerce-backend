@@ -29,7 +29,7 @@ export class ClientController {
       console.log(`👤 Criando Cliente: ${name}`);
 
       const clientAddresses = addresses.map(
-        (addr: any) =>
+        (addr: Address) =>
           new Address(
             addr.typeResidence,
             addr.typeStreet,
@@ -45,7 +45,7 @@ export class ClientController {
       );
 
       const clientCreditCard = creditCard.map(
-        (card: any) =>
+        (card: CreditCard) =>
           new CreditCard(
             card.cardName,
             card.cardNumber,
