@@ -1,6 +1,5 @@
 import IStrategy from "../IStrategy";
 import Client from "../../entities/client";
-import address from "../../entities/address";
 
 export default class ValidationRequiredClientFields implements IStrategy<Client> {
   async executar(client: Client): Promise<string | undefined> {
