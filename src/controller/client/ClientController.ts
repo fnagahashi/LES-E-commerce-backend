@@ -248,6 +248,33 @@ export class ClientController {
     }
   }
 
+  async changePassword(req: Request, res: Response): Promise<void> {
+  try {
+    const { id } = req.params;
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+
+    const clientUpdated = await this.facade.changePassword(
+      id,
+      currentPassword,
+      newPassword,
+      confirmPassword
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Senha alterada com sucesso",
+      data: clientUpdated
+    });
+
+  } catch (error: any) {
+    res.status(400).json({
+      success: false,
+      error: error.message,
+    });
+  }
+}
+
+
   async delete(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;

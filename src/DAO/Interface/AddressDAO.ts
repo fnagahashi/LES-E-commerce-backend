@@ -17,9 +17,14 @@ export default class AddressDAO implements IDAO<Address> {
     await this.repository.remove(address);
   }
 
-  async update(Entity: Address): Promise<Address> {
-    return await this.repository.save(Entity);
-  }
+  async update(address: Address): Promise<Address> {
+          const addressExists = await this.findById(address.id);
+      if (!addressExists) {
+        throw new Error("Endereço não encontrado");
+      }
+      const updatedAddress = this.repository.merge(addressExists[0], address);
+          return await this.repository.save(updatedAddress);
+      }
 
   async findAll(): Promise<Address[]> {
     return this.repository.find();

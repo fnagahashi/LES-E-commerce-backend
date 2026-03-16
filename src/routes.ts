@@ -1,11 +1,6 @@
 // src/routes.ts
 import { Router } from "express";
 import { ClientController } from "./controller/client/ClientController";
-import { RoomController } from "../src/controller/room/RoomController";
-import { ReservationController } from "../src/controller/reservation/ReservationController";
-import { PaymentController } from "../src/controller/payment/PaymentController";
-import { SaleController } from "../src/controller/sale/SaleController";
-import { PolicyController } from "../src/controller/policy/PolicyController";
 import { AppDataSource } from "./database";
 import Facade from "./facade/Facade";
 import Client from "./entities/client";
@@ -32,11 +27,6 @@ const startApp = async () => {
   );
 
   const clientController = new ClientController(facade);
-  const roomController = new RoomController(facade);
-  const reservationController = new ReservationController(facade);
-  const paymentController = new PaymentController(facade);
-  const saleController = new SaleController(facade);
-  const policyController = new PolicyController(facade);
 
   router.post("/clients", (req, res) => clientController.create(req, res));
   router.get("/clients", (req, res) => clientController.findAll(req, res));
@@ -51,6 +41,9 @@ const startApp = async () => {
   router.patch("/clients/:id/activate", (req, res) =>
     clientController.activate(req, res),
   );
+  router.patch("/clients/:id/changePassword", (req, res) =>
+    clientController.changePassword(req, res),
+  );
   router.delete("/clients/:id", (req, res) =>
     clientController.delete(req, res),
   );
@@ -64,12 +57,6 @@ const startApp = async () => {
       version: "1.0.0",
       endpoints: {
         clients: "/api/clients",
-        rooms: "/api/rooms",
-        reservations: "/api/reservations",
-        payments: "/api/payments",
-        sales: "/api/sales",
-        policies: "/api/policies",
-        reports: "/api/reports",
       },
     });
   });

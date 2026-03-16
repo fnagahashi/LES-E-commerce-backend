@@ -26,7 +26,7 @@ export default class ClientDAO implements IDAO<Client> {
   async update(Client: Client): Promise<Client> {
     const clientExists = await this.findById(Client.id);
     if (!clientExists) {
-      throw new Error("Hospede não encontrado");
+      throw new Error("Cliente não encontrado");
     }
     const updatedClient = this.repository.merge(clientExists[0], Client);
     return await this.repository.save(updatedClient);

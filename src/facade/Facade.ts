@@ -10,8 +10,6 @@ import LogDAO from "../DAO/Interface/LogDAO";
 import Log from "../entities/log";
 import ValidationRequiredGuestFields from "../strategy/client/ValidationRequiredFields";
 import ValidationRequiredAddressFields from "../strategy/address/ValidationRequiredFields";
-import ValidationEmail from "../strategy/client/ValidationEmail";
-import ValidationUniqueCPF from "../strategy/client/ValidationCPFUniqueness";
 import ValidationRequiredRoomFields from "../strategy/room/ValidationRequiredFields";
 import ValidationAvailabilityRoom from "../strategy/reservation/ValidationAvailabilityRoom";
 import ValidationDates from "../strategy/reservation/ValidationDates";
@@ -26,6 +24,11 @@ import CalcularValorTotal from "../strategy/payment/CalcularValorTotal";
 import ValidationRequiredReservationFields from "../strategy/reservation/ValidationRequiredFields";
 import ClientDAO from "../DAO/Interface/ClientDAO";
 import ValidationCEP from "../strategy/address/ValidateCEP";
+import ValidateCreditCardFlag from "../strategy/creditCard/ValidateCreditCardFlag";
+import ValidationPassword from "../strategy/client/ValidationPassword";
+import Client from "../entities/client";
+import EncryptPassword from "../strategy/client/EncryptPassword";
+import { EncryptionUtil } from "../utils/encryption";
 
 export default class Facade implements IFacade<entity> {
   private readonly entityDAOMap: Map<string, IDAO<entity>>;
@@ -62,9 +65,19 @@ export default class Facade implements IFacade<entity> {
   }
 
   private initializeStrategies(): void {
-    this.strategyMap.set("Client", [
+    this.strategyMap.set("ClientCreate", [
       new ValidationRequiredGuestFields(),
-      new ValidationEmail(),
+      new ValidationPassword(),
+      new EncryptPassword(),
+    ] as Array<IStrategy<entity>>);
+
+    this.strategyMap.set("ClientUpdate", [
+      new ValidationRequiredGuestFields(),
+    ] as Array<IStrategy<entity>>);
+
+    this.strategyMap.set("ClientChangePassword", [
+      new ValidationPassword(),
+      new EncryptPassword(),
     ] as Array<IStrategy<entity>>);
 
     this.strategyMap.set("Address", [
@@ -72,12 +85,16 @@ export default class Facade implements IFacade<entity> {
       new ValidationCEP(),
     ] as Array<IStrategy<entity>>);
 
+    this.strategyMap.set("CreditCard", [
+      new ValidationRequiredPaymentFields(),
+      new ValidateCreditCardFlag(),
+    ] as Array<IStrategy<entity>>);
   }
 
   public async create(entity: entity): Promise<entity> {
     const entityName = entity.constructor.name;
 
-    const strategies = this.strategyMap.get(entityName) || [];
+    const strategies = this.strategyMap.get(`${entityName}Create`) || [];
 
     let msg: string = "";
 
@@ -107,7 +124,7 @@ export default class Facade implements IFacade<entity> {
   public async update(entity: entity): Promise<entity> {
     const entityName = entity.constructor.name;
 
-    const strategies = this.strategyMap.get(entityName) || [];
+    const strategies = this.strategyMap.get(`${entityName}Update`) || [];
 
     let msg: string = "";
 
@@ -131,6 +148,57 @@ export default class Facade implements IFacade<entity> {
     await this.gerarLog(entidadeAtualizada, "atualizado");
 
     return entidadeAtualizada;
+  }
+
+  public async changePassword(
+    clientId: string,
+    currentPassword: string,
+    newPassword: string,
+    confirmPassword: string,
+  ): Promise<entity> {
+    const clientDAO = this.entityDAOMap.get("Client") as IDAO<entity>;
+
+    if (!clientDAO) {
+      throw new Error("DAO não encontrado para Client");
+    }
+
+    const client = (await clientDAO.findById(clientId)) as Client;
+
+    if (!client) {
+      throw new Error("Cliente não encontrado");
+    }
+    const validatePassword = await EncryptionUtil.comparar(
+      currentPassword,
+      client.password,
+    );
+    if (validatePassword === false) {
+      throw new Error("Senha atual incorreta");
+    }
+
+    client.password = newPassword;
+    client.confirmPassword = confirmPassword;
+
+    const strategies = this.strategyMap.get("ClientChangePassword") || [];
+
+    let msg = "";
+
+    for (const strategy of strategies) {
+      const result = await strategy.executar(client);
+
+      if (result) {
+        msg += result + " ";
+      }
+    }
+
+    if (msg) {
+      throw new Error(msg.trim());
+    }
+
+    const updatedClient = await clientDAO.update(client);
+
+    await this.gerarLog(updatedClient, "senha alterada");
+
+    return updatedClient;
   }
 
   public async delete(entity: entity): Promise<entity> {
