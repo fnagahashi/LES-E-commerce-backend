@@ -11,6 +11,7 @@ import PaymentDAO from "./DAO/Interface/PaymentDAO";
 import RoomDAO from "./DAO/Interface/RoomDAO";
 import LogDAO from "./DAO/Interface/LogDAO";
 import SaleDAO from "./DAO/Interface/SaleDAO";
+import { ensureAuthenticated } from "./midleware/ensureAuthenticated";
 
 
 const router = Router();
@@ -27,24 +28,25 @@ const startApp = async () => {
   );
 
   const clientController = new ClientController(facade);
+  router.post("/login", (req, res) => clientController.login(req, res));
 
   router.post("/clients", (req, res) => clientController.create(req, res));
-  router.get("/clients", (req, res) => clientController.findAll(req, res));
-  router.get("/clients/:id", (req, res) => clientController.findById(req, res));
-  router.get("/clients/search", (req, res) =>
+  router.get("/clients", ensureAuthenticated, clientController.findAll);
+  router.get("/clients/:id", ensureAuthenticated, (req, res) => clientController.findById(req, res));
+  router.get("/clients/search", ensureAuthenticated, (req, res) =>
     clientController.findByFilters(req, res),
   );
-  router.put("/clients/:id", (req, res) => clientController.update(req, res));
-  router.patch("/clients/:id/inactivate", (req, res) =>
+  router.put("/clients/:id", ensureAuthenticated, (req, res) => clientController.update(req, res));
+  router.patch("/clients/:id/inactivate", ensureAuthenticated, (req, res) =>
     clientController.inactivate(req, res),
   );
-  router.patch("/clients/:id/activate", (req, res) =>
+  router.patch("/clients/:id/activate", ensureAuthenticated, (req, res) =>
     clientController.activate(req, res),
   );
-  router.patch("/clients/:id/changePassword", (req, res) =>
+  router.patch("/clients/:id/changePassword", ensureAuthenticated, (req, res) =>
     clientController.changePassword(req, res),
   );
-  router.delete("/clients/:id", (req, res) =>
+  router.delete("/clients/:id", ensureAuthenticated,(req, res) =>
     clientController.delete(req, res),
   );
 

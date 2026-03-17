@@ -4,6 +4,7 @@ import Client from "../../entities/client";
 import Address from "../../entities/address";
 import CreditCard from "../../entities/creditCard";
 import { Gender } from "../../enum/Gender";
+import { sign } from "jsonwebtoken";
 
 export class ClientController {
   constructor(private readonly facade: Facade) {}
@@ -79,6 +80,44 @@ export class ClientController {
       });
     } catch (error: any) {
       console.error("❌ Erro ao criar Cliente:", error);
+      res.status(400).json({
+        success: false,
+        error: error.message,
+      });
+    }
+  }
+
+  async login(req: Request, res: Response): Promise<void> {
+    try {
+      const { email, password } = req.body;
+
+      const clients = await this.facade.findByFilters("Client", { email } as Client) as Client[];
+      const client = clients[0];
+
+      if (!client || client.password !== password) {
+        res.status(401).json({
+          success: false,
+          message: "Email ou senha inválidos",
+        });
+        return;
+      }
+
+      const token = sign(
+        {
+          email: client.email,
+          id: client.id,
+        },
+        "ecommerce",
+        {
+          expiresIn: "1d",
+        },
+      );
+
+      res.json({
+        success: true,
+        token,
+      });
+    } catch (error: any) {
       res.status(400).json({
         success: false,
         error: error.message,
@@ -163,19 +202,19 @@ export class ClientController {
       if (updateData.addresses && Array.isArray(updateData.addresses)) {
         updateData.addresses = updateData.addresses.map(
           (addr: any) =>
-          new Address(
-            addr.typeResidence,
-            addr.typeStreet,
-            addr.cep,
-            addr.street,
-            addr.neighborhood,
-            addr.number,
-            addr.city,
-            addr.state,
-            addr.country,
-            addr.obs,
-          ),
-        )
+            new Address(
+              addr.typeResidence,
+              addr.typeStreet,
+              addr.cep,
+              addr.street,
+              addr.neighborhood,
+              addr.number,
+              addr.city,
+              addr.state,
+              addr.country,
+              addr.obs,
+            ),
+        );
       }
 
       Object.assign(client, updateData);
@@ -198,14 +237,14 @@ export class ClientController {
     try {
       const { id } = req.params;
 
-      const client = await this.facade.findById("Client", id) as Client;
+      const client = (await this.facade.findById("Client", id)) as Client;
 
       if (!client) {
         res.status(404).json({ error: "Cliente não encontrado" });
         return;
       }
       client.isActive = false;
-      
+
       const clientUpdated = await this.facade.update(client);
 
       res.json({
@@ -225,7 +264,7 @@ export class ClientController {
     try {
       const { id } = req.params;
 
-      const client = await this.facade.findById("Client", id) as Client;
+      const client = (await this.facade.findById("Client", id)) as Client;
 
       if (!client) {
         res.status(404).json({ error: "Cliente não encontrado" });
@@ -249,37 +288,35 @@ export class ClientController {
   }
 
   async changePassword(req: Request, res: Response): Promise<void> {
-  try {
-    const { id } = req.params;
-    const { currentPassword, newPassword, confirmPassword } = req.body;
+    try {
+      const { id } = req.params;
+      const { currentPassword, newPassword, confirmPassword } = req.body;
 
-    const clientUpdated = await this.facade.changePassword(
-      id,
-      currentPassword,
-      newPassword,
-      confirmPassword
-    );
+      const clientUpdated = await this.facade.changePassword(
+        id,
+        currentPassword,
+        newPassword,
+        confirmPassword,
+      );
 
-    res.status(200).json({
-      success: true,
-      message: "Senha alterada com sucesso",
-      data: clientUpdated
-    });
-
-  } catch (error: any) {
-    res.status(400).json({
-      success: false,
-      error: error.message,
-    });
+      res.status(200).json({
+        success: true,
+        message: "Senha alterada com sucesso",
+        data: clientUpdated,
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        success: false,
+        error: error.message,
+      });
+    }
   }
-}
-
 
   async delete(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
 
-      const client = await this.facade.findById("Client", id) as Client;
+      const client = (await this.facade.findById("Client", id)) as Client;
 
       if (!client) {
         res.status(404).json({ error: "Cliente não encontrado" });
