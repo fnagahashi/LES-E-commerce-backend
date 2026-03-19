@@ -1,393 +1,393 @@
-// src/controllers/PolicyController.ts
-import { Request, Response } from "express";
-import Facade from "../../facade/Facade";
-import Policy from "../../entities/policy";
+// // src/controllers/PolicyController.ts
+// import { Request, Response } from "express";
+// import Facade from "../../facade/Facade";
+// import Policy from "../../entities/policy";
 
-export class PolicyController {
-    constructor(private readonly facade: Facade) {}
+// export class PolicyController {
+//     constructor(private readonly facade: Facade) {}
 
-    public async criar(req: Request, res: Response): Promise<void> {
-        try {
-            // RF0131: Cadastrar política de cancelamento
-            const policy = await this.definirPolicyCriar(req);
-            
-            const policySalva = await this.facade.create(policy);
-            
-            res.status(201).json({ 
-                success: true,
-                message: "Política de cancelamento criada com sucesso",
-                policy: policySalva 
-            });
+//     public async criar(req: Request, res: Response): Promise<void> {
+//         try {
+//             // RF0131: Cadastrar política de cancelamento
+//             const policy = await this.definirPolicyCriar(req);
 
-        } catch (error) {
-            const err = error as Error;
-            res.status(400).json({
-                success: false,
-                error: err.message
-            });
-        }
-    }
+//             const policySalva = await this.facade.create(policy);
 
-    private async definirPolicyCriar(req: Request): Promise<Policy> {
-        const {
-            description,
-            percentual
-        } = req.body;
+//             res.status(201).json({
+//                 success: true,
+//                 message: "Política de cancelamento criada com sucesso",
+//                 policy: policySalva
+//             });
 
-        return new Policy(
-            description,
-            parseFloat(percentual)
-        );
-    }
+//         } catch (error) {
+//             const err = error as Error;
+//             res.status(400).json({
+//                 success: false,
+//                 error: err.message
+//             });
+//         }
+//     }
 
-    private async definirPolicyAtualizar(req: Request): Promise<Policy> {
-        const {
-            description,
-            percentual
-        } = req.body;
+//     private async definirPolicyCriar(req: Request): Promise<Policy> {
+//         const {
+//             description,
+//             percentual
+//         } = req.body;
 
-        return new Policy(
-            description,
-            parseFloat(percentual)
-        );
-    }
+//         return new Policy(
+//             description,
+//             parseFloat(percentual)
+//         );
+//     }
 
-    private async definirPolicyFiltrar(req: Request): Promise<Partial<Policy>> {
-        const {
-            description,
-            percentualMin,
-            percentualMax
-        } = req.query;
+//     private async definirPolicyAtualizar(req: Request): Promise<Policy> {
+//         const {
+//             description,
+//             percentual
+//         } = req.body;
 
-        const filters: Partial<Policy> = {};
+//         return new Policy(
+//             description,
+//             parseFloat(percentual)
+//         );
+//     }
 
-        if (description) filters.description = description as string;
+//     private async definirPolicyFiltrar(req: Request): Promise<Partial<Policy>> {
+//         const {
+//             description,
+//             percentualMin,
+//             percentualMax
+//         } = req.query;
 
-        // Filtros adicionais para percentual
-        if (percentualMin || percentualMax) {
-            (filters as any).percentualRange = {
-                min: percentualMin ? parseFloat(percentualMin as string) : undefined,
-                max: percentualMax ? parseFloat(percentualMax as string) : undefined
-            };
-        }
+//         const filters: Partial<Policy> = {};
 
-        return filters;
-    }
+//         if (description) filters.description = description as string;
 
-    public async buscarTodas(req: Request, res: Response): Promise<void> {
-        try {
-            // RF0134: Consultar políticas de cancelamento
-            const policies = await this.facade.list({} as Policy, 'findAll') as Policy[];
-            
-            res.status(200).json({
-                success: true,
-                count: policies.length,
-                policies
-            });
+//         // Filtros adicionais para percentual
+//         if (percentualMin || percentualMax) {
+//             (filters as any).percentualRange = {
+//                 min: percentualMin ? parseFloat(percentualMin as string) : undefined,
+//                 max: percentualMax ? parseFloat(percentualMax as string) : undefined
+//             };
+//         }
 
-        } catch (error) {
-            const err = error as Error;
-            res.status(400).json({
-                success: false,
-                error: err.message
-            });
-        }
-    }
+//         return filters;
+//     }
 
-    public async buscarAtivas(req: Request, res: Response): Promise<void> {
-        try {
-            // Buscar políticas não deletadas (ativas)
-            const policies = await this.facade.list({} as Policy, 'findAll') as Policy[];
-            
-            // Filtrar políticas não deletadas (deletedAt é null)
-            const policiesAtivas = policies.filter(policy => !policy.deletedAt);
-            
-            res.status(200).json({
-                success: true,
-                count: policiesAtivas.length,
-                policies: policiesAtivas
-            });
+//     public async buscarTodas(req: Request, res: Response): Promise<void> {
+//         try {
+//             // RF0134: Consultar políticas de cancelamento
+//             const policies = await this.facade.list({} as Policy, 'findAll') as Policy[];
 
-        } catch (error) {
-            const err = error as Error;
-            res.status(400).json({
-                success: false,
-                error: err.message
-            });
-        }
-    }
+//             res.status(200).json({
+//                 success: true,
+//                 count: policies.length,
+//                 policies
+//             });
 
-    public async buscarPorFiltro(req: Request, res: Response): Promise<void> {
-        try {
-            const filters = await this.definirPolicyFiltrar(req);
-            const policies = await this.facade.list(filters as Policy, 'findByFilters') as Policy[];
-            
-            res.status(200).json({
-                success: true,
-                count: policies.length,
-                policies
-            });
+//         } catch (error) {
+//             const err = error as Error;
+//             res.status(400).json({
+//                 success: false,
+//                 error: err.message
+//             });
+//         }
+//     }
 
-        } catch (error) {
-            const err = error as Error;
-            res.status(400).json({
-                success: false,
-                error: err.message
-            });
-        }
-    }
+//     public async buscarAtivas(req: Request, res: Response): Promise<void> {
+//         try {
+//             // Buscar políticas não deletadas (ativas)
+//             const policies = await this.facade.list({} as Policy, 'findAll') as Policy[];
 
-    public async buscarPorId(req: Request, res: Response): Promise<void> {
-        try {
-            const { id } = req.params;
-            
-            const policies = await this.facade.list({ id } as Policy, 'findById') as Policy[];
-            
-            if (policies.length === 0) {
-                res.status(404).json({
-                    success: false,
-                    error: "Política de cancelamento não encontrada"
-                });
-                return;
-            }
+//             // Filtrar políticas não deletadas (deletedAt é null)
+//             const policiesAtivas = policies.filter(policy => !policy.deletedAt);
 
-            res.status(200).json({
-                success: true,
-                policy: policies[0]
-            });
+//             res.status(200).json({
+//                 success: true,
+//                 count: policiesAtivas.length,
+//                 policies: policiesAtivas
+//             });
 
-        } catch (error) {
-            const err = error as Error;
-            res.status(400).json({
-                success: false,
-                error: err.message
-            });
-        }
-    }
+//         } catch (error) {
+//             const err = error as Error;
+//             res.status(400).json({
+//                 success: false,
+//                 error: err.message
+//             });
+//         }
+//     }
 
-    public async atualizar(req: Request, res: Response): Promise<void> {
-        try {
-            // RF0132: Alterar política de cancelamento
-            const { id } = req.params;
-            
-            // Buscar a política atual
-            const policies = await this.facade.list({ id } as Policy, 'findById') as Policy[];
-            
-            if (policies.length === 0) {
-                res.status(404).json({
-                    success: false,
-                    error: "Política de cancelamento não encontrada"
-                });
-                return;
-            }
+//     public async buscarPorFiltro(req: Request, res: Response): Promise<void> {
+//         try {
+//             const filters = await this.definirPolicyFiltrar(req);
+//             const policies = await this.facade.list(filters as Policy, 'findByFilters') as Policy[];
 
-            const policyAtual = policies[0];
-            const dadosAtualizacao = await this.definirPolicyAtualizar(req);
-            
-            // Mesclar os dados mantendo o ID
-            const policyAtualizada = new Policy(
-                dadosAtualizacao.description || policyAtual.description,
-                dadosAtualizacao.percentual ?? policyAtual.percentual
-            );
-            policyAtualizada.id = policyAtual.id;
+//             res.status(200).json({
+//                 success: true,
+//                 count: policies.length,
+//                 policies
+//             });
 
-            const resultado = await this.facade.update(policyAtualizada);
+//         } catch (error) {
+//             const err = error as Error;
+//             res.status(400).json({
+//                 success: false,
+//                 error: err.message
+//             });
+//         }
+//     }
 
-            res.status(200).json({
-                success: true,
-                message: "Política de cancelamento atualizada com sucesso",
-                policy: resultado
-            });
+//     public async buscarPorId(req: Request, res: Response): Promise<void> {
+//         try {
+//             const { id } = req.params;
 
-        } catch (error) {
-            const err = error as Error;
-            res.status(400).json({
-                success: false,
-                error: err.message
-            });
-        }
-    }
+//             const policies = await this.facade.list({ id } as Policy, 'findById') as Policy[];
 
-    public async inativar(req: Request, res: Response): Promise<void> {
-        try {
-            // RF0133: Inativar política de cancelamento
-            const { id } = req.params;
+//             if (policies.length === 0) {
+//                 res.status(404).json({
+//                     success: false,
+//                     error: "Política de cancelamento não encontrada"
+//                 });
+//                 return;
+//             }
 
-            const policies = await this.facade.list({ id } as Policy, 'findById') as Policy[];
-            
-            if (policies.length === 0) {
-                res.status(404).json({
-                    success: false,
-                    error: "Política de cancelamento não encontrada"
-                });
-                return;
-            }
+//             res.status(200).json({
+//                 success: true,
+//                 policy: policies[0]
+//             });
 
-            const policyAtual = policies[0];
+//         } catch (error) {
+//             const err = error as Error;
+//             res.status(400).json({
+//                 success: false,
+//                 error: err.message
+//             });
+//         }
+//     }
 
-            // Para inativar, vamos usar o soft delete (deletedAt)
-            const resultado = await this.facade.delete(policyAtual);
+//     public async atualizar(req: Request, res: Response): Promise<void> {
+//         try {
+//             // RF0132: Alterar política de cancelamento
+//             const { id } = req.params;
 
-            res.status(200).json({
-                success: true,
-                message: "Política de cancelamento inativada com sucesso",
-                policy: resultado
-            });
+//             // Buscar a política atual
+//             const policies = await this.facade.list({ id } as Policy, 'findById') as Policy[];
 
-        } catch (error) {
-            const err = error as Error;
-            res.status(400).json({
-                success: false,
-                error: err.message
-            });
-        }
-    }
+//             if (policies.length === 0) {
+//                 res.status(404).json({
+//                     success: false,
+//                     error: "Política de cancelamento não encontrada"
+//                 });
+//                 return;
+//             }
 
-    public async ativar(req: Request, res: Response): Promise<void> {
-        try {
-            const { id } = req.params;
+//             const policyAtual = policies[0];
+//             const dadosAtualizacao = await this.definirPolicyAtualizar(req);
 
-            const policies = await this.facade.list({ id } as Policy, 'findById') as Policy[];
-            
-            if (policies.length === 0) {
-                res.status(404).json({
-                    success: false,
-                    error: "Política de cancelamento não encontrada"
-                });
-                return;
-            }
+//             // Mesclar os dados mantendo o ID
+//             const policyAtualizada = new Policy(
+//                 dadosAtualizacao.description || policyAtual.description,
+//                 dadosAtualizacao.percentual ?? policyAtual.percentual
+//             );
+//             policyAtualizada.id = policyAtual.id;
 
-            const policyAtual = policies[0];
+//             const resultado = await this.facade.update(policyAtualizada);
 
-            // Para ativar, precisamos criar uma nova instância sem deletedAt
-            const policyAtivada = new Policy(
-                policyAtual.description,
-                policyAtual.percentual
-            );
-            policyAtivada.id = policyAtual.id;
-            // Não setamos deletedAt, então fica null/undefined = ativa
+//             res.status(200).json({
+//                 success: true,
+//                 message: "Política de cancelamento atualizada com sucesso",
+//                 policy: resultado
+//             });
 
-            const resultado = await this.facade.update(policyAtivada);
+//         } catch (error) {
+//             const err = error as Error;
+//             res.status(400).json({
+//                 success: false,
+//                 error: err.message
+//             });
+//         }
+//     }
 
-            res.status(200).json({
-                success: true,
-                message: "Política de cancelamento ativada com sucesso",
-                policy: resultado
-            });
+//     public async inativar(req: Request, res: Response): Promise<void> {
+//         try {
+//             // RF0133: Inativar política de cancelamento
+//             const { id } = req.params;
 
-        } catch (error) {
-            const err = error as Error;
-            res.status(400).json({
-                success: false,
-                error: err.message
-            });
-        }
-    }
+//             const policies = await this.facade.list({ id } as Policy, 'findById') as Policy[];
 
-    public async calcularMultaCancelamento(req: Request, res: Response): Promise<void> {
-        try {
-            const { policyId } = req.params;
-            const { valorReserva, horasAntecedencia } = req.body;
+//             if (policies.length === 0) {
+//                 res.status(404).json({
+//                     success: false,
+//                     error: "Política de cancelamento não encontrada"
+//                 });
+//                 return;
+//             }
 
-            // Buscar a política
-            const policies = await this.facade.list({ id: policyId } as Policy, 'findById') as Policy[];
-            
-            if (policies.length === 0) {
-                res.status(404).json({
-                    success: false,
-                    error: "Política de cancelamento não encontrada"
-                });
-                return;
-            }
+//             const policyAtual = policies[0];
 
-            const policy = policies[0];
+//             // Para inativar, vamos usar o soft delete (deletedAt)
+//             const resultado = await this.facade.delete(policyAtual);
 
-            // Verificar se a política está ativa
-            if (policy.deletedAt) {
-                res.status(400).json({
-                    success: false,
-                    error: "Política de cancelamento está inativa"
-                });
-                return;
-            }
+//             res.status(200).json({
+//                 success: true,
+//                 message: "Política de cancelamento inativada com sucesso",
+//                 policy: resultado
+//             });
 
-            // Calcular multa baseada na política
-            let percentualMulta = policy.percentual;
+//         } catch (error) {
+//             const err = error as Error;
+//             res.status(400).json({
+//                 success: false,
+//                 error: err.message
+//             });
+//         }
+//     }
 
-            // Aplicar regras de negócio (exemplo: sem multa se cancelar com mais de 48h)
-            if (horasAntecedencia > 48) {
-                percentualMulta = 0; // Sem multa
-            }
+//     public async ativar(req: Request, res: Response): Promise<void> {
+//         try {
+//             const { id } = req.params;
 
-            const valorMulta = valorReserva * (percentualMulta / 100);
-            const valorReembolsado = valorReserva - valorMulta;
+//             const policies = await this.facade.list({ id } as Policy, 'findById') as Policy[];
 
-            res.status(200).json({
-                success: true,
-                message: "Cálculo de multa realizado com sucesso",
-                policy: policy,
-                calculo: {
-                    valorReserva,
-                    horasAntecedencia,
-                    percentualMulta,
-                    valorMulta,
-                    valorReembolsado
-                }
-            });
+//             if (policies.length === 0) {
+//                 res.status(404).json({
+//                     success: false,
+//                     error: "Política de cancelamento não encontrada"
+//                 });
+//                 return;
+//             }
 
-        } catch (error) {
-            const err = error as Error;
-            res.status(400).json({
-                success: false,
-                error: err.message
-            });
-        }
-    }
+//             const policyAtual = policies[0];
 
-    public async getEstatisticas(req: Request, res: Response): Promise<void> {
-        try {
-            const policies = await this.facade.list({} as Policy, 'findAll') as Policy[];
+//             // Para ativar, precisamos criar uma nova instância sem deletedAt
+//             const policyAtivada = new Policy(
+//                 policyAtual.description,
+//                 policyAtual.percentual
+//             );
+//             policyAtivada.id = policyAtual.id;
+//             // Não setamos deletedAt, então fica null/undefined = ativa
 
-            const stats = {
-                total: policies.length,
-                ativas: policies.filter(p => !p.deletedAt).length,
-                inativas: policies.filter(p => p.deletedAt).length,
-                percentualMedio: this.calcularPercentualMedio(policies),
-                porFaixaPercentual: this.agruparPorFaixaPercentual(policies)
-            };
+//             const resultado = await this.facade.update(policyAtivada);
 
-            res.status(200).json({
-                success: true,
-                stats
-            });
+//             res.status(200).json({
+//                 success: true,
+//                 message: "Política de cancelamento ativada com sucesso",
+//                 policy: resultado
+//             });
 
-        } catch (error) {
-            const err = error as Error;
-            res.status(400).json({
-                success: false,
-                error: err.message
-            });
-        }
-    }
+//         } catch (error) {
+//             const err = error as Error;
+//             res.status(400).json({
+//                 success: false,
+//                 error: err.message
+//             });
+//         }
+//     }
 
-    // Métodos auxiliares para estatísticas
-    private calcularPercentualMedio(policies: Policy[]): number {
-        if (policies.length === 0) return 0;
-        const total = policies.reduce((sum, policy) => sum + policy.percentual, 0);
-        return Number((total / policies.length).toFixed(2));
-    }
+//     public async calcularMultaCancelamento(req: Request, res: Response): Promise<void> {
+//         try {
+//             const { policyId } = req.params;
+//             const { valorReserva, horasAntecedencia } = req.body;
 
-    private agruparPorFaixaPercentual(policies: Policy[]): { [faixa: string]: number } {
-        return policies.reduce((acc, policy) => {
-            let faixa = '';
-            if (policy.percentual === 0) faixa = '0%';
-            else if (policy.percentual <= 25) faixa = '1-25%';
-            else if (policy.percentual <= 50) faixa = '26-50%';
-            else if (policy.percentual <= 75) faixa = '51-75%';
-            else faixa = '76-100%';
+//             // Buscar a política
+//             const policies = await this.facade.list({ id: policyId } as Policy, 'findById') as Policy[];
 
-            acc[faixa] = (acc[faixa] || 0) + 1;
-            return acc;
-        }, {} as { [faixa: string]: number });
-    }
-}
+//             if (policies.length === 0) {
+//                 res.status(404).json({
+//                     success: false,
+//                     error: "Política de cancelamento não encontrada"
+//                 });
+//                 return;
+//             }
+
+//             const policy = policies[0];
+
+//             // Verificar se a política está ativa
+//             if (policy.deletedAt) {
+//                 res.status(400).json({
+//                     success: false,
+//                     error: "Política de cancelamento está inativa"
+//                 });
+//                 return;
+//             }
+
+//             // Calcular multa baseada na política
+//             let percentualMulta = policy.percentual;
+
+//             // Aplicar regras de negócio (exemplo: sem multa se cancelar com mais de 48h)
+//             if (horasAntecedencia > 48) {
+//                 percentualMulta = 0; // Sem multa
+//             }
+
+//             const valorMulta = valorReserva * (percentualMulta / 100);
+//             const valorReembolsado = valorReserva - valorMulta;
+
+//             res.status(200).json({
+//                 success: true,
+//                 message: "Cálculo de multa realizado com sucesso",
+//                 policy: policy,
+//                 calculo: {
+//                     valorReserva,
+//                     horasAntecedencia,
+//                     percentualMulta,
+//                     valorMulta,
+//                     valorReembolsado
+//                 }
+//             });
+
+//         } catch (error) {
+//             const err = error as Error;
+//             res.status(400).json({
+//                 success: false,
+//                 error: err.message
+//             });
+//         }
+//     }
+
+//     public async getEstatisticas(req: Request, res: Response): Promise<void> {
+//         try {
+//             const policies = await this.facade.list({} as Policy, 'findAll') as Policy[];
+
+//             const stats = {
+//                 total: policies.length,
+//                 ativas: policies.filter(p => !p.deletedAt).length,
+//                 inativas: policies.filter(p => p.deletedAt).length,
+//                 percentualMedio: this.calcularPercentualMedio(policies),
+//                 porFaixaPercentual: this.agruparPorFaixaPercentual(policies)
+//             };
+
+//             res.status(200).json({
+//                 success: true,
+//                 stats
+//             });
+
+//         } catch (error) {
+//             const err = error as Error;
+//             res.status(400).json({
+//                 success: false,
+//                 error: err.message
+//             });
+//         }
+//     }
+
+//     // Métodos auxiliares para estatísticas
+//     private calcularPercentualMedio(policies: Policy[]): number {
+//         if (policies.length === 0) return 0;
+//         const total = policies.reduce((sum, policy) => sum + policy.percentual, 0);
+//         return Number((total / policies.length).toFixed(2));
+//     }
+
+//     private agruparPorFaixaPercentual(policies: Policy[]): { [faixa: string]: number } {
+//         return policies.reduce((acc, policy) => {
+//             let faixa = '';
+//             if (policy.percentual === 0) faixa = '0%';
+//             else if (policy.percentual <= 25) faixa = '1-25%';
+//             else if (policy.percentual <= 50) faixa = '26-50%';
+//             else if (policy.percentual <= 75) faixa = '51-75%';
+//             else faixa = '76-100%';
+
+//             acc[faixa] = (acc[faixa] || 0) + 1;
+//             return acc;
+//         }, {} as { [faixa: string]: number });
+//     }
+// }

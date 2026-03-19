@@ -6,13 +6,8 @@ import Facade from "./facade/Facade";
 import Client from "./entities/client";
 import ClientDAO from "./DAO/Interface/ClientDAO";
 import AddressDAO from "./DAO/Interface/AddressDAO";
-import ReservationDAO from "./DAO/Interface/ReservationDAO";
-import PaymentDAO from "./DAO/Interface/PaymentDAO";
-import RoomDAO from "./DAO/Interface/RoomDAO";
 import LogDAO from "./DAO/Interface/LogDAO";
-import SaleDAO from "./DAO/Interface/SaleDAO";
 import { ensureAuthenticated } from "./midleware/ensureAuthenticated";
-
 
 const router = Router();
 
@@ -20,11 +15,7 @@ const startApp = async () => {
   const facade = new Facade(
     new ClientDAO(AppDataSource),
     new AddressDAO(AppDataSource),
-    new ReservationDAO(AppDataSource),
-    new PaymentDAO(AppDataSource),
-    new RoomDAO(AppDataSource),
     new LogDAO(AppDataSource),
-    new SaleDAO(AppDataSource),
   );
 
   const clientController = new ClientController(facade);
@@ -32,11 +23,15 @@ const startApp = async () => {
 
   router.post("/clients", (req, res) => clientController.create(req, res));
   router.get("/clients", ensureAuthenticated, clientController.findAll);
-  router.get("/clients/:id", ensureAuthenticated, (req, res) => clientController.findById(req, res));
+  router.get("/clients/:id", ensureAuthenticated, (req, res) =>
+    clientController.findById(req, res),
+  );
   router.get("/clients/search", ensureAuthenticated, (req, res) =>
     clientController.findByFilters(req, res),
   );
-  router.put("/clients/:id", ensureAuthenticated, (req, res) => clientController.update(req, res));
+  router.put("/clients/:id", ensureAuthenticated, (req, res) =>
+    clientController.update(req, res),
+  );
   router.patch("/clients/:id/inactivate", ensureAuthenticated, (req, res) =>
     clientController.inactivate(req, res),
   );
@@ -46,10 +41,9 @@ const startApp = async () => {
   router.patch("/clients/:id/changePassword", ensureAuthenticated, (req, res) =>
     clientController.changePassword(req, res),
   );
-  router.delete("/clients/:id", ensureAuthenticated,(req, res) =>
+  router.delete("/clients/:id", ensureAuthenticated, (req, res) =>
     clientController.delete(req, res),
   );
-
 
   router.get("/health", (req, res) => {
     res.json({

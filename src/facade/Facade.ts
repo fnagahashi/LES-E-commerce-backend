@@ -1,27 +1,12 @@
 import AddressDAO from "../DAO/Interface/AddressDAO";
-import ReservationDAO from "../DAO/Interface/ReservationDAO";
 import entity from "../entities/entity";
 import IDAO from "../DAO/IDAO";
 import IFacade from "./IFacade";
-import PaymentDAO from "../DAO/Interface/PaymentDAO";
-import RoomDAO from "../DAO/Interface/RoomDAO";
 import IStrategy from "../strategy/IStrategy";
 import LogDAO from "../DAO/Interface/LogDAO";
 import Log from "../entities/log";
 import ValidationRequiredGuestFields from "../strategy/client/ValidationRequiredFields";
 import ValidationRequiredAddressFields from "../strategy/address/ValidationRequiredFields";
-import ValidationRequiredRoomFields from "../strategy/room/ValidationRequiredFields";
-import ValidationAvailabilityRoom from "../strategy/reservation/ValidationAvailabilityRoom";
-import ValidationDates from "../strategy/reservation/ValidationDates";
-import ValidationCapacityRoom from "../strategy/reservation/ValidationCapacityRoom";
-import ValidationCapacity from "../strategy/reservation/ValidationCapacity";
-import ValidationMinimumStay from "../strategy/reservation/ValidationMinimumStay";
-import PromotionValidation from "../strategy/others/PromotionValidation";
-import SaleDAO from "../DAO/Interface/SaleDAO";
-import ValidationRequiredPaymentFields from "../strategy/payment/ValidationRequiredFields";
-import ValidationReservationConfirm from "../strategy/payment/ValidationReservationConfirm";
-import CalcularValorTotal from "../strategy/payment/CalcularValorTotal";
-import ValidationRequiredReservationFields from "../strategy/reservation/ValidationRequiredFields";
 import ClientDAO from "../DAO/Interface/ClientDAO";
 import ValidationCEP from "../strategy/address/ValidateCEP";
 import ValidateCreditCardFlag from "../strategy/creditCard/ValidateCreditCardFlag";
@@ -46,20 +31,12 @@ export default class Facade implements IFacade<entity> {
   constructor(
     private readonly clientDAO: ClientDAO,
     private readonly addressDAO: AddressDAO,
-    private readonly reservationDAO: ReservationDAO,
-    private readonly paymentDAO: PaymentDAO,
-    private readonly roomDAO: RoomDAO,
     private readonly logDAO: LogDAO,
-    private readonly saleDAO: SaleDAO,
   ) {
     this.entityDAOMap = new Map<string, IDAO<entity>>();
     this.entityDAOMap.set("Client", this.clientDAO);
     this.entityDAOMap.set("Address", this.addressDAO);
-    // this.entityDAOMap.set("Reservation", this.reservationDAO);
-    // this.entityDAOMap.set("Payment", this.paymentDAO);
-    // this.entityDAOMap.set("Room", this.roomDAO);
     this.entityDAOMap.set("Log", this.logDAO);
-    // this.entityDAOMap.set("Sale", this.saleDAO);
     this.strategyMap = new Map<string, Array<IStrategy<entity>>>();
     this.initializeStrategies();
   }
@@ -85,10 +62,9 @@ export default class Facade implements IFacade<entity> {
       new ValidationCEP(),
     ] as Array<IStrategy<entity>>);
 
-    this.strategyMap.set("CreditCard", [
-      new ValidationRequiredPaymentFields(),
-      new ValidateCreditCardFlag(),
-    ] as Array<IStrategy<entity>>);
+    this.strategyMap.set("CreditCard", [new ValidateCreditCardFlag()] as Array<
+      IStrategy<entity>
+    >);
   }
 
   public async create(entity: entity): Promise<entity> {
