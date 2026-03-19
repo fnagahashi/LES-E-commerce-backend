@@ -98,9 +98,12 @@ export default class Facade implements IFacade<entity> {
   }
 
   public async update(entity: entity): Promise<entity> {
+    console.log("Iniciando atualização para entidade:", entity);
     const entityName = entity.constructor.name;
+    console.log("Nome da entidade para atualização:", entityName);
 
     const strategies = this.strategyMap.get(`${entityName}Update`) || [];
+    console.log(`Estratégias encontradas para ${entityName}Update:`, strategies);
 
     let msg: string = "";
 
@@ -116,11 +119,13 @@ export default class Facade implements IFacade<entity> {
     }
 
     const entidadeDAO = this.entityDAOMap.get(entityName);
+    console.log("DAO encontrado para atualização:", entidadeDAO);
     if (!entidadeDAO) {
       throw new Error(`DAO não encontrado para entidade: ${entityName}`);
     }
 
     const entidadeAtualizada = await entidadeDAO.update(entity);
+    console.log("Entidade atualizada com sucesso:", entidadeAtualizada);
     await this.gerarLog(entidadeAtualizada, "atualizado");
 
     return entidadeAtualizada;
@@ -194,7 +199,10 @@ export default class Facade implements IFacade<entity> {
   }
 
   public async findAll(entityName: string): Promise<entity[]> {
+    console.log("entityName:", entityName);
+    console.log("DAO encontrado:", entityName);
     const entidadeDAO = this.entityDAOMap.get(entityName);
+    console.log("Tem findAll?:", entidadeDAO?.findAll);
 
     if (!entidadeDAO) {
       throw new Error(`DAO não encontrado para entidade: ${entityName}`);

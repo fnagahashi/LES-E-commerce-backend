@@ -9,9 +9,9 @@ import AddressDAO from "./DAO/Interface/AddressDAO";
 import LogDAO from "./DAO/Interface/LogDAO";
 import { ensureAuthenticated } from "./midleware/ensureAuthenticated";
 
-const router = Router();
+export const createRouter = () => {
+  const router = Router();
 
-const startApp = async () => {
   const facade = new Facade(
     new ClientDAO(AppDataSource),
     new AddressDAO(AppDataSource),
@@ -22,7 +22,9 @@ const startApp = async () => {
   router.post("/login", (req, res) => clientController.login(req, res));
 
   router.post("/clients", (req, res) => clientController.create(req, res));
-  router.get("/clients", ensureAuthenticated, clientController.findAll);
+  router.get("/clients", ensureAuthenticated, (req, res) =>
+    clientController.findAll(req, res),
+  );
   router.get("/clients/:id", ensureAuthenticated, (req, res) =>
     clientController.findById(req, res),
   );
@@ -64,8 +66,6 @@ const startApp = async () => {
       version: "1.0.0",
     });
   });
+
+  return router;
 };
-
-startApp();
-
-export default router;

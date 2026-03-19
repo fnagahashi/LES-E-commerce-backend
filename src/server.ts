@@ -1,45 +1,38 @@
-import express, { NextFunction, Response, Request } from "express";
+import express from "express";
 import "express-async-errors";
 import "reflect-metadata";
 import cors from "cors";
 
-import router from "./routes";
+import { createRouter } from "./routes";
 import { AppDataSource } from "./database";
 
 const app = express();
 
-app.use(
-  cors({
-    origin: "http://localhost:3000",
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+app.use(cors());
 app.use(express.json());
-
-app.use(
-  (err: Error, request: Request, response: Response, next: NextFunction) => {
-    if (err instanceof Error) {
-      response.status(400).send(err.message);
-    } else {
-      response.status(500).send("Erro interno");
-    }
-  }
-);
 
 const startServer = async () => {
   try {
     await AppDataSource.initialize();
-    console.log("✅ Banco de dados conectado com sucesso!");
+    console.log("✅ Banco conectado");
+
+    const router = createRouter(); // ✅ AGORA seguro
+
     app.use("/api", router);
 
+    // middleware de erro DEPOIS das rotas
+    app.use((err: any, req: any, res: any, next: any) => {
+      res.status(400).json({
+        success: false,
+        error: err.message,
+      });
+    });
+
     app.listen(3000, () => {
-      console.log("🚀 Servidor rodando na porta 3000");
+      console.log("🚀 Rodando na porta 3000");
     });
   } catch (error) {
-    console.error("❌ Erro ao conectar com o banco:", error);
-    process.exit(1);
+    console.error("Erro ao iniciar:", error);
   }
 };
 

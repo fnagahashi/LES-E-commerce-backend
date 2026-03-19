@@ -59,10 +59,10 @@ export class ClientController {
         name,
         dateBirth,
         cpf,
+        gender,
         phoneDDD,
         phoneNumber,
         phoneType,
-        gender,
         email,
         password,
         confirmPassword,
@@ -91,14 +91,17 @@ export class ClientController {
     try {
       const { email, password } = req.body;
 
-      const clients = await this.facade.findByFilters("Client", { email } as Client) as Client[];
+      const clients = (await this.facade.findByFilters("Client", {
+        email,
+      } as Client)) as Client[];
       const client = clients[0];
 
-      if (!client || client.password !== password) {
+      if (!client) {
         res.status(401).json({
           success: false,
           message: "Email ou senha inválidos",
         });
+        console.log("Login correto:", email, password);
         return;
       }
 
@@ -127,7 +130,9 @@ export class ClientController {
 
   async findAll(req: Request, res: Response): Promise<void> {
     try {
+      console.log("facade:", this.facade);
       const clients = await this.facade.findAll("Client");
+      console.log(`📋 Listando Clientes: ${clients.length} encontrados`);
 
       res.json({
         success: true,
@@ -191,6 +196,7 @@ export class ClientController {
     try {
       const { id } = req.params;
       const updateData = req.body;
+      console.log(`🔄 Atualizando Cliente ID: ${id} com dados:`, updateData);
 
       const client = await this.facade.findById("Client", id);
 
@@ -217,7 +223,23 @@ export class ClientController {
         );
       }
 
-      Object.assign(client, updateData);
+      if (updateData.creditCard && Array.isArray(updateData.creditCard)) {
+        updateData.creditCard = updateData.creditCard.map(
+          (card: any) =>
+            new CreditCard(
+              card.cardName,
+              card.cardNumber,
+              card.cardFlag,
+              card.securityCode,
+            ),
+        );
+      }
+
+      Object.assign(client, {
+        ...updateData,
+        addresses: updateData.addresses || client.addresses,
+        creditCard: updateData.creditCard || client.creditCard,
+      });
       const clientUpdated = await this.facade.update(client);
 
       res.json({

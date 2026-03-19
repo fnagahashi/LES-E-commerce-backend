@@ -14,7 +14,7 @@ export default class ClientDAO implements IDAO<Client> {
   }
 
   async findAll(): Promise<Client[]> {
-    return this.repository.find();
+    return await this.repository.find();
   }
 
   async findById(id: string): Promise<Client | null> {
@@ -28,7 +28,7 @@ export default class ClientDAO implements IDAO<Client> {
     if (!clientExists) {
       throw new Error("Cliente não encontrado");
     }
-    const updatedClient = this.repository.merge(clientExists[0], Client);
+    const updatedClient = this.repository.merge(clientExists, Client);
     return await this.repository.save(updatedClient);
   }
 
