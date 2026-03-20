@@ -12,6 +12,7 @@ export class ClientController {
   async create(req: Request, res: Response): Promise<void> {
     try {
       const {
+        role,
         name,
         dateBirth,
         cpf,
@@ -56,6 +57,7 @@ export class ClientController {
       );
 
       const client = new Client(
+        role,
         name,
         dateBirth,
         cpf,
@@ -108,6 +110,7 @@ export class ClientController {
         {
           email: client.email,
           id: client.id,
+          role: client.role,
         },
         "ecommerce",
         {

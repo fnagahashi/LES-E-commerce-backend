@@ -7,13 +7,6 @@ export default class ValidationPassword implements IStrategy<Client> {
         if (!client.password.trim() || !client.password) {
             errors.push("Senha é obrigatória");
         }
-        if (!client.confirmPassword.trim() || !client.confirmPassword) {
-            errors.push("Confirmação de senha é obrigatória");
-        }
-
-        if (client.password !== client.confirmPassword) {
-            errors.push("As senhas não coincidem");
-        }
 
         if(client.password.length < 8) {
             errors.push("A senha deve conter pelo menos 8 caracteres");

@@ -5,6 +5,7 @@ import { NextFunction, Request, Response } from "express";
 interface IPayload {
   email: string;
   id: string;
+  role: string;
 }
 
 export function ensureAuthenticated(
@@ -22,12 +23,13 @@ export function ensureAuthenticated(
   const [, token] = authToken.split(" ");
 
   try {
-    const { email, id } = verify(token, "ecommerce") as IPayload;
+    const { email, id, role } = verify(token, "ecommerce") as IPayload;
 
     const req = request as AuthRequest;
 
     req.email = email;
     req.id = id;
+    req.role = role;
 
     next();
   } catch {
