@@ -1,7 +1,9 @@
 import IStrategy from "../IStrategy";
 import Client from "../../entities/client";
 
-export default class ValidationRequiredClientFields implements IStrategy<Client> {
+export default class ValidationRequiredClientFields
+  implements IStrategy<Client>
+{
   async executar(client: Client): Promise<string | undefined> {
     const errors: string[] = [];
 
@@ -21,7 +23,11 @@ export default class ValidationRequiredClientFields implements IStrategy<Client>
       errors.push("Gênero é obrigatório");
     }
 
-    if (!client.phoneDDD.trim() || !client.phoneNumber.trim() || !client.phoneType.trim()) {
+    if (
+      !client.phoneDDD.trim() ||
+      !client.phoneNumber.trim() ||
+      !client.phoneType.trim()
+    ) {
       errors.push("Telefone é obrigatório");
     }
 
@@ -33,9 +39,9 @@ export default class ValidationRequiredClientFields implements IStrategy<Client>
       errors.push("Senha é obrigatória");
     }
 
-    if(!client.confirmPassword.trim() || client.confirmPassword !== client.password) {
-      errors.push("A senhas não coincidem")
-    }
+    // if(!client.confirmPassword.trim() || client.confirmPassword !== client.password) {
+    //   errors.push("A senhas não coincidem")
+    // }
 
     if (!client.addresses || client.addresses.length === 0) {
       errors.push("Pelo menos um endereço é obrigatório");
