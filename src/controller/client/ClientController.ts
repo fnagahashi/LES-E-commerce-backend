@@ -21,7 +21,6 @@ export class ClientController {
         phoneType,
         email,
         password,
-        confirmPassword,
         addresses = [],
         creditCard = [],
         isActive = true,
@@ -48,8 +47,9 @@ export class ClientController {
       const clientCreditCard = creditCard.map(
         (card: CreditCard) =>
           new CreditCard(
-            card.cardName,
             card.cardNumber,
+            card.cardName,
+            card.cardExpirationDate,
             card.cardFlag,
             card.securityCode,
           ),
@@ -65,7 +65,6 @@ export class ClientController {
         phoneType,
         email,
         password,
-        confirmPassword,
         clientAddresses,
         clientCreditCard,
         isActive,
@@ -229,6 +228,7 @@ export class ClientController {
             new CreditCard(
               card.cardName,
               card.cardNumber,
+              card.cardExpirationDate,
               card.cardFlag,
               card.securityCode,
             ),

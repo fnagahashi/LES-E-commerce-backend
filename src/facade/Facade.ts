@@ -103,7 +103,10 @@ export default class Facade implements IFacade<entity> {
     console.log("Nome da entidade para atualização:", entityName);
 
     const strategies = this.strategyMap.get(`${entityName}Update`) || [];
-    console.log(`Estratégias encontradas para ${entityName}Update:`, strategies);
+    console.log(
+      `Estratégias encontradas para ${entityName}Update:`,
+      strategies,
+    );
 
     let msg: string = "";
 
@@ -157,7 +160,6 @@ export default class Facade implements IFacade<entity> {
     }
 
     client.password = newPassword;
-    client.confirmPassword = confirmPassword;
 
     const strategies = this.strategyMap.get("ClientChangePassword") || [];
 

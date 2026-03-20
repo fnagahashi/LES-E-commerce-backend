@@ -39,11 +39,8 @@ export default class Client extends entity {
   @Column({ unique: true })
   email!: string;
 
-  @Column({unique: true})
+  @Column({ unique: true })
   password!: string;
-
-  @Column()
-  confirmPassword!: string;
 
   @OneToMany(() => Address, (address) => address.client, {
     cascade: true,
@@ -57,7 +54,7 @@ export default class Client extends entity {
   })
   creditCard!: CreditCard[];
 
-  @Column({ type: 'boolean', default: true })
+  @Column({ type: "boolean", default: true })
   isActive: boolean;
 
   @DeleteDateColumn()
@@ -78,8 +75,7 @@ export default class Client extends entity {
     phoneNumber: string,
     phoneType: string,
     email: string,
-    password : string,
-    confirmPassword: string,
+    password: string,
     addresses: Address[],
     creditCard: CreditCard[],
     isActive: boolean,
@@ -94,7 +90,6 @@ export default class Client extends entity {
     this.phoneType = phoneType;
     this.email = email;
     this.password = password;
-    this.confirmPassword = confirmPassword;
     this.addresses = addresses;
     this.creditCard = creditCard;
     this.isActive = isActive;

@@ -19,13 +19,16 @@ export default class CreditCard extends entity {
   cardName!: string;
 
   @Column()
+  cardExpirationDate!: string;
+
+  @Column()
   cardFlag!: CardsFlags;
 
   @Column()
   securityCode!: string;
 
   @ManyToOne(() => Client, (client) => client.creditCard)
-  client: Client; 
+  client: Client;
 
   @CreateDateColumn()
   created_at!: Date;
@@ -34,21 +37,23 @@ export default class CreditCard extends entity {
   updated_at!: Date;
 
   constructor(
-      cardName: string,
-      cardNumber: string,
-      cardFlag: CardsFlags,
-      securityCode: string,
-      client?: Client,
-    ) {
-      super();
-      this.cardName = cardName;
-      this.cardNumber = cardNumber;
-      if(cardFlag) {
-        this.cardFlag = cardFlag
-      }
-      this.securityCode = securityCode;
-      if (client) {
-        this.client = client;
-      }
+    cardNumber: string,
+    cardName: string,
+    cardExpirationDate: string,
+    cardFlag: CardsFlags,
+    securityCode: string,
+    client?: Client,
+  ) {
+    super();
+    this.cardNumber = cardNumber;
+    this.cardName = cardName;
+    this.cardExpirationDate = cardExpirationDate;
+    if (cardFlag) {
+      this.cardFlag = cardFlag;
     }
+    this.securityCode = securityCode;
+    if (client) {
+      this.client = client;
+    }
+  }
 }
