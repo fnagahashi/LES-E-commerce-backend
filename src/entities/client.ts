@@ -12,9 +12,16 @@ import Address from "./address";
 import entity from "./entity";
 import CreditCard from "./creditCard";
 import { Gender } from "../enum/Gender";
+import { Role } from "../enum/Role";
 
 @Entity("client")
 export default class Client extends entity {
+  @Column({
+    type: "enum",
+    enum: Object.values(Role),
+    default: Role.CLIENT,
+  })
+  role!: Role;
   @Column()
   name!: string;
 
@@ -69,6 +76,7 @@ export default class Client extends entity {
   updated_at!: Date;
 
   constructor(
+    role: Role = Role.CLIENT,
     name: string,
     dateBirth: string,
     cpf: string,
@@ -83,6 +91,7 @@ export default class Client extends entity {
     isActive: boolean,
   ) {
     super();
+    this.role = role;
     this.name = name;
     this.dateBirth = dateBirth;
     this.cpf = cpf;
