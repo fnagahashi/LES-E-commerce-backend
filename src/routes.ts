@@ -9,6 +9,7 @@ import AddressDAO from "./DAO/Interface/AddressDAO";
 import LogDAO from "./DAO/Interface/LogDAO";
 import { ensureAuthenticated } from "./midleware/ensureAuthenticated";
 import { ensureAdmin } from "./midleware/ensureAdmin";
+import CreditCardDAO from "./DAO/Interface/CreditCardDAO";
 
 export const createRouter = () => {
   const router = Router();
@@ -16,6 +17,7 @@ export const createRouter = () => {
   const facade = new Facade(
     new ClientDAO(AppDataSource),
     new AddressDAO(AppDataSource),
+    new CreditCardDAO(AppDataSource),
     new LogDAO(AppDataSource),
   );
 
@@ -32,14 +34,26 @@ export const createRouter = () => {
   router.get("/clients/search", ensureAuthenticated, (req, res) =>
     clientController.findByFilters(req, res),
   );
+  router.patch("/clients/:id/", ensureAuthenticated, (req, res) =>
+    clientController.deleteCreditCard(req, res),
+  );
+  router.patch("/clients/:id", ensureAuthenticated, (req, res) =>
+    clientController.deleteAddress(req, res),
+  );
   router.put("/clients/:id", ensureAuthenticated, (req, res) =>
     clientController.update(req, res),
   );
-  router.patch("/clients/:id/inactivate", ensureAuthenticated, ensureAdmin, (req, res) =>
-    clientController.inactivate(req, res),
+  router.patch(
+    "/clients/:id/inactivate",
+    ensureAuthenticated,
+    ensureAdmin,
+    (req, res) => clientController.inactivate(req, res),
   );
-  router.patch("/clients/:id/activate", ensureAuthenticated, ensureAdmin, (req, res) =>
-    clientController.activate(req, res),
+  router.patch(
+    "/clients/:id/activate",
+    ensureAuthenticated,
+    ensureAdmin,
+    (req, res) => clientController.activate(req, res),
   );
   router.patch("/clients/:id/changePassword", ensureAuthenticated, (req, res) =>
     clientController.changePassword(req, res),

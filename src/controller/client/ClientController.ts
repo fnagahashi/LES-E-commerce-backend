@@ -215,7 +215,6 @@ export class ClientController {
         return;
       }
 
-      // só mescla dados simples
       Object.assign(client, updateData);
 
       const clientUpdated = await this.facade.update(client);
@@ -333,6 +332,55 @@ export class ClientController {
       res.status(400).json({
         success: false,
         error: "Delete falhou: " + error.message,
+      });
+    }
+  }
+  async deleteCreditCard(req: Request, res: Response): Promise<void> {
+    try {
+      const {id} = req.params;
+
+      const creditCard = (await this.facade.findById("CreditCard", id)) as CreditCard;
+
+      if (!creditCard) {
+        res.status(404).json({ error: "Cartão de crédito não encontrado"});
+        return;
+      }
+
+      await this.facade.delete(creditCard);
+
+      res.json({
+        success: true,
+        message: "Cartão de crédito deletado com sucesso",
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        success: false,
+        error: "Delete falhou: " + error.message,
+      });
+    }
+  }
+
+  async deleteAddress(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+
+      const address = (await this.facade.findById("Address", id)) as Address;
+
+      if(!address) {
+        res.status(404).json({error: "Endereço não encontrado"});
+        return;
+      }
+
+      await this.facade.delete(address);
+
+      res.json({
+        success: true,
+        message: "Endereço deletado com sucesso",
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        success: false,
+        error: "Delete falhou " + error.message,
       });
     }
   }

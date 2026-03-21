@@ -140,9 +140,6 @@ export default class Facade implements IFacade<entity> {
         throw new Error("Cliente não encontrado");
       }
 
-      // ========================
-      // 🏠 ADDRESSES
-      // ========================
       if (entity.addresses) {
         const existing = client.addresses || [];
 
@@ -154,7 +151,7 @@ export default class Facade implements IFacade<entity> {
               return found;
             }
           }
-          return addr; // novo
+          return addr;
         });
 
         const incomingIds = entity.addresses
@@ -171,7 +168,7 @@ export default class Facade implements IFacade<entity> {
 
         client.addresses = updated;
       }
-      // 💳 CREDIT CARD (mesma lógica)
+
       if (entity.creditCard) {
         const existing = client.creditCard || [];
 
