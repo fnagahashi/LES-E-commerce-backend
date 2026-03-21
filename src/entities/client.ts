@@ -45,12 +45,14 @@ export default class Client extends entity {
   @OneToMany(() => Address, (address) => address.client, {
     cascade: true,
     eager: true,
+    orphanedRowAction: "delete",
   })
   addresses!: Address[];
 
   @OneToMany(() => CreditCard, (creditCard) => creditCard.client, {
     cascade: true,
     eager: true,
+    orphanedRowAction: "delete",
   })
   creditCard!: CreditCard[];
 

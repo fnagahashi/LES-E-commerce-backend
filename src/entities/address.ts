@@ -15,6 +15,9 @@ export default class Address extends entity {
   typeResidence!: string;
 
   @Column()
+  addressNickname!: string;
+
+  @Column()
   typeStreet!: string;
 
   @Column()
@@ -41,6 +44,12 @@ export default class Address extends entity {
   @Column({ nullable: true })
   obs: string;
 
+  @Column({ default: false })
+  isDeliveryAddress: boolean;
+
+  @Column({ default: false })
+  isBillingAddress: boolean;
+
   @ManyToOne(() => Client, (client) => client.addresses)
   client: Client;
 
@@ -52,6 +61,7 @@ export default class Address extends entity {
 
   constructor(
     typeResidence: string,
+    addressNickname: string,
     typeStreet: string,
     cep: string,
     street: string,
@@ -61,10 +71,13 @@ export default class Address extends entity {
     state: string,
     country: string,
     obs: string,
+    isDeliveryAddress: boolean,
+    isBillingAddress: boolean,
     client?: Client,
   ) {
     super();
     this.typeResidence = typeResidence;
+    this.addressNickname = addressNickname;
     this.typeStreet = typeStreet;
     this.cep = cep;
     this.street = street;
@@ -74,6 +87,8 @@ export default class Address extends entity {
     this.state = state;
     this.country = country;
     this.obs = obs;
+    this.isDeliveryAddress = isDeliveryAddress;
+    this.isBillingAddress = isBillingAddress;
     if (client) {
       this.client = client;
     }

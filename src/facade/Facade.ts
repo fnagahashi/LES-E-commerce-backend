@@ -14,6 +14,7 @@ import ValidationPassword from "../strategy/client/ValidationPassword";
 import Client from "../entities/client";
 import EncryptPassword from "../strategy/client/EncryptPassword";
 import { EncryptionUtil } from "../utils/encryption";
+import CreditCardDAO from "../DAO/Interface/CreditCardDAO";
 
 export default class Facade implements IFacade<entity> {
   private readonly entityDAOMap: Map<string, IDAO<entity>>;
@@ -31,11 +32,13 @@ export default class Facade implements IFacade<entity> {
   constructor(
     private readonly clientDAO: ClientDAO,
     private readonly addressDAO: AddressDAO,
+    private readonly creditCardDAO: CreditCardDAO,
     private readonly logDAO: LogDAO,
   ) {
     this.entityDAOMap = new Map<string, IDAO<entity>>();
     this.entityDAOMap.set("Client", this.clientDAO);
     this.entityDAOMap.set("Address", this.addressDAO);
+    this.entityDAOMap.set("CreditCard", this.creditCardDAO);
     this.entityDAOMap.set("Log", this.logDAO);
     this.strategyMap = new Map<string, Array<IStrategy<entity>>>();
     this.initializeStrategies();
@@ -125,6 +128,84 @@ export default class Facade implements IFacade<entity> {
     console.log("DAO encontrado para atualização:", entidadeDAO);
     if (!entidadeDAO) {
       throw new Error(`DAO não encontrado para entidade: ${entityName}`);
+    }
+    if (entityName === "Client") {
+      const clientDAO = this.clientDAO;
+      const addressDAO = this.addressDAO;
+      const creditCardDAO = this.creditCardDAO;
+
+      const client = (await clientDAO.findById(entity.id)) as Client;
+
+      if (!client) {
+        throw new Error("Cliente não encontrado");
+      }
+
+      // ========================
+      // 🏠 ADDRESSES
+      // ========================
+      if (entity.addresses) {
+        const existing = client.addresses || [];
+
+        const updated = entity.addresses.map((addr: any) => {
+          if (addr.id) {
+            const found = existing.find((a) => a.id === addr.id);
+            if (found) {
+              Object.assign(found, addr);
+              return found;
+            }
+          }
+          return addr; // novo
+        });
+
+        const incomingIds = entity.addresses
+          .filter((a: any) => a.id)
+          .map((a: any) => a.id);
+
+        const toRemove = existing.filter((a) => !incomingIds.includes(a.id));
+
+        if (toRemove.length > 0) {
+          for (const addr of toRemove) {
+            await addressDAO.delete(addr);
+          }
+        }
+
+        client.addresses = updated;
+      }
+      // 💳 CREDIT CARD (mesma lógica)
+      if (entity.creditCard) {
+        const existing = client.creditCard || [];
+
+        const updated = entity.creditCard.map((card: any) => {
+          if (card.id) {
+            const found = existing.find((c) => c.id === card.id);
+            if (found) {
+              Object.assign(found, card);
+              return found;
+            }
+          }
+          return card;
+        });
+
+        const incomingIds = entity.creditCard
+          .filter((c: any) => c.id)
+          .map((c: any) => c.id);
+
+        const toRemove = existing.filter((c) => !incomingIds.includes(c.id));
+
+        for (const card of toRemove) {
+          await creditCardDAO.delete(card);
+        }
+
+        client.creditCard = updated;
+      }
+
+      Object.assign(client, entity);
+
+      const updatedClient = await clientDAO.update(client);
+
+      await this.gerarLog(updatedClient, "atualizado");
+
+      return updatedClient;
     }
 
     const entidadeAtualizada = await entidadeDAO.update(entity);

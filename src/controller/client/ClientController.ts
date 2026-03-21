@@ -32,6 +32,7 @@ export class ClientController {
         (addr: Address) =>
           new Address(
             addr.typeResidence,
+            addr.addressNickname,
             addr.typeStreet,
             addr.cep,
             addr.street,
@@ -41,6 +42,8 @@ export class ClientController {
             addr.state,
             addr.country,
             addr.obs,
+            addr.isDeliveryAddress,
+            addr.isBillingAddress,
           ),
       );
 
@@ -50,8 +53,10 @@ export class ClientController {
             card.cardNumber,
             card.cardName,
             card.cardExpirationDate,
+            card.cardHolderName,
             card.cardFlag,
             card.securityCode,
+            card.isMainCard,
           ),
       );
 
@@ -94,6 +99,7 @@ export class ClientController {
         email,
       } as Client)) as Client[];
       const client = clients[0];
+      const { password: _, ...clientSafe } = client;
 
       if (!client) {
         res.status(401).json({
@@ -118,6 +124,7 @@ export class ClientController {
       res.json({
         success: true,
         token,
+        user: clientSafe,
       });
     } catch (error: any) {
       res.status(400).json({
@@ -195,7 +202,8 @@ export class ClientController {
     try {
       const { id } = req.params;
       const updateData = req.body;
-      console.log(`🔄 Atualizando Cliente ID: ${id} com dados:`, updateData);
+
+      console.log(`🔄 Atualizando Cliente ID: ${id}`, updateData);
 
       const client = await this.facade.findById("Client", id);
 
@@ -204,42 +212,9 @@ export class ClientController {
         return;
       }
 
-      if (updateData.addresses && Array.isArray(updateData.addresses)) {
-        updateData.addresses = updateData.addresses.map(
-          (addr: any) =>
-            new Address(
-              addr.typeResidence,
-              addr.typeStreet,
-              addr.cep,
-              addr.street,
-              addr.neighborhood,
-              addr.number,
-              addr.city,
-              addr.state,
-              addr.country,
-              addr.obs,
-            ),
-        );
-      }
+      // só mescla dados simples
+      Object.assign(client, updateData);
 
-      if (updateData.creditCard && Array.isArray(updateData.creditCard)) {
-        updateData.creditCard = updateData.creditCard.map(
-          (card: any) =>
-            new CreditCard(
-              card.cardName,
-              card.cardNumber,
-              card.cardExpirationDate,
-              card.cardFlag,
-              card.securityCode,
-            ),
-        );
-      }
-
-      Object.assign(client, {
-        ...updateData,
-        addresses: updateData.addresses || client.addresses,
-        creditCard: updateData.creditCard || client.creditCard,
-      });
       const clientUpdated = await this.facade.update(client);
 
       res.json({

@@ -18,13 +18,13 @@ export default class AddressDAO implements IDAO<Address> {
   }
 
   async update(address: Address): Promise<Address> {
-          const addressExists = await this.findById(address.id);
-      if (!addressExists) {
-        throw new Error("Endereço não encontrado");
-      }
-      const updatedAddress = this.repository.merge(addressExists[0], address);
-          return await this.repository.save(updatedAddress);
-      }
+    const addressExists = await this.findById(address.id);
+    if (!addressExists) {
+      throw new Error("Endereço não encontrado");
+    }
+    const updatedAddress = this.repository.merge(addressExists[0], address);
+    return await this.repository.save(updatedAddress);
+  }
 
   async findAll(): Promise<Address[]> {
     return this.repository.find();
@@ -32,7 +32,7 @@ export default class AddressDAO implements IDAO<Address> {
 
   async findById(id: string): Promise<Address | null> {
     return this.repository.findOne({
-      where:{id},
+      where: { id },
     });
   }
 
