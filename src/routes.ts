@@ -34,6 +34,12 @@ export const createRouter = () => {
   router.get("/clients/search", ensureAuthenticated, (req, res) =>
     clientController.findByFilters(req, res),
   );
+  router.patch("/clients/:id/", ensureAuthenticated, (req, res) =>
+    clientController.deleteCreditCard(req, res),
+  );
+  router.patch("/clients/:id", ensureAuthenticated, (req, res) =>
+    clientController.deleteAddress(req, res),
+  );
   router.put("/clients/:id", ensureAuthenticated, (req, res) =>
     clientController.update(req, res),
   );

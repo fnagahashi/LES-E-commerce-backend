@@ -39,10 +39,6 @@ export default class ValidationRequiredClientFields
       errors.push("Senha é obrigatória");
     }
 
-    // if(!client.confirmPassword.trim() || client.confirmPassword !== client.password) {
-    //   errors.push("A senhas não coincidem")
-    // }
-
     if (!client.addresses || client.addresses.length === 0) {
       errors.push("Pelo menos um endereço é obrigatório");
     }

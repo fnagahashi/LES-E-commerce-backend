@@ -26,4 +26,11 @@ export default class ValidationPassword implements IStrategy<Client> {
 
     return errors.length > 0 ? errors.join(", ") : undefined;
   }
+  // if (!client.confirmPassword.trim() || !client.confirmPassword) {
+  //     errors.push("Confirmação de senha é obrigatória");
+  // }
+
+  // if (client.password !== client.confirmPassword) {
+  //     errors.push("As senhas não coincidem");
+  // }
 }
