@@ -69,7 +69,7 @@ export const createRouter = () => {
       timestamp: new Date().toISOString(),
       version: "1.0.0",
       endpoints: {
-        clients: "/api/clients",
+        clients: "/clients",
       },
     });
   });
