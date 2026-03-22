@@ -279,16 +279,19 @@ export default class Facade implements IFacade<entity> {
   }
 
   public async findAll(entityName: string): Promise<entity[]> {
-    console.log("entityName:", entityName);
-    console.log("DAO encontrado:", entityName);
     const entidadeDAO = this.entityDAOMap.get(entityName);
-    console.log("Tem findAll?:", entidadeDAO?.findAll);
 
     if (!entidadeDAO) {
       throw new Error(`DAO não encontrado para entidade: ${entityName}`);
     }
 
-    const entidades = await entidadeDAO.findAll();
+    let entidades;
+
+    if (entityName === "Client") {
+      entidades = await (entidadeDAO as any).findByRole("CLIENT");
+    } else {
+      entidades = await entidadeDAO.findAll();
+    }
 
     if (entidades.length > 0) {
       await this.gerarLog(entidades[0], "listado");
