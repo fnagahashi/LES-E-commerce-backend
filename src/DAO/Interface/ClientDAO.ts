@@ -81,4 +81,26 @@ export default class ClientDAO implements IDAO<Client> {
     }
     return query.getMany();
   }
+  async findBySearch(search: string): Promise<Client[]> {
+    const query = this.repository
+      .createQueryBuilder("client")
+      .leftJoinAndSelect("client.addresses", "address")
+      .leftJoinAndSelect("client.creditCard", "creditCard");
+    query.andWhere("client.role = :role", {
+      role: "CLIENT",
+    });
+    if (search && search.trim() !== "") {
+      query.andWhere(
+        `(
+        client.name ILIKE :search OR
+        client.email ILIKE :search OR
+        client.cpf ILIKE :search OR
+        client.phoneNumber ILIKE :search
+      )`,
+        { search: `%${search.trim()}%` },
+      );
+    }
+
+    return query.getMany();
+  }
 }

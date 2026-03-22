@@ -26,7 +26,7 @@ export const createRouter = () => {
 
   router.post("/clients", (req, res) => clientController.create(req, res));
   router.get("/clients", ensureAuthenticated, ensureAdmin, (req, res) =>
-    clientController.findAll(req, res),
+    clientController.find(req, res),
   );
   router.get("/clients/:id", ensureAuthenticated, (req, res) =>
     clientController.findById(req, res),

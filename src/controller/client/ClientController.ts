@@ -136,7 +136,27 @@ export class ClientController {
       });
     }
   }
+  async find(req: Request, res: Response): Promise<void> {
+    try {
+      const search =
+        typeof req.query.search === "string" ? req.query.search : "";
 
+      const clients = search
+        ? await this.facade.findBySearch("Client", search)
+        : await this.facade.findAll("Client");
+
+      res.json({
+        success: true,
+        count: clients.length,
+        clients,
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        success: false,
+        error: error.message,
+      });
+    }
+  }
   async findAll(req: Request, res: Response): Promise<void> {
     try {
       console.log("facade:", this.facade);
@@ -337,12 +357,15 @@ export class ClientController {
   }
   async deleteCreditCard(req: Request, res: Response): Promise<void> {
     try {
-      const {id} = req.params;
+      const { id } = req.params;
 
-      const creditCard = (await this.facade.findById("CreditCard", id)) as CreditCard;
+      const creditCard = (await this.facade.findById(
+        "CreditCard",
+        id,
+      )) as CreditCard;
 
       if (!creditCard) {
-        res.status(404).json({ error: "Cartão de crédito não encontrado"});
+        res.status(404).json({ error: "Cartão de crédito não encontrado" });
         return;
       }
 
@@ -366,8 +389,8 @@ export class ClientController {
 
       const address = (await this.facade.findById("Address", id)) as Address;
 
-      if(!address) {
-        res.status(404).json({error: "Endereço não encontrado"});
+      if (!address) {
+        res.status(404).json({ error: "Endereço não encontrado" });
         return;
       }
 
@@ -381,6 +404,25 @@ export class ClientController {
       res.status(400).json({
         success: false,
         error: "Delete falhou " + error.message,
+      });
+    }
+  }
+  async findBySearch(req: Request, res: Response): Promise<void> {
+    try {
+      const search =
+        typeof req.query.search === "string" ? req.query.search : "";
+
+      const clients = await this.facade.findBySearch("Client", search);
+
+      res.json({
+        success: true,
+        count: clients.length,
+        clients,
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        success: false,
+        error: error.message,
       });
     }
   }

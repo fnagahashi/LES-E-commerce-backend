@@ -333,4 +333,20 @@ export default class Facade implements IFacade<entity> {
 
     return entidades;
   }
+  public async findBySearch(
+    entityName: string,
+    search: string,
+  ): Promise<entity[]> {
+    const entidadeDAO = this.entityDAOMap.get(entityName);
+
+    if (!entidadeDAO) {
+      throw new Error(`DAO não encontrado para entidade: ${entityName}`);
+    }
+
+    if (!entidadeDAO.findBySearch) {
+      throw new Error(`Busca não suportada para entidade: ${entityName}`);
+    }
+
+    return await entidadeDAO.findBySearch(search);
+  }
 }
