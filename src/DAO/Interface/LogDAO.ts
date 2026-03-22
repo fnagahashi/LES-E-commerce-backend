@@ -31,10 +31,13 @@ export default class LogDAO implements IDAO<Log> {
   }
 
   async findByFilters(filters: Partial<Log>): Promise<Log[]> {
-      return this.repository.find();
+    return this.repository.find();
   }
 
   async delete(log: Log): Promise<void> {
     await this.repository.delete(log.id);
+  }
+  async findBySearch(search: string): Promise<Log[]> {
+    return this.repository.find();
   }
 }

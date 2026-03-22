@@ -39,4 +39,8 @@ export default class AddressDAO implements IDAO<Address> {
   async findByFilters(filters: Partial<Address>): Promise<Address[]> {
     return this.repository.find();
   }
+
+  async findBySearch(search: string): Promise<Address[]> {
+    return this.repository.find();
+  }
 }

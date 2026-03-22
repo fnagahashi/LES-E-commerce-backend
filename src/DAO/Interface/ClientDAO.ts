@@ -1,6 +1,7 @@
 import { DataSource, Like, Repository } from "typeorm";
 import Client from "../../entities/client";
 import IDAO from "../IDAO";
+import { Role } from "../../enum/Role";
 
 export default class ClientDAO implements IDAO<Client> {
   private repository: Repository<Client>;
@@ -20,6 +21,12 @@ export default class ClientDAO implements IDAO<Client> {
   async findById(id: string): Promise<Client | null> {
     return this.repository.findOne({
       where: { id },
+    });
+  }
+
+  async findByRole(role: Role): Promise<Client[]> {
+    return this.repository.find({
+      where: { role },
     });
   }
 
@@ -72,6 +79,28 @@ export default class ClientDAO implements IDAO<Client> {
         isActive: filters.isActive,
       });
     }
+    return query.getMany();
+  }
+  async findBySearch(search: string): Promise<Client[]> {
+    const query = this.repository
+      .createQueryBuilder("client")
+      .leftJoinAndSelect("client.addresses", "address")
+      .leftJoinAndSelect("client.creditCard", "creditCard");
+    query.andWhere("client.role = :role", {
+      role: "CLIENT",
+    });
+    if (search && search.trim() !== "") {
+      query.andWhere(
+        `(
+        client.name ILIKE :search OR
+        client.email ILIKE :search OR
+        client.cpf ILIKE :search OR
+        client.phoneNumber ILIKE :search
+      )`,
+        { search: `%${search.trim()}%` },
+      );
+    }
+
     return query.getMany();
   }
 }

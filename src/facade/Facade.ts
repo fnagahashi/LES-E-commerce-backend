@@ -286,16 +286,19 @@ export default class Facade implements IFacade<entity> {
   }
 
   public async findAll(entityName: string): Promise<entity[]> {
-    console.log("entityName:", entityName);
-    console.log("DAO encontrado:", entityName);
     const entidadeDAO = this.entityDAOMap.get(entityName);
-    console.log("Tem findAll?:", entidadeDAO?.findAll);
 
     if (!entidadeDAO) {
       throw new Error(`DAO não encontrado para entidade: ${entityName}`);
     }
 
-    const entidades = await entidadeDAO.findAll();
+    let entidades;
+
+    if (entityName === "Client") {
+      entidades = await (entidadeDAO as any).findByRole("CLIENT");
+    } else {
+      entidades = await entidadeDAO.findAll();
+    }
 
     if (entidades.length > 0) {
       await this.gerarLog(entidades[0], "listado");
@@ -336,5 +339,21 @@ export default class Facade implements IFacade<entity> {
     const entidades = await entidadeDAO.findByFilters(filters);
 
     return entidades;
+  }
+  public async findBySearch(
+    entityName: string,
+    search: string,
+  ): Promise<entity[]> {
+    const entidadeDAO = this.entityDAOMap.get(entityName);
+
+    if (!entidadeDAO) {
+      throw new Error(`DAO não encontrado para entidade: ${entityName}`);
+    }
+
+    if (!entidadeDAO.findBySearch) {
+      throw new Error(`Busca não suportada para entidade: ${entityName}`);
+    }
+
+    return await entidadeDAO.findBySearch(search);
   }
 }

@@ -41,4 +41,7 @@ export default class CreditCardDAO implements IDAO<CreditCard> {
   async findByFilters(filters: Partial<CreditCard>): Promise<CreditCard[]> {
     return this.repository.find();
   }
+  async findBySearch(search: string): Promise<CreditCard[]> {
+    return this.repository.find();
+  }
 }

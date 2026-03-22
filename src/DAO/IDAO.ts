@@ -5,4 +5,5 @@ export default interface IDAO<entity> {
   findById(id: string): Promise<entity>;
   findAll(): Promise<entity[]>;
   findByFilters(filters: Partial<entity>): Promise<entity[]>;
+  findBySearch(search: string): Promise<entity[]>;
 }

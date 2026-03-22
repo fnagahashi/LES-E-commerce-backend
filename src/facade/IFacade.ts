@@ -8,4 +8,5 @@ export default interface IFacade<T> {
   findById(entity: string, id: string): Promise<entity>;
   findAll(entity: string): Promise<entity[]>;
   findByFilters(entity: string, filters: Partial<entity>): Promise<entity[]>;
+  findBySearch(entity: string, search: string): Promise<entity[]>;
 }
