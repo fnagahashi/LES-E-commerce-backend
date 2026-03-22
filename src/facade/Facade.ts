@@ -143,6 +143,13 @@ export default class Facade implements IFacade<entity> {
       if (entity.addresses) {
         const existing = client.addresses || [];
 
+        entity.addresses = entity.addresses.map((addr: any) => {
+          if (!addr.id || addr.id === "") {
+            delete addr.id;
+          }
+          return addr;
+        });
+
         const updated = entity.addresses.map((addr: any) => {
           if (addr.id) {
             const found = existing.find((a) => a.id === addr.id);

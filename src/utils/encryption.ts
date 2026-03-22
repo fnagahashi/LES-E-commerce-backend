@@ -9,6 +9,7 @@ export class EncryptionUtil {
 
 
   static async comparar(password: string, passwordEncryption: string): Promise<boolean> {
-    return await bcrypt.compare(password, passwordEncryption);
+    await bcrypt.compare(password, passwordEncryption);
+    return;
   }
 }
