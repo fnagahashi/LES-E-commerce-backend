@@ -1,8 +1,10 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne } from "typeorm";
 import entity from "./entity";
 import Client from "./client";
 import { OrderStatus } from "../enum/OrderStatus";
 import OrderItem from "./orderItem";
+import Payment from "./payment";
+import Delivery from "./delivery";
 
 @Entity("order")
 export default class Order extends entity {
@@ -10,8 +12,15 @@ export default class Order extends entity {
   @JoinColumn({ name: "clientId" })
   client: Client;
 
-  @OneToMany(() => OrderItem, (orderItem) => orderItem.order)
+  @OneToMany(() => OrderItem, (orderItem) => orderItem.order, { cascade: true })
   orderItems: OrderItem[];
+
+  @OneToMany(() => Payment, (payment) => payment.order, { cascade: true })
+  payment: Payment[];
+
+  @OneToOne(() => Delivery, (delivery) => delivery.order, { cascade: true })
+  @JoinColumn()
+  delivery: Delivery;
 
   @Column()
   orderDate: Date;

@@ -9,7 +9,7 @@ export default class OrderItem extends entity {
   @JoinColumn({ name: "orderId" })
   order: Order;
 
-  @OneToOne(() => Book)
+  @ManyToOne(() => Book)
   @JoinColumn({ name: "bookId" })
   book: Book;
 

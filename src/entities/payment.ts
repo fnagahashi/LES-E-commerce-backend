@@ -1,19 +1,52 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne } from "typeorm";
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+} from "typeorm";
 import entity from "./entity";
 import Order from "./order";
 import CreditCard from "./creditCard";
+import { PaymentStatus } from "../enum/PaymentStatus";
+import { PaymentMethod } from "../enum/PaymentMethod";
+import Cupom from "./cupom";
 
 @Entity("payment")
 export default class Payment extends entity {
-    @OneToOne(() => Order) 
-    @JoinColumn({ name: "orderId" })
-      order: Order;
+  @ManyToOne(() => Order, (order) => order.payment)
+  order: Order;
 
-    @OneToMany(() => CreditCard, (creditCard) => creditCard.payment)
-    creditCard: CreditCard[];
+  @ManyToOne(() => CreditCard, { nullable: true })
+  creditCard?: CreditCard;
 
-    @Column()
-    paymentValue: string
+  @ManyToOne(() => Cupom, { nullable: true })
+  cupom?: Cupom;
 
-    @Column
+  @Column()
+  paymentMethod: PaymentMethod;
+
+  @Column()
+  paymentValue: string;
+
+  @Column()
+  paymentStatus: PaymentStatus;
+
+  constructor(
+    order: Order,
+    creditCard: CreditCard,
+    cupom: Cupom,
+    paymentMethod: PaymentMethod,
+    paymentValue: string,
+    paymentStatus: PaymentStatus,
+  ) {
+    super();
+    this.order = order;
+    this.creditCard = creditCard;
+    this.cupom = cupom;
+    this.paymentMethod = paymentMethod;
+    this.paymentValue = paymentValue;
+    this.paymentStatus = paymentStatus;
+  }
 }

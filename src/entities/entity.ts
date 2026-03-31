@@ -1,9 +1,6 @@
-import { PrimaryGeneratedColumn, Column } from "typeorm";
+import { PrimaryGeneratedColumn } from "typeorm";
 
 export default abstract class entity {
     @PrimaryGeneratedColumn("uuid")
     id!: string;
-  addresses: any;
-  creditCard: any;
-
 }
