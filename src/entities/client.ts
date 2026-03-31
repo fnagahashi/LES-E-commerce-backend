@@ -13,6 +13,7 @@ import entity from "./entity";
 import CreditCard from "./creditCard";
 import { Gender } from "../enum/Gender";
 import { Role } from "../enum/Role";
+import Order from "./order";
 
 @Entity("client")
 export default class Client extends entity {
@@ -65,6 +66,9 @@ export default class Client extends entity {
 
   @Column({ type: "boolean", default: true })
   isActive: boolean;
+
+  @OneToMany(() => Order, (order) => order.client)
+  order: Order[];
 
   @DeleteDateColumn()
   deletedAt?: Date;

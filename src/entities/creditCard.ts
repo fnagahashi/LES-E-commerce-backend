@@ -9,6 +9,7 @@ import {
 import entity from "./entity";
 import Client from "./client";
 import { CardsFlags } from "../enum/CardsFlags";
+import Payment from "./payment";
 
 @Entity("creditCard")
 export default class CreditCard extends entity {
@@ -35,6 +36,9 @@ export default class CreditCard extends entity {
 
   @ManyToOne(() => Client, (client) => client.creditCard)
   client: Client;
+
+  @ManyToOne(() => Payment, (payment) => payment.creditCard)
+  payment: Payment;
 
   @CreateDateColumn()
   created_at!: Date;

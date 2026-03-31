@@ -3,7 +3,6 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
-  OneToMany,
   UpdateDateColumn,
 } from "typeorm";
 import Client from "./client";
