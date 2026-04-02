@@ -15,6 +15,31 @@ import Client from "../entities/client";
 import EncryptPassword from "../strategy/client/EncryptPassword";
 import { EncryptionUtil } from "../utils/encryption";
 import CreditCardDAO from "../DAO/Interface/CreditCardDAO";
+import OrderDAO from "../DAO/Interface/OrderDAO";
+import PaymentDAO from "../DAO/Interface/PaymentDAO";
+import ValidationOrderRequiredFields from "../strategy/order/ValidationOrderRequiredFields";
+import StockDAO from "../DAO/Interface/StockDAO";
+import ValidationStock from "../strategy/order/ValidationStock";
+import ValidationRequiredFields from "../strategy/payment/ValidationRequiredFields";
+import CalculatedTotalOrder from "../strategy/payment/CalculatedTotalOrder";
+import ValidationTotalValue from "../strategy/payment/ValidationTotalValue";
+import ValidationCreditCard from "../strategy/payment/ValidationCreditCard";
+import ValidationCupom from "../strategy/payment/ValidationCupom";
+import ValidationPaymentExcess from "../strategy/payment/ValidationPaymentExcess";
+import ValidateMinValuePerCardStrategy from "../strategy/payment/ValidateMinValuePerCard";
+import ValidateCouponAndCardCombinationStrategy from "../strategy/payment/ValidateCouponAndCardCombination";
+import ProcessPaymentStatusStrategy from "../strategy/payment/ProcessPaymentStatus";
+import DecreaseStockStrategy from "../strategy/order/DecreaseStock";
+import ValidateExchangeRequestStrategy from "../strategy/order/ValidateExchangeRequest";
+import RequestExchangeStrategy from "../strategy/order/RequestExchange";
+import AuthorizeExchangeStrategy from "../strategy/order/AuthorizeExchange";
+import RestockFromReturnStrategy from "../strategy/order/RestockFromReturn";
+import GenerateCouponFromExchangeStrategy from "../strategy/order/GenerateCouponFromExchange";
+import ConfirmReturnStrategy from "../strategy/order/ConfirmExchange";
+import SetOrderInProcessingStrategy from "../strategy/order/SetOrderInProcessing";
+import ApproveOrderStrategy from "../strategy/order/ApprovedOrder";
+import ShipOrderStrategy from "../strategy/order/ShipOrder";
+import DeliverOrderStrategy from "../strategy/order/ConfirmDelivery";
 
 export default class Facade implements IFacade<entity> {
   private readonly entityDAOMap: Map<string, IDAO<entity>>;
@@ -33,12 +58,16 @@ export default class Facade implements IFacade<entity> {
     private readonly clientDAO: ClientDAO,
     private readonly addressDAO: AddressDAO,
     private readonly creditCardDAO: CreditCardDAO,
+    private readonly orderDAO: OrderDAO,
+    private readonly paymentDAO: PaymentDAO,
+    private readonly stockDAO: StockDAO,
     private readonly logDAO: LogDAO,
   ) {
     this.entityDAOMap = new Map<string, IDAO<entity>>();
     this.entityDAOMap.set("Client", this.clientDAO);
     this.entityDAOMap.set("Address", this.addressDAO);
     this.entityDAOMap.set("CreditCard", this.creditCardDAO);
+    this.entityDAOMap.set("Order", this.orderDAO);
     this.entityDAOMap.set("Log", this.logDAO);
     this.strategyMap = new Map<string, Array<IStrategy<entity>>>();
     this.initializeStrategies();
@@ -64,6 +93,43 @@ export default class Facade implements IFacade<entity> {
       new ValidationRequiredAddressFields(),
       new ValidationCEP(),
     ] as Array<IStrategy<entity>>);
+
+    this.strategyMap.set("OrderCreate", [
+      new ValidationOrderRequiredFields(),
+      new ValidationStock(this.stockDAO),
+      new ValidateMinValuePerCardStrategy(),
+      new ValidateCouponAndCardCombinationStrategy(),
+      new ProcessPaymentStatusStrategy(),
+      new SetOrderInProcessingStrategy(),
+    ] as Array<IStrategy<entity>>);
+
+    this.strategyMap.set("OrderApproved", [
+      new ApproveOrderStrategy(),
+      new DecreaseStockStrategy(this.stockDAO),
+    ]);
+
+    this.strategyMap.set("OrderShip", [
+      new ShipOrderStrategy(),
+    ]);
+
+    this.strategyMap.set("OrderDeliver", [
+      new DeliverOrderStrategy(),
+    ])
+
+    this.strategyMap.set("OrderRequestExchange", [
+      new ValidateExchangeRequestStrategy(),
+      new RequestExchangeStrategy(),
+    ] as Array<IStrategy<entity>>);
+
+    this.strategyMap.set("OrderAuthorizeExchange", [
+      new AuthorizeExchangeStrategy(),
+    ]);
+
+    this.strategyMap.set("OrderConfirmReturn", [
+      new ConfirmReturnStrategy(),
+      new RestockFromReturnStrategy(this.stockDAO),
+      new GenerateCouponFromExchangeStrategy(),
+    ]);
 
     this.strategyMap.set("CreditCard", [new ValidateCreditCardFlag()] as Array<
       IStrategy<entity>
@@ -130,6 +196,7 @@ export default class Facade implements IFacade<entity> {
       throw new Error(`DAO não encontrado para entidade: ${entityName}`);
     }
     if (entityName === "Client") {
+      const clientEntity = entity as Client;
       const clientDAO = this.clientDAO;
       const addressDAO = this.addressDAO;
       const creditCardDAO = this.creditCardDAO;
@@ -140,17 +207,17 @@ export default class Facade implements IFacade<entity> {
         throw new Error("Cliente não encontrado");
       }
 
-      if (entity.addresses) {
+      if (clientEntity.addresses) {
         const existing = client.addresses || [];
 
-        entity.addresses = entity.addresses.map((addr: any) => {
+        clientEntity.addresses = clientEntity.addresses.map((addr: any) => {
           if (!addr.id || addr.id === "") {
             delete addr.id;
           }
           return addr;
         });
 
-        const updated = entity.addresses.map((addr: any) => {
+        const updated = clientEntity.addresses.map((addr: any) => {
           if (addr.id) {
             const found = existing.find((a) => a.id === addr.id);
             if (found) {
@@ -161,7 +228,7 @@ export default class Facade implements IFacade<entity> {
           return addr;
         });
 
-        const incomingIds = entity.addresses
+        const incomingIds = clientEntity.addresses
           .filter((a: any) => a.id)
           .map((a: any) => a.id);
 
@@ -176,10 +243,10 @@ export default class Facade implements IFacade<entity> {
         client.addresses = updated;
       }
 
-      if (entity.creditCard) {
+      if (clientEntity.creditCard) {
         const existing = client.creditCard || [];
 
-        const updated = entity.creditCard.map((card: any) => {
+        const updated = clientEntity.creditCard.map((card: any) => {
           if (card.id) {
             const found = existing.find((c) => c.id === card.id);
             if (found) {
@@ -190,7 +257,7 @@ export default class Facade implements IFacade<entity> {
           return card;
         });
 
-        const incomingIds = entity.creditCard
+        const incomingIds = clientEntity.creditCard
           .filter((c: any) => c.id)
           .map((c: any) => c.id);
 
@@ -217,6 +284,148 @@ export default class Facade implements IFacade<entity> {
     await this.gerarLog(entidadeAtualizada, "atualizado");
 
     return entidadeAtualizada;
+  }
+
+  private async executeStrategies(key: string, entity: entity): Promise<void> {
+    const strategies = this.strategyMap.get(key) || [];
+
+    let msg = "";
+
+    for (const strategy of strategies) {
+      const result = await strategy.executar(entity);
+
+      if (result) {
+        msg += result + " ";
+      }
+    }
+
+    if (msg) {
+      throw new Error(msg.trim());
+    }
+  }
+
+  public async approveOrder(order: entity): Promise<entity> {
+    const entityName = order.constructor.name;
+
+    if (entityName !== "Order") {
+      throw new Error("Operação válida apenas para pedidos");
+    }
+    await this.executeStrategies("OrderApprove", order);
+
+    const orderDAO = this.entityDAOMap.get("Order");
+
+    if (!orderDAO) {
+      throw new Error("DAO não encontrado");
+    }
+
+    const updated = await orderDAO.update(order);
+
+    await this.gerarLog(updated, "pedido aprovado");
+
+    return updated;
+  }
+
+  public async shipOrder(order: entity): Promise<entity> {
+    const entityName = order.constructor.name;
+
+    if (entityName !== "Order") {
+      throw new Error("Operação válida apenas para pedidos");
+    }
+
+    await this.executeStrategies("OrderShip", order);
+
+    const dao = this.entityDAOMap.get("Order");
+
+    if (!dao) throw new Error("DAO não encontrado");
+
+    const updated = await dao.update(order);
+
+    await this.gerarLog(updated, "pedido enviado");
+
+    return updated;
+  }
+
+  public async deliverOrder(order: entity): Promise<entity> {
+    const entityName = order.constructor.name;
+
+    if (entityName !== "Order") {
+      throw new Error("Operação válida apenas para pedidos");
+    }
+    await this.executeStrategies("OrderDeliver", order);
+
+    const dao = this.entityDAOMap.get("Order");
+
+    if (!dao) throw new Error("DAO não encontrado");
+
+    const updated = await dao.update(order);
+
+    await this.gerarLog(updated, "pedido entregue");
+
+    return updated;
+  }
+
+  public async requestExchange(order: entity): Promise<entity> {
+    const entityName = order.constructor.name;
+
+    if (entityName !== "Order") {
+      throw new Error("Operação válida apenas para pedidos");
+    }
+
+    await this.executeStrategies("OrderRequestExchange", order);
+
+    const orderDAO = this.entityDAOMap.get("Order");
+
+    if (!orderDAO) {
+      throw new Error("DAO não encontrado para Order");
+    }
+
+    const updatedOrder = await orderDAO.update(order);
+    await this.gerarLog(updatedOrder, "Solicitou Troca");
+
+    return updatedOrder;
+  }
+
+  public async authorizeExchange(order: entity): Promise<entity> {
+    const entityName = order.constructor.name;
+
+    if (entityName !== "Order") {
+      throw new Error("Operação válida apenas para pedidos");
+    }
+
+    await this.executeStrategies("OrderAuthorizeExchange", order);
+    const orderDAO = this.entityDAOMap.get("Order");
+
+    if (!orderDAO) {
+      throw new Error("DAO não encontrado para Order");
+    }
+
+    const updatedOrder = await orderDAO.update(order);
+
+    await this.gerarLog(updatedOrder, "Autorizou Troca");
+
+    return updatedOrder;
+  }
+
+  public async confirmReturn(order: entity): Promise<entity> {
+    const entityName = order.constructor.name;
+
+    if (entityName !== "Order") {
+      throw new Error("Operação válida apenas para pedidos");
+    }
+
+    await this.executeStrategies("OrderConfirmReturn", order);
+
+    const orderDAO = this.entityDAOMap.get("Order");
+
+    if (!orderDAO) {
+      throw new Error("DAO não encontrado para Order");
+    }
+
+    const updatedOrder = await orderDAO.update(order);
+
+    await this.gerarLog(updatedOrder, "confirmou retorno de troca");
+
+    return updatedOrder;
   }
 
   public async changePassword(

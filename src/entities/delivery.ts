@@ -4,17 +4,29 @@ import Order from "./order";
 import Address from "./address";
 
 @Entity("delivery")
-export default class Delivery extends entity{
+export default class Delivery extends entity {
+  @OneToOne(() => Order, (order) => order.delivery)
+  order: Order;
 
-    @OneToOne(() => Order, order => order.delivery)
-    order: Order
+  @ManyToOne(() => Address)
+  address: Address;
 
-    @ManyToOne(() => Address)
-    address: Address
+  @Column()
+  freightType: string;
 
-    @Column()
-    freightType: string
+  @Column()
+  freightValue: string;
 
-    @Column()
+  constructor(
+    order: Order,
+    address: Address,
+    freightType: string,
     freightValue: string
+  ) {
+    super();
+    this.order = order;
+    this.address = address;
+    this.freightType = freightType;
+    this.freightValue = freightValue;
+  }
 }

@@ -19,7 +19,7 @@ export default class Order extends entity {
   payment: Payment[];
 
   @OneToOne(() => Delivery, (delivery) => delivery.order, { cascade: true })
-  @JoinColumn()
+  @JoinColumn({name: "deliveryId"})
   delivery: Delivery;
 
   @Column()
@@ -37,6 +37,8 @@ export default class Order extends entity {
   constructor(
     client: Client,
     orderItems: OrderItem[],
+    payment: Payment[],
+    delivery: Delivery,
     orderDate: Date,
     totalPrice: string,
     freightValue: string,
@@ -45,6 +47,8 @@ export default class Order extends entity {
     super();
     this.client = client;
     this.orderItems = orderItems;
+    this.payment = payment;
+    this.delivery = delivery;
     this.orderDate = orderDate;
     this.totalPrice = totalPrice;
     this.freightValue = freightValue;

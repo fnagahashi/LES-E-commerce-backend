@@ -3,9 +3,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  ManyToOne,
   OneToMany,
-  PrimaryColumn,
   UpdateDateColumn,
 } from "typeorm";
 import Address from "./address";

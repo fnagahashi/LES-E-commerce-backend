@@ -7,6 +7,6 @@ export default class EncryptPassword implements IStrategy<Client> {
         if (client.password) {
             client.password = await EncryptionUtil.criptografar(client.password);
         }
-        return null;
+        return undefined;
     }
 }

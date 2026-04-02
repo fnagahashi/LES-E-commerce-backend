@@ -5,5 +5,6 @@ export enum OrderStatus {
     inTransportation = "inTransportation",
     delivered = "delivered",
     inExchange = "InExchange",
+    exchangeApproved = "exchangeApproved",
     exchanged = "exchanged"
 };

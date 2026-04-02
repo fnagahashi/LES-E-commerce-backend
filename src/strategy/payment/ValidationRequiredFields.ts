@@ -1,40 +1,14 @@
-// import IStrategy from "../IStrategy";
-// import Payment from "../../entities/payment";
+import IStrategy from "../IStrategy";
+import Order from "../../entities/order";
 
-// export default class ValidationRequiredPaymentFields
-//   implements IStrategy<Payment>
-// {
-//   async executar(payment: Payment): Promise<string | undefined> {
-//     const errors: string[] = [];
+export default class ValidationRequiredFields implements IStrategy<Order> {
+    async executar(order: Order): Promise<string | undefined> {
+        const errors: string[] = [];
 
-//     if (!payment.reservation) {
-//       errors.push("Reserva é obrigatória");
-//     }
+        if (!order.payment || order.payment.length === 0) {
+            errors.push("A venda deve possuir pelo menos um pagamento");
+        }
 
-//     if (payment.price === undefined || payment.price === null) {
-//       errors.push("Valor do pagamento é obrigatório");
-//     }
-
-//     if (!payment.paymentDate) {
-//       errors.push("Data do pagamento é obrigatória");
-//     }
-
-//     if (!payment.status?.trim()) {
-//       errors.push("Status do pagamento é obrigatório");
-//     } else {
-//       const statusValidos = [
-//         "pending",
-//         "approved",
-//         "denied",
-//         "refunded",
-//         "cancelled",
-//       ];
-//       if (!statusValidos.includes(payment.status.toLowerCase())) {
-//         errors.push(
-//           `Status do pagamento inválido. Status válidos: ${statusValidos.join(", ")}`
-//         );
-//       }
-//     }
-//     return errors.length > 0 ? errors.join(", ") : undefined;
-//   }
-// }
+        return errors.length > 0 ? errors.join(", ") : undefined;
+    }
+}

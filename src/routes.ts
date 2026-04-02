@@ -10,6 +10,9 @@ import LogDAO from "./DAO/Interface/LogDAO";
 import { ensureAuthenticated } from "./midleware/ensureAuthenticated";
 import { ensureAdmin } from "./midleware/ensureAdmin";
 import CreditCardDAO from "./DAO/Interface/CreditCardDAO";
+import OrderDAO from "./DAO/Interface/OrderDAO";
+import PaymentDAO from "./DAO/Interface/PaymentDAO";
+import StockDAO from "./DAO/Interface/StockDAO";
 
 export const createRouter = () => {
   const router = Router();
@@ -18,6 +21,9 @@ export const createRouter = () => {
     new ClientDAO(AppDataSource),
     new AddressDAO(AppDataSource),
     new CreditCardDAO(AppDataSource),
+    new OrderDAO(AppDataSource),
+    new PaymentDAO(AppDataSource),
+    new StockDAO(AppDataSource),
     new LogDAO(AppDataSource),
   );
 
@@ -61,6 +67,7 @@ export const createRouter = () => {
   router.delete("/clients/:id", ensureAuthenticated, (req, res) =>
     clientController.delete(req, res),
   );
+
 
   router.get("/health", (req, res) => {
     res.json({
