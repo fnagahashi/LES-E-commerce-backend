@@ -2,8 +2,10 @@ import IStrategy from "../IStrategy";
 import Order from "../../entities/order";
 import Cupom from "../../entities/cupom";
 import { CupomType } from "../../enum/CupomType";
+import CupomDAO from "../../DAO/Interface/CupomDAO";
 
 export default class GenerateCouponFromExchangeStrategy implements IStrategy<Order> {
+  constructor(private cupomDAO: CupomDAO) {}
   async executar(order: Order): Promise<string | undefined> {
     if (!order.orderItems) return;
 
@@ -16,10 +18,12 @@ export default class GenerateCouponFromExchangeStrategy implements IStrategy<Ord
       "TROCA-" + Date.now(),
       total.toString(),
       true,
-      CupomType.exchange
+      CupomType.exchange,
+      false,
+      order.client
     );
 
-    console.log("Cupom de troca gerado:", newCoupon);
+    await this.cupomDAO.create(newCoupon);
 
     return;
   }

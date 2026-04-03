@@ -1,15 +1,13 @@
-import { NextFunction, Response } from "express";
-import { AuthRequest } from "../DAO/Interface/AuthRequest";
+import { Request, Response, NextFunction } from "express";
 
-export function ensureAdmin(
-  request: AuthRequest,
-  response: Response,
-  next: NextFunction,
-): void {
-  if (request.role !== "ADMIN") {
-    response.status(403).json({
-      message: "Acesso negado: apenas administradores",
-    });
+export function ensureAdmin(req: Request, res: Response, next: NextFunction) {
+  if (!req.user) {
+    res.status(401).json({ error: "Não autenticado" })
+    return;
+  }
+
+  if (req.user.role !== "ADMIN") {
+    res.status(403).json({ error: "Acesso negado" })
     return;
   }
 

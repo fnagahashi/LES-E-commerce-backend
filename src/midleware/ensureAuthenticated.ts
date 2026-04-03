@@ -1,5 +1,4 @@
 import { verify } from "jsonwebtoken";
-import { AuthRequest } from "../DAO/Interface/AuthRequest";
 import { NextFunction, Request, Response } from "express";
 
 interface IPayload {
@@ -16,7 +15,7 @@ export function ensureAuthenticated(
   const authToken = request.headers.authorization;
 
   if (!authToken) {
-    response.status(401).end();
+    response.status(401).json({ message: "Token não informado" });
     return;
   }
 
@@ -25,14 +24,15 @@ export function ensureAuthenticated(
   try {
     const { email, id, role } = verify(token, "ecommerce") as IPayload;
 
-    const req = request as AuthRequest;
-
-    req.email = email;
-    req.id = id;
-    req.role = role;
+    request.user = {
+      id,
+      email,
+      role,
+    };
 
     next();
   } catch {
     response.status(401).json({ message: "Token inválido!" });
+    return;
   }
 }

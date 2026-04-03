@@ -25,6 +25,8 @@ export class ClientController {
         addresses = [],
         creditCard = [],
         isActive = true,
+        order = [],
+        cupons = [],
       } = req.body;
 
       console.log(`👤 Criando Cliente: ${name}`);
@@ -75,6 +77,8 @@ export class ClientController {
         clientAddresses,
         clientCreditCard,
         isActive,
+        order,
+        cupons,
       );
 
       const clientCreated = await this.facade.create(client);
@@ -193,6 +197,31 @@ export class ClientController {
       res.json({
         success: true,
         client,
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        success: false,
+        error: error.message,
+      });
+    }
+  }
+
+  async getCupons(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const client = await this.facade.findById("Client", id);
+
+      if (!client) {
+        res.status(404).json({ error: "Cliente nao encontrado" });
+        return;
+      }
+
+      const cupons = await this.facade.getCuponsByClient(id);
+
+      res.json({
+        success: true,
+        count: cupons.length,
+        cupons,
       });
     } catch (error: any) {
       res.status(400).json({

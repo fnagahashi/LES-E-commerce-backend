@@ -40,10 +40,15 @@ import SetOrderInProcessingStrategy from "../strategy/order/SetOrderInProcessing
 import ApproveOrderStrategy from "../strategy/order/ApprovedOrder";
 import ShipOrderStrategy from "../strategy/order/ShipOrder";
 import DeliverOrderStrategy from "../strategy/order/ConfirmDelivery";
+import ValidateCouponUsageStrategy from "../strategy/payment/ValidateCouponUsage";
+import MarkCouponAsUsedStrategy from "../strategy/payment/MarkUsedCoupon";
+import CupomDAO from "../DAO/Interface/CupomDAO";
+import ReprovedOrderStrategy from "../strategy/order/ReprovedOrder";
 
 export default class Facade implements IFacade<entity> {
   private readonly entityDAOMap: Map<string, IDAO<entity>>;
   private readonly strategyMap: Map<string, Array<IStrategy<entity>>>;
+  cupomDAO!: CupomDAO;
 
   private async gerarLog(entity: entity, acao: string): Promise<void> {
     const logDAO = this.entityDAOMap.get("Log") as IDAO<Log>;
@@ -59,7 +64,6 @@ export default class Facade implements IFacade<entity> {
     private readonly addressDAO: AddressDAO,
     private readonly creditCardDAO: CreditCardDAO,
     private readonly orderDAO: OrderDAO,
-    private readonly paymentDAO: PaymentDAO,
     private readonly stockDAO: StockDAO,
     private readonly logDAO: LogDAO,
   ) {
@@ -72,6 +76,8 @@ export default class Facade implements IFacade<entity> {
     this.strategyMap = new Map<string, Array<IStrategy<entity>>>();
     this.initializeStrategies();
   }
+
+  
 
   private initializeStrategies(): void {
     this.strategyMap.set("ClientCreate", [
@@ -97,8 +103,10 @@ export default class Facade implements IFacade<entity> {
     this.strategyMap.set("OrderCreate", [
       new ValidationOrderRequiredFields(),
       new ValidationStock(this.stockDAO),
+      new CalculatedTotalOrder(),
       new ValidateMinValuePerCardStrategy(),
       new ValidateCouponAndCardCombinationStrategy(),
+      new ValidateCouponUsageStrategy(),
       new ProcessPaymentStatusStrategy(),
       new SetOrderInProcessingStrategy(),
     ] as Array<IStrategy<entity>>);
@@ -106,6 +114,11 @@ export default class Facade implements IFacade<entity> {
     this.strategyMap.set("OrderApproved", [
       new ApproveOrderStrategy(),
       new DecreaseStockStrategy(this.stockDAO),
+      new MarkCouponAsUsedStrategy(this.cupomDAO),
+    ]);
+
+    this.strategyMap.set("OrderReproved", [
+      new ReprovedOrderStrategy(),
     ]);
 
     this.strategyMap.set("OrderShip", [
@@ -128,7 +141,7 @@ export default class Facade implements IFacade<entity> {
     this.strategyMap.set("OrderConfirmReturn", [
       new ConfirmReturnStrategy(),
       new RestockFromReturnStrategy(this.stockDAO),
-      new GenerateCouponFromExchangeStrategy(),
+      new GenerateCouponFromExchangeStrategy(this.cupomDAO),
     ]);
 
     this.strategyMap.set("CreditCard", [new ValidateCreditCardFlag()] as Array<
@@ -286,6 +299,11 @@ export default class Facade implements IFacade<entity> {
     return entidadeAtualizada;
   }
 
+  public async getCuponsByClient(clientId: string) {
+    await this.cupomDAO.findByClient(clientId);
+    return [];
+  }
+
   private async executeStrategies(key: string, entity: entity): Promise<void> {
     const strategies = this.strategyMap.get(key) || [];
 
@@ -321,6 +339,27 @@ export default class Facade implements IFacade<entity> {
     const updated = await orderDAO.update(order);
 
     await this.gerarLog(updated, "pedido aprovado");
+
+    return updated;
+  }
+
+  public async reproveOrder(order: entity): Promise<entity> {
+    const entityName = order.constructor.name;
+
+    if (entityName !== "Order") {
+      throw new Error("Operação válida apenas para pedidos");
+    }
+    await this.executeStrategies("OrderReproved", order);
+
+    const orderDAO = this.entityDAOMap.get("Order");
+
+    if (!orderDAO) {
+      throw new Error("DAO não encontrado");
+    }
+
+    const updated = await orderDAO.update(order);
+
+    await this.gerarLog(updated, "pedido reprovado");
 
     return updated;
   }

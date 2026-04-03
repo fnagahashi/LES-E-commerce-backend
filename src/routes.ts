@@ -13,6 +13,8 @@ import CreditCardDAO from "./DAO/Interface/CreditCardDAO";
 import OrderDAO from "./DAO/Interface/OrderDAO";
 import PaymentDAO from "./DAO/Interface/PaymentDAO";
 import StockDAO from "./DAO/Interface/StockDAO";
+import { OrderController } from "./controller/OrderController";
+import CupomDAO from "./DAO/Interface/CupomDAO";
 
 export const createRouter = () => {
   const router = Router();
@@ -22,12 +24,12 @@ export const createRouter = () => {
     new AddressDAO(AppDataSource),
     new CreditCardDAO(AppDataSource),
     new OrderDAO(AppDataSource),
-    new PaymentDAO(AppDataSource),
     new StockDAO(AppDataSource),
     new LogDAO(AppDataSource),
   );
 
   const clientController = new ClientController(facade);
+  const orderController = new OrderController(facade);
   router.post("/login", (req, res) => clientController.login(req, res));
 
   router.post("/clients", (req, res) => clientController.create(req, res));
@@ -68,6 +70,55 @@ export const createRouter = () => {
     clientController.delete(req, res),
   );
 
+  // Rotas venda
+  router.post("/orders", ensureAuthenticated, (req, res) =>
+    orderController.create(req, res),
+  );
+  router.patch(
+    "/orders/:id/approve",
+    ensureAuthenticated,
+    ensureAdmin,
+    (req, res) => orderController.approveOrder(req, res),
+  );
+  router.patch(
+    "/orders/:id/reprove",
+    ensureAuthenticated,
+    ensureAdmin,
+    (req, res) => orderController.reproveOrder(req, res),
+  );
+  router.patch(
+    "/orders/:id/ship",
+    ensureAuthenticated,
+    ensureAdmin,
+    (req, res) => orderController.shipOrder(req, res),
+  );
+  router.patch(
+    "/orders/:id/confirmDelivery",
+    ensureAuthenticated,
+    ensureAdmin,
+    (req, res) => orderController.confirmDelivery(req, res),
+  );
+  router.patch("/orders/:id/requestExchange", ensureAuthenticated, (req, res) =>
+    orderController.requestExchange(req, res),
+  );
+  router.patch(
+    "/orders/:id/authorizeExchange",
+    ensureAuthenticated,
+    ensureAdmin,
+    (req, res) => orderController.authorizeExchange(req, res),
+  );
+  router.patch(
+    "/orders/:id/confirmExchange",
+    ensureAuthenticated,
+    ensureAdmin,
+    (req, res) => orderController.confirmExchange(req, res),
+  );
+  router.get("/orders/:id", ensureAuthenticated, ensureAdmin, (req, res) =>
+    orderController.findById(req, res),
+  );
+  router.get("/orders", ensureAuthenticated, ensureAdmin, (req, res) =>
+    orderController.findAll(req, res),
+  );
 
   router.get("/health", (req, res) => {
     res.json({
