@@ -70,6 +70,11 @@ export const createRouter = () => {
     clientController.delete(req, res),
   );
 
+  //Rota para pegar cupons de acordo com o cliente
+  router.get("/clients/:id/cupons", ensureAuthenticated, (req, res) =>
+    clientController.getCupons(req, res),
+  );
+
   // Rotas venda
   router.post("/orders", ensureAuthenticated, (req, res) =>
     orderController.create(req, res),
