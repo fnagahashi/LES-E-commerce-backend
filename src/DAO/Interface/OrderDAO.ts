@@ -21,16 +21,16 @@ export default class OrderDAO implements IDAO<Order> {
     await this.repository.remove(order);
   }
 
-  async findById(id: string): Promise<Order> {
+  async findById(id: string): Promise<Order | null> {
     return this.repository.findOne({
       where: { id },
-      relations: ['orderItems', 'payment', 'delivery', 'client'],
+      relations: ["orderItems", "payment", "delivery", "client"],
     });
   }
 
   async findAll(): Promise<Order[]> {
     return this.repository.find({
-      relations: ['orderItems', 'payment', 'delivery', 'client'],
+      relations: ["orderItems", "payment", "delivery", "client"],
     });
   }
 
@@ -40,9 +40,16 @@ export default class OrderDAO implements IDAO<Order> {
 
   async findBySearch(search: string): Promise<Order[]> {
     return this.repository
-      .createQueryBuilder('venda')
-      .leftJoinAndSelect('venda.cliente', 'cliente')
-      .where('cliente.nome ILIKE :search', { search: `%${search}%` })
+      .createQueryBuilder("venda")
+      .leftJoinAndSelect("venda.cliente", "cliente")
+      .where("cliente.nome ILIKE :search", { search: `%${search}%` })
       .getMany();
+  }
+
+  async findByClient(clientId: string) {
+    return this.repository.find({
+      where: { client: { id: clientId } },
+      relations: ["orderItems", "payment"],
+    });
   }
 }

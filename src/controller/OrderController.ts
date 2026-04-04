@@ -154,7 +154,7 @@ export class OrderController {
     }
   }
 
-  async confirmDelivery (req: Request, res: Response) {
+  async confirmDelivery(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const order = await this.facade.findById("Order", id);
@@ -197,7 +197,7 @@ export class OrderController {
     }
   }
 
-  async authorizeExchange (req: Request, res: Response) {
+  async authorizeExchange(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const order = await this.facade.findById("Order", id);
@@ -218,7 +218,7 @@ export class OrderController {
     }
   }
 
-  async confirmExchange (req: Request, res: Response) {
+  async confirmExchange(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const order = await this.facade.findById("Order", id);
@@ -242,6 +242,12 @@ export class OrderController {
   async findById(req: Request, res: Response) {
     try {
       const { id } = req.params;
+      const user = req.user;
+
+      if (user?.id !== id && user?.role !== "ADMIN") {
+        res.status(403).json({ error: "Acesso negado" });
+        return;
+      }
 
       const order = await this.facade.findById("Order", id);
 
@@ -262,10 +268,38 @@ export class OrderController {
   async findAll(req: Request, res: Response) {
     try {
       const orders = await this.facade.findAll("Order");
+      const user = req.user;
+
+      if (user?.role !== "ADMIN") {
+        res.status(403).json({ error: "Acesso negado" });
+        return;
+      }
 
       res.status(200).json(orders);
     } catch (error: any) {
       console.error("❌ Erro ao listar todos os pedidos:", error);
+      res.status(400).json({
+        success: false,
+        error: error.message,
+      });
+    }
+  }
+
+  async getOrdersByClient(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const user = req.user;
+
+      if (user?.id !== id && user?.role !== "ADMIN") {
+        res.status(403).json({ error: "Acesso negado" });
+        return;
+      }
+
+      const orders = await this.facade.getOrdersByClient(id);
+
+      res.status(200).json(orders);
+    } catch (error: any) {
+      console.error("❌ Erro ao listar os pedidos do cliente:", error);
       res.status(400).json({
         success: false,
         error: error.message,

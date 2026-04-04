@@ -1,7 +1,7 @@
 import IStrategy from "../IStrategy";
 import Order from "../../entities/order";
 
-export default class ValidationRequiredFields implements IStrategy<Order> {
+export default class ValidationRequiredPaymentFields implements IStrategy<Order> {
     async executar(order: Order): Promise<string | undefined> {
         const errors: string[] = [];
 

@@ -12,7 +12,7 @@ export default class Cupom extends entity {
   cupomCode: string;
 
   @Column()
-  cupomValue: string;
+  cupomValue: number;
 
   @Column()
   isActive: boolean;
@@ -25,7 +25,7 @@ export default class Cupom extends entity {
 
   constructor(
     cupomCode: string,
-    cupomValue: string,
+    cupomValue: number,
     isActive: boolean,
     cupomType: CupomType,
     used: boolean,

@@ -75,6 +75,11 @@ export const createRouter = () => {
     clientController.getCupons(req, res),
   );
 
+  //Rota cliente ver o seu pedido
+  router.get("/clients/:id/orders", ensureAuthenticated, (req, res) =>
+    orderController.getOrdersByClient(req, res),
+  );
+
   // Rotas venda
   router.post("/orders", ensureAuthenticated, (req, res) =>
     orderController.create(req, res),
@@ -118,7 +123,7 @@ export const createRouter = () => {
     ensureAdmin,
     (req, res) => orderController.confirmExchange(req, res),
   );
-  router.get("/orders/:id", ensureAuthenticated, ensureAdmin, (req, res) =>
+  router.get("/orders/:id", ensureAuthenticated, (req, res) =>
     orderController.findById(req, res),
   );
   router.get("/orders", ensureAuthenticated, ensureAdmin, (req, res) =>

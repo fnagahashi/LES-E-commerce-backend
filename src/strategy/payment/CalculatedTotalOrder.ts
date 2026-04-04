@@ -17,7 +17,9 @@ export default class CalculatedTotalOrder implements IStrategy<Order> {
             p.paymentMethod === PaymentMethod.cupomExchange,
         )
         .reduce((acc, p) => acc + Number(p.paymentValue), 0) || 0;
-    order.totalPrice = (totalItems - totalCoupons).toFixed(2) + order.freightValue;
+    order.totalPrice =
+      (Number((totalItems - totalCoupons).toFixed(2)) +
+      Number(order.freightValue)).toString();
     return undefined;
   }
 }

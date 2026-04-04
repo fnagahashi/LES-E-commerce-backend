@@ -44,6 +44,7 @@ import ValidateCouponUsageStrategy from "../strategy/payment/ValidateCouponUsage
 import MarkCouponAsUsedStrategy from "../strategy/payment/MarkUsedCoupon";
 import CupomDAO from "../DAO/Interface/CupomDAO";
 import ReprovedOrderStrategy from "../strategy/order/ReprovedOrder";
+import ValidationRequiredPaymentFields from "../strategy/payment/ValidationRequiredFields";
 
 export default class Facade implements IFacade<entity> {
   private readonly entityDAOMap: Map<string, IDAO<entity>>;
@@ -104,6 +105,9 @@ export default class Facade implements IFacade<entity> {
       new ValidationOrderRequiredFields(),
       new ValidationStock(this.stockDAO),
       new CalculatedTotalOrder(),
+      new ValidationRequiredPaymentFields(),
+      new ValidationTotalValue(),
+      new ValidationPaymentExcess(),
       new ValidateMinValuePerCardStrategy(),
       new ValidateCouponAndCardCombinationStrategy(),
       new ValidateCouponUsageStrategy(),
@@ -299,8 +303,17 @@ export default class Facade implements IFacade<entity> {
     return entidadeAtualizada;
   }
 
+  public async findByClient (clientId: string) {
+    
+  }
+
   public async getCuponsByClient(clientId: string) {
     await this.cupomDAO.findByClient(clientId);
+    return [];
+  }
+
+  public async getOrdersByClient(clientId: string) {
+    await this.orderDAO.findByClient(clientId);
     return [];
   }
 

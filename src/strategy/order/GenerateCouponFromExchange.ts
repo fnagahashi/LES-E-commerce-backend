@@ -16,7 +16,7 @@ export default class GenerateCouponFromExchangeStrategy implements IStrategy<Ord
 
     const newCoupon = new Cupom(
       "TROCA-" + Date.now(),
-      total.toString(),
+      total,
       true,
       CupomType.exchange,
       false,
@@ -24,6 +24,8 @@ export default class GenerateCouponFromExchangeStrategy implements IStrategy<Ord
     );
 
     await this.cupomDAO.create(newCoupon);
+
+    (order as any).generateCoupon = newCoupon;
 
     return;
   }
