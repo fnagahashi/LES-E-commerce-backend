@@ -15,6 +15,8 @@ import PaymentDAO from "./DAO/Interface/PaymentDAO";
 import StockDAO from "./DAO/Interface/StockDAO";
 import { OrderController } from "./controller/OrderController";
 import CupomDAO from "./DAO/Interface/CupomDAO";
+import BookDAO from "./DAO/Interface/BookDAO";
+import { BooksController } from "./controller/BooksController";
 
 export const createRouter = () => {
   const router = Router();
@@ -26,10 +28,13 @@ export const createRouter = () => {
     new OrderDAO(AppDataSource),
     new StockDAO(AppDataSource),
     new LogDAO(AppDataSource),
+    new BookDAO(AppDataSource),
   );
 
   const clientController = new ClientController(facade);
   const orderController = new OrderController(facade);
+  const bookController = new BooksController(facade);
+
   router.post("/login", (req, res) => clientController.login(req, res));
 
   router.post("/clients", (req, res) => clientController.create(req, res));
@@ -79,6 +84,10 @@ export const createRouter = () => {
   router.get("/clients/:id/orders", ensureAuthenticated, (req, res) =>
     orderController.getOrdersByClient(req, res),
   );
+
+  // Rotas livro
+  router.get("/books", (req, res) => bookController.findAll(req, res));
+  router.get("/books/:id", (req, res) => bookController.findById(req, res));
 
   // Rotas venda
   router.post("/orders", ensureAuthenticated, (req, res) =>

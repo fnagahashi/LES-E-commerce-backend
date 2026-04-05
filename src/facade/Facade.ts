@@ -45,6 +45,7 @@ import MarkCouponAsUsedStrategy from "../strategy/payment/MarkUsedCoupon";
 import CupomDAO from "../DAO/Interface/CupomDAO";
 import ReprovedOrderStrategy from "../strategy/order/ReprovedOrder";
 import ValidationRequiredPaymentFields from "../strategy/payment/ValidationRequiredFields";
+import BookDAO from "../DAO/Interface/BookDAO";
 
 export default class Facade implements IFacade<entity> {
   private readonly entityDAOMap: Map<string, IDAO<entity>>;
@@ -67,6 +68,7 @@ export default class Facade implements IFacade<entity> {
     private readonly orderDAO: OrderDAO,
     private readonly stockDAO: StockDAO,
     private readonly logDAO: LogDAO,
+    private readonly bookDAO: BookDAO,
   ) {
     this.entityDAOMap = new Map<string, IDAO<entity>>();
     this.entityDAOMap.set("Client", this.clientDAO);
@@ -74,11 +76,10 @@ export default class Facade implements IFacade<entity> {
     this.entityDAOMap.set("CreditCard", this.creditCardDAO);
     this.entityDAOMap.set("Order", this.orderDAO);
     this.entityDAOMap.set("Log", this.logDAO);
+    this.entityDAOMap.set("Book", this.bookDAO);
     this.strategyMap = new Map<string, Array<IStrategy<entity>>>();
     this.initializeStrategies();
   }
-
-  
 
   private initializeStrategies(): void {
     this.strategyMap.set("ClientCreate", [
@@ -121,17 +122,11 @@ export default class Facade implements IFacade<entity> {
       new MarkCouponAsUsedStrategy(this.cupomDAO),
     ]);
 
-    this.strategyMap.set("OrderReproved", [
-      new ReprovedOrderStrategy(),
-    ]);
+    this.strategyMap.set("OrderReproved", [new ReprovedOrderStrategy()]);
 
-    this.strategyMap.set("OrderShip", [
-      new ShipOrderStrategy(),
-    ]);
+    this.strategyMap.set("OrderShip", [new ShipOrderStrategy()]);
 
-    this.strategyMap.set("OrderDeliver", [
-      new DeliverOrderStrategy(),
-    ])
+    this.strategyMap.set("OrderDeliver", [new DeliverOrderStrategy()]);
 
     this.strategyMap.set("OrderRequestExchange", [
       new ValidateExchangeRequestStrategy(),
@@ -303,9 +298,7 @@ export default class Facade implements IFacade<entity> {
     return entidadeAtualizada;
   }
 
-  public async findByClient (clientId: string) {
-    
-  }
+  public async findByClient(clientId: string) {}
 
   public async getCuponsByClient(clientId: string) {
     await this.cupomDAO.findByClient(clientId);
