@@ -1,6 +1,7 @@
-import { Column, Entity } from "typeorm";
+import { Column, Entity, OneToOne } from "typeorm";
 import entity from "./entity";
 import { Categories } from "../enum/Categories";
+import Stock from "./stock";
 
 @Entity("book")
 export default class Book extends entity {
@@ -34,6 +35,9 @@ export default class Book extends entity {
   @Column()
   active!: boolean;
 
+  @OneToOne(() => Stock, (stock) => stock.book)
+  stock: Stock;
+
   constructor(
     title: string,
     author: string,
@@ -45,6 +49,7 @@ export default class Book extends entity {
     price: string,
     description: string,
     active: boolean,
+    stock: Stock,
   ) {
     super();
     this.title = title;
@@ -57,5 +62,6 @@ export default class Book extends entity {
     this.price = price;
     this.description = description;
     this.active = active;
+    this.stock = stock;
   }
 }

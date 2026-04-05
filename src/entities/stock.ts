@@ -4,7 +4,7 @@ import Book from "./book";
 
 @Entity("stock")
 export default class Stock extends entity {
-  @OneToOne(() => Book)
+  @OneToOne(() => Book )
   @JoinColumn()
   book: Book;
 

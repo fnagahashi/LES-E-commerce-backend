@@ -32,7 +32,7 @@ export default class StockDAO implements IDAO<Stock> {
     });
   }
   async findAll() {
-    return this.repository.find({ relations: ['produto'] });
+    return this.repository.find({ relations: ['book'] });
   }
 
   async findByFilters(filters: Partial<Stock>) {
