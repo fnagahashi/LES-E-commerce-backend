@@ -35,10 +35,10 @@ export default class CreditCard extends entity {
   isMainCard!: boolean;
 
   @ManyToOne(() => Client, (client) => client.creditCard)
-  client: Client;
+  client?: Client;
 
   @ManyToOne(() => Payment, (payment) => payment.creditCard)
-  payment: Payment;
+  payment?: Payment;
 
   @CreateDateColumn()
   created_at!: Date;
@@ -55,6 +55,7 @@ export default class CreditCard extends entity {
     securityCode: string,
     isMainCard: boolean,
     client?: Client,
+    payment?: Payment
   ) {
     super();
     this.cardNumber = cardNumber;
@@ -68,6 +69,9 @@ export default class CreditCard extends entity {
     this.isMainCard = isMainCard;
     if (client) {
       this.client = client;
+    }
+    if (payment) {
+      this.payment = payment;
     }
   }
 }

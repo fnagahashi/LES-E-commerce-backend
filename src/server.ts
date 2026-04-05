@@ -16,11 +16,10 @@ const startServer = async () => {
     await AppDataSource.initialize();
     console.log("✅ Banco conectado");
 
-    const router = createRouter(); // ✅ AGORA seguro
+    const router = createRouter();
 
     app.use("/api", router);
 
-    // middleware de erro DEPOIS das rotas
     app.use((err: any, req: any, res: any, next: any) => {
       res.status(400).json({
         success: false,

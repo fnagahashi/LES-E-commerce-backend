@@ -13,8 +13,8 @@ export default class Address extends entity {
   @Column()
   typeResidence!: string;
 
-  @Column()
-  addressNickname!: string;
+  @Column({ nullable: true })
+  addressNickname: string;
 
   @Column()
   typeStreet!: string;
@@ -50,7 +50,7 @@ export default class Address extends entity {
   isBillingAddress: boolean;
 
   @ManyToOne(() => Client, (client) => client.addresses)
-  client: Client;
+  client?: Client;
 
   @CreateDateColumn()
   created_at!: Date;

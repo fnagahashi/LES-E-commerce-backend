@@ -24,9 +24,6 @@ export default class Book extends entity {
   publisher!: string;
 
   @Column()
-  quantityStock!: number;
-
-  @Column()
   price!: string;
 
   @Column()
@@ -45,7 +42,6 @@ export default class Book extends entity {
     yearPublication: string,
     isbn: string,
     publisher: string,
-    quantityStock: number,
     price: string,
     description: string,
     active: boolean,
@@ -58,7 +54,6 @@ export default class Book extends entity {
     this.yearPublication = yearPublication;
     this.isbn = isbn;
     this.publisher = publisher;
-    this.quantityStock = quantityStock;
     this.price = price;
     this.description = description;
     this.active = active;
