@@ -9,6 +9,7 @@ export default class CalculatedTotalOrder implements IStrategy<Order> {
         soma + Number(orderItem.unitaryValue) * orderItem.quantity,
       0,
     );
+    console.log("totalItems", totalItems);
     const totalCoupons =
       order.payment
         ?.filter(
@@ -17,9 +18,11 @@ export default class CalculatedTotalOrder implements IStrategy<Order> {
             p.paymentMethod === PaymentMethod.cupomExchange,
         )
         .reduce((acc, p) => acc + Number(p.paymentValue), 0) || 0;
-    order.totalPrice =
-      (Number((totalItems - totalCoupons).toFixed(2)) +
-      Number(order.freightValue)).toString();
+    console.log("totalCoupons", totalCoupons);
+    order.totalPrice = (
+      Number(totalItems.toFixed(2)) + Number(order.freightValue)
+    ).toString();
+    console.log("order.totalPrice", order.totalPrice);
     return undefined;
   }
 }
