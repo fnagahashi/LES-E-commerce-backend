@@ -18,7 +18,7 @@ export default class CupomDAO {
     });
   }
 
-  async findByCode(cupomCode: string) {
+  async findByCode(cupomCode: string): Promise<Cupom | null> {
     return this.repository.findOne({
       where: { cupomCode },
       relations: ["client"],
@@ -30,14 +30,13 @@ export default class CupomDAO {
   }
 
   async findByClient(clientId: string) {
-    this.repository.find({
+    return await this.repository.find({
       where: {
         client: { id: clientId },
         isActive: true,
         used: false,
       },
     });
-    return;
   }
 
   async markAsUsed(cupomId: string) {

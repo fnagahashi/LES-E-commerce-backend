@@ -28,11 +28,11 @@ export default class BookDAO {
     return this.repository.find({ where: { title: search } });
   }
 
-  findById(id: string) {
-    return this.repository.findOneBy({ id });
+  async findById(id: string) {
+    return this.repository.findOne({ where: { id } });
   }
 
-  findAll() {
+  async findAll() {
     return this.repository.find();
   }
 }

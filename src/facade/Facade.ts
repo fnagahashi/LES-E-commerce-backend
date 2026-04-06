@@ -46,11 +46,11 @@ import CupomDAO from "../DAO/Interface/CupomDAO";
 import ReprovedOrderStrategy from "../strategy/order/ReprovedOrder";
 import ValidationRequiredPaymentFields from "../strategy/payment/ValidationRequiredFields";
 import BookDAO from "../DAO/Interface/BookDAO";
+import Cupom from "../entities/cupom";
 
 export default class Facade implements IFacade<entity> {
   private readonly entityDAOMap: Map<string, IDAO<entity>>;
   private readonly strategyMap: Map<string, Array<IStrategy<entity>>>;
-  cupomDAO!: CupomDAO;
 
   private async gerarLog(entity: entity, acao: string): Promise<void> {
     const logDAO = this.entityDAOMap.get("Log") as IDAO<Log>;
@@ -69,6 +69,7 @@ export default class Facade implements IFacade<entity> {
     private readonly stockDAO: StockDAO,
     private readonly logDAO: LogDAO,
     private readonly bookDAO: BookDAO,
+    private readonly cupomDAO: CupomDAO,
   ) {
     this.entityDAOMap = new Map<string, IDAO<entity>>();
     this.entityDAOMap.set("Client", this.clientDAO);
@@ -116,7 +117,7 @@ export default class Facade implements IFacade<entity> {
       new SetOrderInProcessingStrategy(),
     ] as Array<IStrategy<entity>>);
 
-    this.strategyMap.set("OrderApproved", [
+    this.strategyMap.set("OrderApprove", [
       new ApproveOrderStrategy(),
       new DecreaseStockStrategy(this.stockDAO),
       new MarkCouponAsUsedStrategy(this.cupomDAO),
@@ -176,6 +177,11 @@ export default class Facade implements IFacade<entity> {
     await this.gerarLog(entidadeCriada, "criado");
 
     return entidadeCriada;
+  }
+
+  public async getCupomByCode(code: string): Promise<Cupom | null> {
+    const cupom = await this.cupomDAO.findByCode(code);
+    return cupom;
   }
 
   public async update(entity: entity): Promise<entity> {
@@ -301,18 +307,19 @@ export default class Facade implements IFacade<entity> {
   public async findByClient(clientId: string) {}
 
   public async getCuponsByClient(clientId: string) {
-    await this.cupomDAO.findByClient(clientId);
-    return [];
+    const coupons = await this.cupomDAO.findByClient(clientId);
+    return coupons;
   }
 
   public async getOrdersByClient(clientId: string) {
-    await this.orderDAO.findByClient(clientId);
-    return [];
+    const orders = await this.orderDAO.findByClient(clientId);
+    return orders;
   }
 
   private async executeStrategies(key: string, entity: entity): Promise<void> {
+    console.log("Executando estratégias para:", key);
     const strategies = this.strategyMap.get(key) || [];
-
+    console.log(`Estratégias encontradas para ${key}:`, strategies);
     let msg = "";
 
     for (const strategy of strategies) {
@@ -330,12 +337,12 @@ export default class Facade implements IFacade<entity> {
 
   public async approveOrder(order: entity): Promise<entity> {
     const entityName = order.constructor.name;
-
+    console.log("Aprovando pedido fachada: ", order);
     if (entityName !== "Order") {
       throw new Error("Operação válida apenas para pedidos");
     }
     await this.executeStrategies("OrderApprove", order);
-
+    console.log("Pedido aprovado fachada: ", order);
     const orderDAO = this.entityDAOMap.get("Order");
 
     if (!orderDAO) {
@@ -343,7 +350,7 @@ export default class Facade implements IFacade<entity> {
     }
 
     const updated = await orderDAO.update(order);
-
+    console.log("Pedido aprovado fachada: ", order);
     await this.gerarLog(updated, "pedido aprovado");
 
     return updated;
@@ -566,7 +573,7 @@ export default class Facade implements IFacade<entity> {
     id: string,
   ): Promise<entity | null> {
     const entidadeDAO = this.entityDAOMap.get(entityName);
-
+    console.log("id", id);
     if (!entidadeDAO) {
       throw new Error(`DAO não encontrado para entidade: ${entityName}`);
     }

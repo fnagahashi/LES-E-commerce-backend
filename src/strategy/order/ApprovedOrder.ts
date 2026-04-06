@@ -4,6 +4,7 @@ import { OrderStatus } from "../../enum/OrderStatus";
 
 export default class ApproveOrderStrategy implements IStrategy<Order> {
   async executar(order: Order): Promise<string | undefined> {
+    console.log("Aprovando pedido");
     if (order.status !== OrderStatus.inProcessing) {
       return "Pedido não está em processamento";
     }

@@ -29,6 +29,7 @@ export const createRouter = () => {
     new StockDAO(AppDataSource),
     new LogDAO(AppDataSource),
     new BookDAO(AppDataSource),
+    new CupomDAO(AppDataSource),
   );
 
   const clientController = new ClientController(facade);

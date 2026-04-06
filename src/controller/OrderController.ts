@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
 import Facade from "../facade/Facade";
 import Order from "../entities/order";
-import entity from "../entities/entity";
 import { OrderStatus } from "../enum/OrderStatus";
 import OrderItem from "../entities/orderItem";
 import Payment from "../entities/payment";
-import Delivery from "../entities/delivery";
+import Cupom from "../entities/cupom";
+import Book from "../entities/book";
 
 export class OrderController {
   constructor(private readonly facade: Facade) {}
@@ -25,27 +25,47 @@ export class OrderController {
       console.log("Criando pedido: ", req.body);
       console.log("Para qual cliente é esse pedido: ", clientId.name);
 
-      const items = orderItems.map(
-        (item: OrderItem) =>
-          new OrderItem(
+      const items = await Promise.all(
+        orderItems.map(async (item: any) => {
+          console.log("item: ", item.bookId);
+          const book = (await this.facade.findById(
+            "Book",
+            item.bookId,
+          )) as Book;
+
+          if (!book) throw new Error("Livro não encontrado");
+
+          return new OrderItem(
             item.order,
-            item.book,
+            { id: item.bookId } as Book,
             item.quantity,
             item.unitaryValue,
             item.totalItemValue,
-          ),
+          );
+        }),
       );
+      const paymentsOrder = await Promise.all(
+        payments.map(async (payment: any) => {
+          let cupom: Cupom | null = null;
 
-      const paymentsOrder = payments.map(
-        (payment: Payment) =>
-          new Payment(
+          if (payment.cupomCode) {
+            cupom =
+              (await this.facade.getCupomByCode(payment.cupomCode)) ?? null;
+
+            if (!cupom) {
+              throw new Error(`Cupom ${payment.cupomCode} não encontrado`);
+            }
+          }
+
+          return new Payment(
             payment.order,
-            payment.creditCard!,
-            payment.cupom!,
+            payment.creditCard ?? null,
+            cupom ?? null,
             payment.paymentMethod,
             payment.paymentValue,
             payment.paymentStatus,
-          ),
+          );
+        }),
       );
 
       const order = new Order(
@@ -78,7 +98,6 @@ export class OrderController {
   async approveOrder(req: Request, res: Response) {
     try {
       const { id } = req.params;
-
       const order = await this.facade.findById("Order", id);
 
       if (!order) {
@@ -244,15 +263,15 @@ export class OrderController {
       const { id } = req.params;
       const user = req.user;
 
-      if (user?.id !== id && user?.role !== "ADMIN") {
-        res.status(403).json({ error: "Acesso negado" });
-        return;
-      }
-
-      const order = await this.facade.findById("Order", id);
+      const order = (await this.facade.findById("Order", id)) as Order;
 
       if (!order) {
         res.status(404).json({ error: "Pedido nao encontrado" });
+      }
+
+      if (user?.email !== order.client.email) {
+        res.status(403).json({ error: "Acesso negado" });
+        return;
       }
 
       res.status(200).json(order);
@@ -288,12 +307,6 @@ export class OrderController {
   async getOrdersByClient(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const user = req.user;
-
-      if (user?.id !== id && user?.role !== "ADMIN") {
-        res.status(403).json({ error: "Acesso negado" });
-        return;
-      }
 
       const orders = await this.facade.getOrdersByClient(id);
 

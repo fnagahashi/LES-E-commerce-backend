@@ -36,7 +36,7 @@ export default class Payment extends entity {
   constructor(
     order: Order,
     creditCard: CreditCard,
-    cupom: Cupom,
+    cupom: Cupom | null,
     paymentMethod: PaymentMethod,
     paymentValue: string,
     paymentStatus: PaymentStatus,
@@ -44,7 +44,7 @@ export default class Payment extends entity {
     super();
     this.order = order;
     this.creditCard = creditCard;
-    this.cupom = cupom;
+    this.cupom = cupom ?? undefined;
     this.paymentMethod = paymentMethod;
     this.paymentValue = paymentValue;
     this.paymentStatus = paymentStatus;

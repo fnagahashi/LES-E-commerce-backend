@@ -215,12 +215,12 @@ export class ClientController {
         res.status(404).json({ error: "Cliente nao encontrado" });
         return;
       }
-
-      const cupons = await this.facade.getCuponsByClient(id);
-
+      const cupons = (await this.facade.getCuponsByClient(
+        id,
+      )) as unknown as any[];
+      console.log("cupons", cupons);
       res.json({
         success: true,
-        count: cupons.length,
         cupons,
       });
     } catch (error: any) {

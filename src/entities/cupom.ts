@@ -11,7 +11,7 @@ export default class Cupom extends entity {
   @Column()
   cupomCode: string;
 
-  @Column()
+  @Column("decimal", { precision: 10, scale: 2 })
   cupomValue: number;
 
   @Column()

@@ -24,7 +24,14 @@ export default class OrderDAO implements IDAO<Order> {
   async findById(id: string): Promise<Order | null> {
     return this.repository.findOne({
       where: { id },
-      relations: ["orderItems", "payment", "delivery", "client"],
+      relations: [
+        "orderItems",
+        "payment",
+        "delivery",
+        "client",
+        "orderItems.book",
+        "orderItems.book.stock.book",
+      ],
     });
   }
 
@@ -49,7 +56,7 @@ export default class OrderDAO implements IDAO<Order> {
   async findByClient(clientId: string) {
     return this.repository.find({
       where: { client: { id: clientId } },
-      relations: ["orderItems", "payment"],
+      relations: ["orderItems", "orderItems.book", "payment"],
     });
   }
 }

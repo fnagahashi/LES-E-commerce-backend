@@ -9,7 +9,7 @@ export default class RestockFromReturnStrategy implements IStrategy<Order> {
     if (!order.orderItems) return;
 
     for (const item of order.orderItems) {
-      const stock = await this.stockDAO.findById(item.book.id);
+      const stock = await this.stockDAO.findById(item.book.stock.id);
 
       if (stock) {
         stock.quantity += item.quantity;

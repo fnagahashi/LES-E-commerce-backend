@@ -24,7 +24,7 @@ export class BooksController {
     try {
       console.log("facade:", this.facade);
       const books = await this.facade.findAll("Book");
-      console.log(`📋 Listando Clientes: ${books.length} encontrados`);
+      console.log(`📋 Listando produtos: ${books.length} encontrados`);
 
       res.json({
         success: true,

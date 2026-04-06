@@ -28,11 +28,11 @@ export default class StockDAO implements IDAO<Stock> {
   async findById(id: string) {
     return this.repository.findOne({
       where: { id },
-      relations: ["book"],
+      relations: ["book", "book.stock"],
     });
   }
   async findAll() {
-    return this.repository.find({ relations: ['book'] });
+    return this.repository.find({ relations: ["book"] });
   }
 
   async findByFilters(filters: Partial<Stock>) {
