@@ -47,6 +47,7 @@ import ReprovedOrderStrategy from "../strategy/order/ReprovedOrder";
 import ValidationRequiredPaymentFields from "../strategy/payment/ValidationRequiredFields";
 import BookDAO from "../DAO/Interface/BookDAO";
 import Cupom from "../entities/cupom";
+import CalculateFreight from "../strategy/payment/CalculateFreight";
 
 export default class Facade implements IFacade<entity> {
   private readonly entityDAOMap: Map<string, IDAO<entity>>;
@@ -107,9 +108,10 @@ export default class Facade implements IFacade<entity> {
       new ValidationOrderRequiredFields(),
       new ValidationStock(this.stockDAO),
       new ValidationRequiredPaymentFields(),
+      new CalculateFreight(),
+      new CalculatedTotalOrder(),
       new ValidationTotalValue(),
       new ValidationPaymentExcess(),
-      new CalculatedTotalOrder(),
       new ValidateCouponAndCardCombinationStrategy(),
       new ValidateMinValuePerCardStrategy(),
       new ValidateCouponUsageStrategy(),

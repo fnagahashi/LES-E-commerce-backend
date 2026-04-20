@@ -20,8 +20,8 @@ export default class CalculatedTotalOrder implements IStrategy<Order> {
         .reduce((acc, p) => acc + Number(p.paymentValue), 0) || 0;
     console.log("totalCoupons", totalCoupons);
     order.totalPrice = (
-      Number(totalItems.toFixed(2)) + Number(order.freightValue)
-    ).toString();
+      Number(totalItems) + Number(order.freightValue)
+    ).toFixed(2);
     console.log("order.totalPrice", order.totalPrice);
     return undefined;
   }
