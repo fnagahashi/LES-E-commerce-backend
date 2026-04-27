@@ -2,7 +2,7 @@ import request from "supertest";
 import app from "../server";
 import { AppDataSource } from "../database";
 
-describe("Registro de Pedido", () => {
+describe("Registro de Pedido - Pagamento com 2 cartões", () => {
   let token: string;
   beforeAll(async () => {
     process.env.NODE_ENV = "test";
@@ -23,7 +23,7 @@ describe("Registro de Pedido", () => {
     await AppDataSource.destroy();
   });
 
-  test("deve registrar pedido com sucesso", async () => {
+  test("pagamento com 2 cartões", async () => {
     const response = await request(app)
       .post("/api/orders")
       .set("Authorization", `Bearer ${token}`)
@@ -51,12 +51,20 @@ describe("Registro de Pedido", () => {
         payments: [
           {
             paymentMethod: "CREDIT_CARD",
-            paymentValue: "147.70",
+            paymentValue: "70.00",
             paymentStatus: "APPROVED",
             creditCard: {
               id: "f093a981-38c9-47f2-b18f-50ce88e1ec0c",
             },
           },
+          {
+          paymentMethod: "CREDIT_CARD",
+          paymentValue: "77.70",
+          paymentStatus: "APPROVED",
+          creditCard: {
+            id: "4f2bed0b-f05d-4fdf-9bf5-3f8b259c663c",
+          },
+        },
         ],
 
         delivery: {
@@ -74,8 +82,7 @@ describe("Registro de Pedido", () => {
 
     expect(response.status).toBe(201);
     expect(response.body.success).toBe(true);
-    expect(response.body.order.freightValue).toBe("5");
-    expect(response.body.order.totalPrice).toBe("147.70");
+    expect(response.body.order.payment.length).toBe(2);
     expect(response.body.order).toHaveProperty("id");
   });
 });
