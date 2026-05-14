@@ -1,18 +1,16 @@
 {
-   "compilerOptions": {
-      "typeRoots": ["./src/@types", "./node_modules/@types"],
-      "types": ["node", "jest"],
-      "lib": [
-         "es5",
-         "es6"
-      ],
-      "target": "es5",
-      "module": "commonjs",
-      "moduleResolution": "node",
-      "outDir": "./build",
-      "emitDecoratorMetadata": true,
-      "experimentalDecorators": true,
-      "esModuleInterop": true,
-      "sourceMap": true
-   }
+  "compilerOptions": {
+    "typeRoots": ["./src/@types", "./node_modules/@types"],
+    "types": ["node", "jest", "express"],
+    "lib": ["es5", "es6"],
+    "target": "es5",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "outDir": "./build",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "esModuleInterop": true,
+    "sourceMap": true
+  },
+  "include": ["src/**/*.ts"]
 }

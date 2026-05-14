@@ -7,8 +7,8 @@ import Client from "./entities/client";
 import ClientDAO from "./DAO/Interface/ClientDAO";
 import AddressDAO from "./DAO/Interface/AddressDAO";
 import LogDAO from "./DAO/Interface/LogDAO";
-import { ensureAuthenticated } from "./midleware/ensureAuthenticated";
-import { ensureAdmin } from "./midleware/ensureAdmin";
+import { ensureAuthenticated } from "./middleware/ensureAuthenticated";
+import { ensureAdmin } from "./middleware/ensureAdmin";
 import CreditCardDAO from "./DAO/Interface/CreditCardDAO";
 import OrderDAO from "./DAO/Interface/OrderDAO";
 import PaymentDAO from "./DAO/Interface/PaymentDAO";
@@ -126,6 +126,12 @@ export const createRouter = () => {
     ensureAuthenticated,
     ensureAdmin,
     (req, res) => orderController.authorizeExchange(req, res),
+  );
+  router.patch(
+    "/orders/:id/reprovedExchange",
+    ensureAuthenticated,
+    ensureAdmin,
+    (req, res) => orderController.reprovedExchange(req, res),
   );
   router.patch(
     "/orders/:id/confirmExchange",

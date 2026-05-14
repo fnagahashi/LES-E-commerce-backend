@@ -48,6 +48,7 @@ import ValidationRequiredPaymentFields from "../strategy/payment/ValidationRequi
 import BookDAO from "../DAO/Interface/BookDAO";
 import Cupom from "../entities/cupom";
 import CalculateFreight from "../strategy/payment/CalculateFreight";
+import ReprovedExchangeStrategy from "../strategy/order/ReprovedExchange";
 
 export default class Facade implements IFacade<entity> {
   private readonly entityDAOMap: Map<string, IDAO<entity>>;
@@ -135,6 +136,10 @@ export default class Facade implements IFacade<entity> {
       new ValidateExchangeRequestStrategy(),
       new RequestExchangeStrategy(),
     ] as Array<IStrategy<entity>>);
+
+    this.strategyMap.set("OrderReproveExchange", [
+      new ReprovedExchangeStrategy(),
+    ]);
 
     this.strategyMap.set("OrderAuthorizeExchange", [
       new AuthorizeExchangeStrategy(),
@@ -456,6 +461,27 @@ export default class Facade implements IFacade<entity> {
     const updatedOrder = await orderDAO.update(order);
 
     await this.gerarLog(updatedOrder, "Autorizou Troca");
+
+    return updatedOrder;
+  }
+
+  public async reprovedExchange(order: entity): Promise<entity> {
+    const entityName = order.constructor.name;
+
+    if (entityName !== "Order") {
+      throw new Error("Operação válida apenas para pedidos");
+    }
+
+    await this.executeStrategies("OrderReproveExchange", order);
+    const orderDAO = this.entityDAOMap.get("Order");
+
+    if (!orderDAO) {
+      throw new Error("DAO não encontrado para Order");
+    }
+
+    const updatedOrder = await orderDAO.update(order);
+
+    await this.gerarLog(updatedOrder, "Reprovou Troca");
 
     return updatedOrder;
   }
