@@ -198,17 +198,28 @@ export class OrderController {
   async requestExchange(req: Request, res: Response) {
     try {
       const { id } = req.params;
+      const { orderItemIds } = req.body;
+
       const order = await this.facade.findById("Order", id);
 
       if (!order) {
         res.status(404).json({ error: "Pedido nao encontrado" });
+        return;
       }
 
-      const result = await this.facade.requestExchange(order as Order);
+      const orderEntity = order as Order;
+
+      orderEntity.orderItems = orderEntity.orderItems.map((item) => ({
+        ...item,
+        exchangeRequested: orderItemIds.includes(item.id),
+      }));
+
+      const result = await this.facade.requestExchange(orderEntity);
 
       res.status(200).json(result);
     } catch (error: any) {
       console.error("❌ Erro ao solicitar troca do Pedido:", error);
+
       res.status(400).json({
         success: false,
         error: error.message,

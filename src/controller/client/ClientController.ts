@@ -231,6 +231,96 @@ export class ClientController {
     }
   }
 
+  async addAddress(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const addressData = req.body;
+
+      const client = (await this.facade.findById("Client", id)) as Client;
+
+      if (!client) {
+        res.status(404).json({
+          success: false,
+          message: "Cliente não encontrado",
+        });
+        return;
+      }
+
+      const newAddress = new Address(
+        addressData.typeResidence,
+        addressData.addressNickname,
+        addressData.typeStreet,
+        addressData.cep,
+        addressData.street,
+        addressData.neighborhood,
+        addressData.number,
+        addressData.city,
+        addressData.state,
+        addressData.country,
+        addressData.obs,
+        addressData.isDeliveryAddress,
+        addressData.isBillingAddress,
+      );
+
+      client.addresses.push(newAddress);
+
+      const updatedClient = await this.facade.update(client);
+
+      res.status(200).json({
+        success: true,
+        message: "Endereço adicionado com sucesso",
+        client: updatedClient,
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        success: false,
+        error: error.message,
+      });
+    }
+  }
+
+  async addCreditCard(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const cardData = req.body;
+
+      const client = (await this.facade.findById("Client", id)) as Client;
+
+      if (!client) {
+        res.status(404).json({
+          success: false,
+          message: "Cliente não encontrado",
+        });
+        return;
+      }
+
+      const newCard = new CreditCard(
+        cardData.cardNumber,
+        cardData.cardName,
+        cardData.cardExpirationDate,
+        cardData.cardHolderName,
+        cardData.cardFlag,
+        cardData.securityCode,
+        cardData.isMainCard,
+      );
+
+      client.creditCard.push(newCard);
+
+      const updatedClient = await this.facade.update(client);
+
+      res.status(200).json({
+        success: true,
+        message: "Cartão adicionado com sucesso",
+        client: updatedClient,
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        success: false,
+        error: error.message,
+      });
+    }
+  }
+
   async findByFilters(req: Request, res: Response): Promise<void> {
     try {
       const filters = req.query;

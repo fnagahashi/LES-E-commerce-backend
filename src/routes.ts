@@ -57,6 +57,15 @@ export const createRouter = () => {
   router.put("/clients/:id", ensureAuthenticated, (req, res) =>
     clientController.update(req, res),
   );
+
+  //rota para adicionar endereço e cartão de crédito
+  router.post("/clients/:id/address", ensureAuthenticated, (req, res) =>
+    clientController.addAddress(req, res),
+  );
+  router.post("/clients/:id/creditCard", ensureAuthenticated, (req, res) =>
+    clientController.addCreditCard(req, res),
+  );
+
   router.patch(
     "/clients/:id/inactivate",
     ensureAuthenticated,
