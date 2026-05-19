@@ -12,7 +12,7 @@ export default class CalculateFreight implements IStrategy<Order> {
 
         if(totalItems < 60) {
             freight = 20;
-        } else if(totalItems <= 60 && totalItems < 100) {
+        } else if(totalItems >= 60 && totalItems < 100) {
             freight = 10;
         } else if(totalItems >= 100 && totalItems < 150) {
             freight = 5;
