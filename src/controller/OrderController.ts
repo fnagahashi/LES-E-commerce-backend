@@ -77,6 +77,7 @@ export class OrderController {
         totalPrice,
         freightValue,
         status,
+        false
       );
 
       const orderCreated = await this.facade.create(order);

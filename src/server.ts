@@ -2,6 +2,7 @@ import express from "express";
 import "express-async-errors";
 import "reflect-metadata";
 import cors from "cors";
+import "dotenv/config";
 
 import { createRouter } from "./routes";
 import { AppDataSource } from "./database";

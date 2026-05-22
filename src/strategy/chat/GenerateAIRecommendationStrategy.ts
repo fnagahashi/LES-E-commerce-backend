@@ -5,7 +5,7 @@ import ChatRecommendation
 from "../../entities/chatRecommendation";
 
 import OpenAIService
-from "../../services/OpenAIService";
+from "../../services/AIRecommendationService";
 
 export default class
 GenerateAIRecommendationStrategy

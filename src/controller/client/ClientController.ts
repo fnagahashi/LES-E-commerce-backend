@@ -79,6 +79,7 @@ export class ClientController {
         isActive,
         order,
         cupons,
+        [],
       );
 
       const clientCreated = await this.facade.create(client);

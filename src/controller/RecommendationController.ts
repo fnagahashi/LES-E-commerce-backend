@@ -14,24 +14,43 @@ export class RecommendationController {
   ): Promise<void> {
 
     try {
-      const {
-        clientId,
-        message,
-      } = req.body;
+
+      const { message } =
+        req.body;
+
+      const user =
+        req.user;
 
       if (!message) {
         res.status(400).json({
           success: false,
-          error: "Mensagem é obrigatória",
+          error:
+            "Mensagem é obrigatória",
         });
         return;
       }
 
-      const client =
-        (await this.facade.findById(
+      if (!user?.email) {
+        res.status(401).json({
+          success: false,
+          error:
+            "Usuário não autenticado",
+        });
+        return;
+      }
+
+      const clients =
+        await this.facade
+        .findByFilters(
           "Client",
-          clientId
-        )) as Client;
+          {
+            email:
+              user.email,
+          } as any
+        );
+
+      const client =
+        clients[0] as Client;
 
       if (!client) {
         res.status(404).json({
