@@ -17,6 +17,7 @@ import { OrderController } from "./controller/OrderController";
 import CupomDAO from "./DAO/Interface/CupomDAO";
 import BookDAO from "./DAO/Interface/BookDAO";
 import { BooksController } from "./controller/BooksController";
+import { RecommendationController } from "./controller/RecommendationController";
 
 export const createRouter = () => {
   const router = Router();
@@ -35,6 +36,7 @@ export const createRouter = () => {
   const clientController = new ClientController(facade);
   const orderController = new OrderController(facade);
   const bookController = new BooksController(facade);
+  const recommendationController = new RecommendationController(facade);
 
   router.post("/login", (req, res) => clientController.login(req, res));
 
@@ -153,6 +155,11 @@ export const createRouter = () => {
   );
   router.get("/orders", ensureAuthenticated, ensureAdmin, (req, res) =>
     orderController.findAll(req, res),
+  );
+
+  //chat recomendações
+  router.post("/chat/recommendation", ensureAuthenticated, (req, res) =>
+    recommendationController.recommend(req, res),
   );
 
   router.get("/health", (req, res) => {

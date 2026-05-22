@@ -13,6 +13,7 @@ import { Gender } from "../enum/Gender";
 import { Role } from "../enum/Role";
 import Order from "./order";
 import Cupom from "./cupom";
+import ChatSession from "./chatSession";
 
 @Entity("client")
 export default class Client extends entity {
@@ -72,6 +73,9 @@ export default class Client extends entity {
   @OneToMany(() => Cupom, (cupom) => cupom.client)
   cupons: Cupom[];
 
+  @OneToMany(() => ChatSession, (session) => session.client)
+  chatSessions: ChatSession[];
+
   @DeleteDateColumn()
   deletedAt?: Date;
 
@@ -97,6 +101,7 @@ export default class Client extends entity {
     isActive: boolean,
     order: Order[],
     cupons: Cupom[],
+    chatSessions: ChatSession[],
   ) {
     super();
     this.role = role;
@@ -114,5 +119,6 @@ export default class Client extends entity {
     this.isActive = isActive;
     this.order = order;
     this.cupons = cupons;
+    this.chatSessions = chatSessions;
   }
 }

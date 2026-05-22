@@ -50,6 +50,9 @@ import Cupom from "../entities/cupom";
 import CalculateFreight from "../strategy/payment/CalculateFreight";
 import ReprovedExchangeStrategy from "../strategy/order/ReprovedExchange";
 import Order from "../entities/order";
+import FindRelevantBooksStrategy from "../strategy/chat/FindRelevantBooksStrategy";
+import ClientHistoryStrategy from "../strategy/chat/ClientHistoryStrategy";
+import GenerateAIRecommendationStrategy from "../strategy/chat/GenerateAIRecommendationStrategy";
 
 export default class Facade implements IFacade<entity> {
   private readonly entityDAOMap: Map<string, IDAO<entity>>;
@@ -155,6 +158,12 @@ export default class Facade implements IFacade<entity> {
     this.strategyMap.set("CreditCard", [new ValidateCreditCardFlag()] as Array<
       IStrategy<entity>
     >);
+
+    this.strategyMap.set("ChatRecommendationCreate", [
+      new FindRelevantBooksStrategy(this.bookDAO),
+      new ClientHistoryStrategy(this.orderDAO),
+      new GenerateAIRecommendationStrategy(),
+    ]);
   }
 
   public async create(entity: entity): Promise<entity> {
@@ -665,5 +674,17 @@ export default class Facade implements IFacade<entity> {
     }
 
     return await entidadeDAO.findBySearch(search);
+  }
+
+  public async recommendProducts(recommendation: entity): Promise<any> {
+    const entityName = recommendation.constructor.name;
+
+    if (entityName !== "ChatRecommendation") {
+      throw new Error("Entidade inválida");
+    }
+
+    await this.executeStrategies("ChatRecommendationCreate", recommendation);
+
+    return recommendation;
   }
 }

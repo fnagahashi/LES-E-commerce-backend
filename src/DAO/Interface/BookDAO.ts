@@ -1,4 +1,4 @@
-import { DataSource, Repository } from "typeorm";
+import { DataSource, Repository, FindOptionsWhere } from "typeorm";
 import Book from "../../entities/book";
 
 export default class BookDAO {
@@ -20,7 +20,7 @@ export default class BookDAO {
     await this.repository.remove(book);
   }
 
-  findByFilters(filters: Partial<Book>) {
+  findByFilters(filters: FindOptionsWhere<Book>) {
     return this.repository.find({ where: filters });
   }
 
@@ -34,5 +34,86 @@ export default class BookDAO {
 
   async findAll() {
     return this.repository.find();
+  }
+
+  async findRelevantBooks(
+    search: string
+  ) {
+
+    const terms =
+      search
+      .toLowerCase()
+      .split(" ");
+
+    const query =
+      this.repository
+      .createQueryBuilder(
+        "book"
+      );
+
+    terms.forEach(
+      (term, index) => {
+
+      query.orWhere(
+        `LOWER(book.title)
+        LIKE :term${index}`,
+        {
+          [`term${index}`]:
+          `%${term}%`,
+        }
+      );
+
+      query.orWhere(
+        `LOWER(book.description)
+        LIKE :term${index}`,
+        {
+          [`term${index}`]:
+          `%${term}%`,
+        }
+      );
+
+      query.orWhere(
+        `LOWER(book.author)
+        LIKE :term${index}`,
+        {
+          [`term${index}`]:
+          `%${term}%`,
+        }
+      );
+
+      query.orWhere(
+        `LOWER(book.category)
+        LIKE :term${index}`,
+        {
+          [`term${index}`]:
+          `%${term}%`,
+        }
+      );
+
+      query.orWhere(
+        `LOWER(book.keywords)
+        LIKE :term${index}`,
+        {
+          [`term${index}`]:
+          `%${term}%`,
+        }
+      );
+
+      query.orWhere(
+        `LOWER(book.level)
+        LIKE :term${index}`,
+        {
+          [`term${index}`]:
+          `%${term}%`,
+        }
+      );
+    });
+
+    return query
+      .andWhere(
+        "book.active = true"
+      )
+      .take(10)
+      .getMany();
   }
 }

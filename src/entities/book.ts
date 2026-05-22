@@ -32,6 +32,12 @@ export default class Book extends entity {
   @Column()
   active!: boolean;
 
+  @Column({ nullable: true })
+  level!: string;
+
+  @Column("simple-array", { nullable: true })
+  keywords!: string[];
+
   @OneToOne(() => Stock, (stock) => stock.book)
   stock: Stock;
 

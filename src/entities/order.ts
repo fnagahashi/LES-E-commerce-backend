@@ -34,6 +34,9 @@ export default class Order extends entity {
   @Column()
   status: OrderStatus;
 
+  @Column({ nullable: true})
+  chatRecommendatioUsed: boolean;
+
   constructor(
     client: Client,
     orderItems: OrderItem[],
@@ -43,6 +46,7 @@ export default class Order extends entity {
     totalPrice: string,
     freightValue: string,
     status: OrderStatus,
+    chatRecommendatioUsed: boolean
   ) {
     super();
     this.client = client;
@@ -53,5 +57,6 @@ export default class Order extends entity {
     this.totalPrice = totalPrice;
     this.freightValue = freightValue;
     this.status = status;
+    this.chatRecommendatioUsed = chatRecommendatioUsed
   }
 }
