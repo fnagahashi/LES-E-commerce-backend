@@ -36,84 +36,21 @@ export default class BookDAO {
     return this.repository.find();
   }
 
-  async findRelevantBooks(
-    search: string
-  ) {
-
-    const terms =
-      search
-      .toLowerCase()
-      .split(" ");
-
-    const query =
-      this.repository
-      .createQueryBuilder(
-        "book"
-      );
-
-    terms.forEach(
-      (term, index) => {
-
-      query.orWhere(
-        `LOWER(book.title)
-        LIKE :term${index}`,
-        {
-          [`term${index}`]:
-          `%${term}%`,
-        }
-      );
-
-      query.orWhere(
-        `LOWER(book.description)
-        LIKE :term${index}`,
-        {
-          [`term${index}`]:
-          `%${term}%`,
-        }
-      );
-
-      query.orWhere(
-        `LOWER(book.author)
-        LIKE :term${index}`,
-        {
-          [`term${index}`]:
-          `%${term}%`,
-        }
-      );
-
-      query.orWhere(
-        `LOWER(book.category)
-        LIKE :term${index}`,
-        {
-          [`term${index}`]:
-          `%${term}%`,
-        }
-      );
-
-      query.orWhere(
-        `LOWER(book.keywords)
-        LIKE :term${index}`,
-        {
-          [`term${index}`]:
-          `%${term}%`,
-        }
-      );
-
-      query.orWhere(
-        `LOWER(book.level)
-        LIKE :term${index}`,
-        {
-          [`term${index}`]:
-          `%${term}%`,
-        }
-      );
+  async findRelevantBooks(message: string): Promise<Book[]> {
+    const books = await this.repository.find({
+      where: {
+        active: true,
+      },
     });
 
-    return query
-      .andWhere(
-        "book.active = true"
-      )
-      .take(10)
-      .getMany();
+    const normalizedMessage = message.toLowerCase();
+
+    return books.filter((book) => {
+      const keywords = book.keywords ?? [];
+
+      return keywords.some((keyword) =>
+        normalizedMessage.includes(keyword.toLowerCase()),
+      );
+    });
   }
 }
