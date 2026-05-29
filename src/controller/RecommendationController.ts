@@ -45,11 +45,17 @@ export class RecommendationController {
       const recommendation = new ChatRecommendation(client, message);
 
       const result = await this.facade.recommendProducts(recommendation);
+      const session = await this.facade.getOrCreateChatSession(client);
+
+      await this.facade.saveChatMessage(session, "user", message);
+
+      await this.facade.saveChatMessage(session, "assistant", result.response);
 
       if (!result.recommendedBooks || result.recommendedBooks.length === 0) {
         res.status(200).json({
           success: true,
-          response: "Não encontrei livros relacionados ao seu pedido. Tente reformular a sua pergunta.",
+          response:
+            "Não encontrei livros relacionados ao seu pedido. Tente reformular a sua pergunta.",
           recommendedBooks: [],
         });
 

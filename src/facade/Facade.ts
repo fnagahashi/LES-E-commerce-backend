@@ -53,6 +53,11 @@ import Order from "../entities/order";
 import FindRelevantBooksStrategy from "../strategy/chat/FindRelevantBooksStrategy";
 import ClientHistoryStrategy from "../strategy/chat/ClientHistoryStrategy";
 import GenerateAIRecommendationStrategy from "../strategy/chat/GenerateAIRecommendationStrategy";
+import ChatMessageDAO from "../DAO/Interface/ChatMesssageDAO";
+import ChatSessionDAO from "../DAO/Interface/ChatSessionDAO";
+import ChatSession from "../entities/chatSession";
+import ChatMessage from "../entities/chatMessage";
+import { RoleMessage } from "../enum/RoleMessage";
 
 export default class Facade implements IFacade<entity> {
   private readonly entityDAOMap: Map<string, IDAO<entity>>;
@@ -76,6 +81,8 @@ export default class Facade implements IFacade<entity> {
     private readonly logDAO: LogDAO,
     private readonly bookDAO: BookDAO,
     private readonly cupomDAO: CupomDAO,
+    private readonly chatSessionDAO: ChatSessionDAO,
+    private readonly chatMessageDAO: ChatMessageDAO,
   ) {
     this.entityDAOMap = new Map<string, IDAO<entity>>();
     this.entityDAOMap.set("Client", this.clientDAO);
@@ -686,5 +693,39 @@ export default class Facade implements IFacade<entity> {
     await this.executeStrategies("ChatRecommendationCreate", recommendation);
 
     return recommendation;
+  }
+
+  public async getOrCreateChatSession(client: Client) {
+    let session = await this.chatSessionDAO.findActiveByClient(client.id);
+
+    if (!session) {
+      session = new ChatSession();
+
+      session.client = client;
+
+      session.active = true;
+
+      session.messages = [];
+
+      session = await this.chatSessionDAO.create(session);
+    }
+
+    return session;
+  }
+
+  public async saveChatMessage(
+    session: ChatSession,
+    role: string,
+    text: string,
+  ) {
+    const message = new ChatMessage();
+
+    message.session = session;
+
+    message.role = role as RoleMessage;
+
+    message.message = text;
+
+    return this.chatMessageDAO.create(message);
   }
 }

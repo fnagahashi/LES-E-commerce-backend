@@ -1,5 +1,6 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   ManyToOne,
   OneToMany,
@@ -15,7 +16,10 @@ export default class ChatSession
 
   @ManyToOne(
     () => Client,
-    (client) => client.chatSessions
+    (client) => client.chatSessions,
+    {
+      onDelete: "CASCADE",
+    }
   )
   client!: Client;
 
@@ -33,6 +37,6 @@ export default class ChatSession
   })
   active!: boolean;
 
-  @Column()
+  @CreateDateColumn()
   startedAt!: Date;
 }

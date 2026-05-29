@@ -18,6 +18,8 @@ import CupomDAO from "./DAO/Interface/CupomDAO";
 import BookDAO from "./DAO/Interface/BookDAO";
 import { BooksController } from "./controller/BooksController";
 import { RecommendationController } from "./controller/RecommendationController";
+import ChatMessageDAO from "./DAO/Interface/ChatMesssageDAO";
+import ChatSessionDAO from "./DAO/Interface/ChatSessionDAO";
 
 export const createRouter = () => {
   const router = Router();
@@ -31,6 +33,8 @@ export const createRouter = () => {
     new LogDAO(AppDataSource),
     new BookDAO(AppDataSource),
     new CupomDAO(AppDataSource),
+    new ChatSessionDAO(AppDataSource),
+    new ChatMessageDAO(AppDataSource),
   );
 
   const clientController = new ClientController(facade);
