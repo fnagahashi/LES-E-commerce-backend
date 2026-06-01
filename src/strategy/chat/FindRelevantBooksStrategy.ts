@@ -1,58 +1,45 @@
 import IStrategy from "../IStrategy";
 import ChatRecommendation from "../../entities/chatRecommendation";
 import BookDAO from "../../DAO/Interface/BookDAO";
-import OrderDAO from "../../DAO/Interface/OrderDAO";
-import Book from "../../entities/book";
-import { Categories } from "../../enum/Categories";
-import book from "../../entities/book";
+import AIRecommendationService from "../../services/AIRecommendationService";
 
 export default class FindRelevantBooksStrategy
-  implements IStrategy<ChatRecommendation>
-{
+  implements IStrategy<ChatRecommendation> {
+
+  private aiService =
+    new AIRecommendationService();
+
   constructor(
     private readonly bookDAO: BookDAO,
-    private readonly orderDAO: OrderDAO,
   ) {}
 
-  async executar(entity: ChatRecommendation): Promise<string | undefined> {
-    if (!entity.message || entity.message.trim() === "") {
-      return "Digite algo para eu recomendar livros.";
+  async executar(
+    entity: ChatRecommendation,
+  ): Promise<string | undefined> {
+
+    if (!entity.message?.trim()) {
+      return "Digite uma pergunta para recomendar livros.";
     }
 
-    const orders = await this.orderDAO.findByClient(entity.client.id);
+    const intent =
+      await this.aiService
+        .extractIntent(
+          entity.message
+        );
 
-    entity.purchaseHistory = orders;
+    console.log("Intent extraída:", intent);
 
-    const purchasedBooks = orders.reduce((acc: Book[], order: { orderItems: { book: Book; }[]; }) => {
-      acc.push(...order.orderItems.map((item: { book: Book; }) => item.book));
-      return acc;
-    }, [] as Book[]);
+    const books =
+      await this.bookDAO
+        .findBooksByAI(
+          intent.category,
+          intent.keywords,
+        );
 
-    const purchasedBookIds = purchasedBooks.map((book: Book) => book.id);
+    console.log("Livros encontrados:", books);
 
-    const booksByMessage = await this.bookDAO.findRelevantBooks(entity.message);
-
-    const categories = Array.from(
-      new Set(
-        purchasedBooks.map(
-          (book: { category: Categories }) => book.category,
-        ) as Book["category"][],
-      ),
-    );
-
-    const booksByHistory = await this.bookDAO.findBooksByCategories(categories);
-
-    const allBooks = [...booksByMessage, ...booksByHistory];
-
-    const uniqueBooks = allBooks.filter(
-      (book, index, self) => index === self.findIndex((b) => b.id === book.id),
-    );
-
-    const filteredBooks = uniqueBooks.filter(
-      (book) => !purchasedBookIds.includes(book.id),
-    );
-
-    entity.recommendedBooks = filteredBooks.slice(0, 5);
+    entity.recommendedBooks =
+      books;
 
     return undefined;
   }

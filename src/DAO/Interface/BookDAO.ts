@@ -36,20 +36,16 @@ export default class BookDAO {
     return this.repository.find();
   }
 
-  async findRelevantBooks(message: string): Promise<Book[]> {
-    const books = await this.repository.find({
-      where: {
-        active: true,
-      },
-    });
+  async findRelevantBooks(message: string) {
+    const books = await this.findAll();
 
-    const normalizedMessage = message.toLowerCase();
+    const normalized = message.toLowerCase();
 
     return books.filter((book) => {
       const keywords = book.keywords ?? [];
 
       return keywords.some((keyword) =>
-        normalizedMessage.includes(keyword.toLowerCase()),
+        normalized.includes(keyword.toLowerCase()),
       );
     });
   }
@@ -59,5 +55,25 @@ export default class BookDAO {
       .createQueryBuilder("book")
       .where("book.category IN (:...categories)", { categories })
       .getMany();
+  }
+
+  async findBooksByAI(category: string, keywords: string[]) {
+    const books = await this.findAll();
+
+    return books.filter((book) => {
+      const bookKeywords = (book.keywords ?? []).map((k) => k.toLowerCase());
+
+      const keywordMatch = keywords.some((keyword) =>
+        bookKeywords.some((bookKeyword) =>
+          bookKeyword.includes(keyword.toLowerCase()),
+        ),
+      );
+
+      const categoryMatch = book.category
+        ?.toLowerCase()
+        .includes(category.toLowerCase());
+
+      return keywordMatch || categoryMatch;
+    });
   }
 }

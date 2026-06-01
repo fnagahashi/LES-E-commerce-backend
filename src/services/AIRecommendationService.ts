@@ -20,34 +20,47 @@ export default class AIRecommendationService {
       return "Não encontrei livros relacionados ao que você pediu.";
     }
 
-    const prompt = `
-Você é um chatbot de recomendação de livros.
+    try {
+      const prompt = `
+Você é um assistente de recomendação
+de livros.
 
-REGRAS:
-- Recomende SOMENTE livros enviados.
-- Nunca invente livros.
-- Nunca invente categorias.
-- Se não existir livro relevante, diga que não encontrou.
-- Considere histórico do cliente.
+REGRAS OBRIGATÓRIAS:
+- Recomende SOMENTE os livros enviados.
+- NÃO invente livros.
+- NÃO invente autores.
+- NÃO invente categorias.
+- NÃO fale de livros que não estejam na lista.
+- Considere o histórico do cliente.
+- Explique brevemente por que os livros combinam com o pedido.
 
-Pergunta:
-${message}
+Pedido do cliente:
+"${message}"
 
-Histórico do cliente:
-${JSON.stringify(history)}
+Histórico de compras:
+${history
+  .reduce<string[]>((titles, order) => {
+    titles.push(...order.orderItems.map((item) => item.book?.title ?? ""));
+    return titles;
+  }, [])
+  .filter((title) => title)
+  .join(", ")}
 
-Livros disponíveis:
-${JSON.stringify(
-  books.map((book) => ({
-    title: book.title,
-    author: book.author,
-    category: book.category,
-    description: book.description,
-  })),
-)}
+Livros disponíveis para recomendar:
+${books
+  .map(
+    (book) => `
+Título: ${book.title}
+Autor: ${book.author}
+Categoria: ${book.category}
+Descrição: ${book.description}
+`,
+  )
+  .join("\n")}
+
+Seja natural e amigável.
 `;
 
-    try {
       const response = await this.ai.models.generateContent({
         model: "gemini-2.0-flash",
         contents: prompt,
@@ -58,19 +71,122 @@ ${JSON.stringify(
       console.error("Erro Gemini:", error);
 
       return `
-Com base na sua busca
-"${message}",
-
-recomendo:
+Encontrei alguns livros
+que podem combinar
+com o que você procura:
 
 ${books
   .slice(0, 3)
-  .map((b) => b.title)
-  .join(", ")}
-
-Esses livros estão
-disponíveis na loja.
+  .map((book) => `• ${book.title} (${book.category})`)
+  .join("\n")}
 `;
+    }
+  }
+
+  async extractIntent(message: string): Promise<{
+    category: string;
+    keywords: string[];
+  }> {
+    try {
+      const response = await this.ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: `
+Você é um classificador
+de intenção para uma
+livraria.
+
+Tarefa:
+Entender o significado
+da mensagem do usuário.
+
+IMPORTANTE:
+- Retorne APENAS JSON válido.
+- Nunca explique.
+- Nunca use markdown.
+- Nunca repita as palavras
+da frase do usuário.
+- Interprete semântica.
+
+Categorias possíveis:
+[
+"fantasia",
+"romance",
+"terror",
+"suspense",
+"biografia",
+"aventura",
+]
+
+Exemplos:
+
+Entrada:
+quero livro sobre a vida de outra pessoa
+
+Saída:
+{
+  "category": "biografia",
+  "keywords": [
+    "vida real",
+    "historia real",
+    "biografia"
+  ]
+}
+
+Entrada:
+quero algo de magia
+
+Saída:
+{
+  "category": "fantasia",
+  "keywords": [
+    "magia",
+    "aventura",
+    "mundo fantastico"
+  ]
+}
+
+Entrada:
+quero algo romantico
+
+Saída:
+{
+  "category": "romance",
+  "keywords": [
+    "amor",
+    "casal",
+    "romantico"
+  ]
+}
+
+Entrada:
+${message}
+
+Saída:
+`,
+      });
+
+      const text = response.text ?? "{}";
+
+      console.log("Resposta bruta Gemini:", text);
+
+      const cleanText = text
+        .replace(/```json/g, "")
+        .replace(/```/g, "")
+        .trim();
+
+      const parsed = JSON.parse(cleanText);
+
+      return {
+        category: parsed.category ?? "",
+        keywords: parsed.keywords ?? [],
+      };
+    } catch (error) {
+      console.error("Erro interpretando intenção:", error);
+
+      return {
+        category: "",
+        keywords: [],
+      };
     }
   }
 }
