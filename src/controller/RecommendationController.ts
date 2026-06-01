@@ -44,6 +44,10 @@ export class RecommendationController {
 
       const recommendation = new ChatRecommendation(client, message);
 
+      const orders = await this.facade.getOrdersByClient(client.id);
+
+      recommendation.purchaseHistory = orders;
+
       const result = await this.facade.recommendProducts(recommendation);
       const session = await this.facade.getOrCreateChatSession(client);
 

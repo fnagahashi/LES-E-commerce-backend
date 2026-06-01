@@ -53,4 +53,11 @@ export default class BookDAO {
       );
     });
   }
+
+  async findBooksByCategories(categories: string[]): Promise<Book[]> {
+    return this.repository
+      .createQueryBuilder("book")
+      .where("book.category IN (:...categories)", { categories })
+      .getMany();
+  }
 }

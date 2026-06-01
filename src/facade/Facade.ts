@@ -167,7 +167,7 @@ export default class Facade implements IFacade<entity> {
     >);
 
     this.strategyMap.set("ChatRecommendationCreate", [
-      new FindRelevantBooksStrategy(this.bookDAO),
+      new FindRelevantBooksStrategy(this.bookDAO, this.orderDAO),
       new ClientHistoryStrategy(this.orderDAO),
       new GenerateAIRecommendationStrategy(),
     ]);
