@@ -57,21 +57,27 @@ export default class BookDAO {
       .getMany();
   }
 
-  async findBooksByAI(category: string, keywords: string[]) {
+  async findBooksByAI(category: string, keywords: string[]): Promise<Book[]> {
     const books = await this.findAll();
 
     return books.filter((book) => {
-      const bookKeywords = (book.keywords ?? []).map((k) => k.toLowerCase());
+      const bookCategory = book.category?.toLowerCase().trim() ?? "";
 
-      const keywordMatch = keywords.some((keyword) =>
-        bookKeywords.some((bookKeyword) =>
-          bookKeyword.includes(keyword.toLowerCase()),
-        ),
+      const bookKeywords = (book.keywords ?? []).map((keyword) =>
+        keyword.toLowerCase().trim(),
       );
 
-      const categoryMatch = book.category
-        ?.toLowerCase()
-        .includes(category.toLowerCase());
+      const normalizedKeywords = keywords.map((keyword) =>
+        keyword.toLowerCase().trim(),
+      );
+
+      const keywordMatch = normalizedKeywords.some((keyword) =>
+        bookKeywords.some((bookKeyword) => bookKeyword.includes(keyword)),
+      );
+
+      const categoryMatch = category
+        ? bookCategory.includes(category.toLowerCase().trim())
+        : false;
 
       return keywordMatch || categoryMatch;
     });

@@ -1,11 +1,6 @@
-import IStrategy
-from "../IStrategy";
-
-import ChatRecommendation
-from "../../entities/chatRecommendation";
-
-import OpenAIService
-from "../../services/AIRecommendationService";
+import IStrategy from "../IStrategy";
+import ChatRecommendation from "../../entities/chatRecommendation";
+import OpenAIService from "../../services/AIRecommendationService";
 
 export default class
 GenerateAIRecommendationStrategy
@@ -22,12 +17,16 @@ IStrategy<ChatRecommendation> {
     string | undefined
   > {
 
+    if (entity.response) {
+      return undefined;
+    }
+
     entity.response =
       await this.openAIService
       .recommendBooks(
         entity.message,
         entity.recommendedBooks,
-        entity.purchaseHistory
+        entity.purchaseHistory,
       );
 
     return undefined;

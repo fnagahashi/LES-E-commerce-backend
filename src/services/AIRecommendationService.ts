@@ -22,17 +22,23 @@ export default class AIRecommendationService {
 
     try {
       const prompt = `
-Você é um assistente de recomendação
-de livros.
+Você é um assistente
+de recomendação
+de livros de uma livraria.
 
 REGRAS OBRIGATÓRIAS:
-- Recomende SOMENTE os livros enviados.
+- Recomende SOMENTE livros enviados.
 - NÃO invente livros.
 - NÃO invente autores.
 - NÃO invente categorias.
-- NÃO fale de livros que não estejam na lista.
-- Considere o histórico do cliente.
-- Explique brevemente por que os livros combinam com o pedido.
+- Seja breve.
+- Use no máximo 3 recomendações.
+- Cada recomendação deve ter no máximo 1 frase curta.
+- Responda no máximo em 4 linhas.
+- NÃO escreva introdução longa.
+- NÃO faça resumo do histórico.
+- NÃO explique demais.
+- Se houver histórico, use-o discretamente.
 
 Pedido do cliente:
 "${message}"
@@ -41,12 +47,13 @@ Histórico de compras:
 ${history
   .reduce<string[]>((titles, order) => {
     titles.push(...order.orderItems.map((item) => item.book?.title ?? ""));
+
     return titles;
   }, [])
-  .filter((title) => title)
+  .filter(Boolean)
   .join(", ")}
 
-Livros disponíveis para recomendar:
+Livros disponíveis:
 ${books
   .map(
     (book) => `
@@ -58,11 +65,19 @@ Descrição: ${book.description}
   )
   .join("\n")}
 
-Seja natural e amigável.
+Formato obrigatório:
+
+Posso te recomendar:
+
+• Livro — motivo curto
+
+• Livro — motivo curto
+
+Seja natural.
 `;
 
       const response = await this.ai.models.generateContent({
-        model: "gemini-2.0-flash",
+        model: "gemini-2.5-flash",
         contents: prompt,
       });
 
@@ -71,9 +86,9 @@ Seja natural e amigável.
       console.error("Erro Gemini:", error);
 
       return `
-Encontrei alguns livros
+Não existem livros para recomendar. Mas encontrei alguns livros
 que podem combinar
-com o que você procura:
+com você:
 
 ${books
   .slice(0, 3)
@@ -84,28 +99,39 @@ ${books
   }
 
   async extractIntent(message: string): Promise<{
+    valid: boolean;
+    reason: string;
     category: string;
     keywords: string[];
+    useHistory?: boolean;
   }> {
     try {
       const response = await this.ai.models.generateContent({
         model: "gemini-2.5-flash",
         contents: `
 Você é um classificador
-de intenção para uma
-livraria.
+de intenção de uma
+livraria virtual.
 
-Tarefa:
-Entender o significado
-da mensagem do usuário.
+Sua função NÃO é
+recomendar livros.
 
-IMPORTANTE:
+Sua função é:
+
+1. entender o que
+o usuário realmente quer;
+
+2. decidir se o pedido
+faz sentido para uma
+recomendação de livros.
+
+REGRAS:
+
 - Retorne APENAS JSON válido.
-- Nunca explique.
 - Nunca use markdown.
-- Nunca repita as palavras
-da frase do usuário.
-- Interprete semântica.
+- Nunca explique fora do JSON.
+- Interprete significado
+semântico da frase.
 
 Categorias possíveis:
 [
@@ -114,16 +140,72 @@ Categorias possíveis:
 "terror",
 "suspense",
 "biografia",
-"aventura",
+"aventura"
 ]
 
-Exemplos:
+Um pedido é VÁLIDO quando:
+- pede gênero;
+- pede tema;
+- pede assunto;
+- pede estilo de leitura;
+- pede algo parecido
+com outro livro.
+
+Um pedido é INVÁLIDO quando:
+- mistura atividade sem relação
+com leitura;
+- pede algo sem sentido;
+- tenta relacionar livro
+com situações absurdas;
+- fala de assuntos
+que não ajudam
+na recomendação.
+
+Formato obrigatório:
+
+{
+  "valid": true,
+  "reason": "",
+  "category": "",
+  "keywords": [],
+  "useHistory": false
+}
+
+EXEMPLOS:
 
 Entrada:
-quero livro sobre a vida de outra pessoa
+"me recomenda algo parecido com o que eu gosto"
 
 Saída:
 {
+  "valid": true,
+  "reason": "",
+  "category": "",
+  "keywords": [],
+  "useHistory": true
+}
+
+Entrada:
+"qual livro de romance você me sugere?"
+
+Saída:
+{
+  "valid": true,
+  "reason": "",
+  "category": "romance",
+  "keywords": [
+    "amor",
+    "relacionamento"
+  ]
+}
+
+Entrada:
+"quero livro sobre a vida de outra pessoa"
+
+Saída:
+{
+  "valid": true,
+  "reason": "",
   "category": "biografia",
   "keywords": [
     "vida real",
@@ -133,29 +215,61 @@ Saída:
 }
 
 Entrada:
-quero algo de magia
+"qual livro ler enquanto mergulho em alto mar"
 
 Saída:
 {
-  "category": "fantasia",
-  "keywords": [
-    "magia",
-    "aventura",
-    "mundo fantastico"
-  ]
+  "valid": false,
+  "reason":
+    "A situação não faz sentido para recomendar livros.",
+  "category": "",
+  "keywords": []
 }
 
 Entrada:
-quero algo romantico
+"o pequeno principe é bom para ler no banho?"
 
 Saída:
 {
-  "category": "romance",
-  "keywords": [
-    "amor",
-    "casal",
-    "romantico"
-  ]
+  "valid": false,
+  "reason":
+    "A pergunta relaciona leitura com uma situação sem relevância para recomendação.",
+  "category": "",
+  "keywords": []
+}
+
+Entrada:
+"qual carro devo comprar enquanto leio romance?"
+
+Saída:
+{
+  "valid": false,
+  "reason":
+    "A pergunta não é sobre recomendação de livros.",
+  "category": "",
+  "keywords": []
+}
+
+IMPORTANTE:
+
+Se a mensagem:
+- relacionar leitura com veículos;
+- comida;
+- banho;
+- esporte;
+- atividades físicas;
+- situações absurdas;
+- objetos sem relação com livros;
+
+retorne SEMPRE:
+
+{
+  "valid": false,
+  "reason":
+    "Não consigo recomendar livros para esse tipo de pedido.",
+  "category": "",
+  "keywords": [],
+  "useHistory": false
 }
 
 Entrada:
@@ -177,16 +291,80 @@ Saída:
       const parsed = JSON.parse(cleanText);
 
       return {
+        valid: parsed.valid ?? false,
+        reason: parsed.reason ?? "",
         category: parsed.category ?? "",
         keywords: parsed.keywords ?? [],
+        useHistory: parsed.useHistory ?? false,
       };
     } catch (error) {
       console.error("Erro interpretando intenção:", error);
 
       return {
+        valid: false,
+        reason: "Não foi possível interpretar a intenção.",
         category: "",
         keywords: [],
       };
+    }
+  }
+
+  async generateInvalidRequestResponse(
+    message: string,
+    reason: string,
+  ): Promise<string> {
+    try {
+      const response = await this.ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: `
+Você é um chatbot
+de uma livraria.
+
+O usuário fez um pedido
+que NÃO faz sentido
+para recomendar livros.
+
+Sua função:
+- responder de forma natural;
+- explicar brevemente
+por que não é possível
+recomendar livros;
+- NÃO inventar livros;
+- NÃO sugerir coisas absurdas;
+- manter tom amigável;
+- no máximo 2 frases.
+
+Mensagem do usuário:
+"${message}"
+
+Motivo:
+"${reason}"
+
+Exemplos de estilo:
+
+Usuário:
+"qual livro ler mergulhando no mar"
+
+Resposta:
+"Não consigo recomendar livros para esse tipo de situação, porque a pergunta mistura leitura com uma atividade que não ajuda a escolher um livro."
+
+Usuário:
+"qual carro comprar lendo romance"
+
+Resposta:
+"Parece que sua pergunta não é sobre recomendação de livros. Se quiser, posso indicar romances disponíveis na loja."
+
+Usuário:
+"o pequeno príncipe é bom no banho?"
+
+Resposta:
+"Não consigo avaliar livros com base nesse tipo de situação. Posso te dizer se o livro é bom dependendo do gênero ou estilo que você gosta."
+`,
+      });
+
+      return response.text ?? "Não consigo recomendar livros para isso.";
+    } catch {
+      return reason || "Não consigo recomendar livros para isso.";
     }
   }
 }

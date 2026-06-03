@@ -59,6 +59,7 @@ export class RecommendationController {
         res.status(200).json({
           success: true,
           response:
+            result.response ??
             "Não encontrei livros relacionados ao seu pedido. Tente reformular a sua pergunta.",
           recommendedBooks: [],
         });
