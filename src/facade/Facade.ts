@@ -728,4 +728,26 @@ export default class Facade implements IFacade<entity> {
 
     return this.chatMessageDAO.create(message);
   }
+
+  public async getSalesByCategory(
+    startDate: Date,
+    endDate: Date,
+  ): Promise<any> {
+    const raw = await this.orderDAO.getSalesByCategory(startDate, endDate);
+
+    const months = Array.from(new Set(raw.map((r) => r.month))).sort();
+    const categories = Array.from(new Set(raw.map((r) => r.category)));
+
+    const series = categories.map((category) => ({
+      category,
+      data: months.map((month) => {
+        const found = raw.find(
+          (r) => r.month === month && r.category === category,
+        );
+        return found ? Number(found.totalSold) : 0;
+      }),
+    }));
+
+    return { months, series };
+  }
 }

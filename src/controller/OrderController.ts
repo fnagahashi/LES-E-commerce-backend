@@ -77,7 +77,7 @@ export class OrderController {
         totalPrice,
         freightValue,
         status,
-        false
+        false,
       );
 
       const orderCreated = await this.facade.create(order);
@@ -350,6 +350,27 @@ export class OrderController {
         success: false,
         error: error.message,
       });
+    }
+  }
+
+  async getSalesByCategory(req: Request, res: Response): Promise<void> {
+    try {
+      const { startDate, endDate } = req.query;
+
+      if (!startDate || !endDate) {
+        res.status(400).json({ error: "startDate e endDate são obrigatórios" });
+        return;
+      }
+
+      const result = await this.facade.getSalesByCategory(
+        new Date(startDate as string),
+        new Date(endDate as string),
+      );
+
+      res.status(200).json(result);
+    } catch (error: any) {
+      console.error("❌ Erro ao buscar vendas por categoria:", error);
+      res.status(500).json({ success: false, error: error.message });
     }
   }
 }

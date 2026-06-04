@@ -160,6 +160,9 @@ export const createRouter = () => {
   router.get("/orders", ensureAuthenticated, ensureAdmin, (req, res) =>
     orderController.findAll(req, res),
   );
+  router.get("/orders/sales/by-category", ensureAuthenticated, ensureAdmin, (req, res) =>
+    orderController.getSalesByCategory(req, res),
+  );
 
   //chat recomendações
   router.post("/chat/recommendation", ensureAuthenticated, (req, res) =>

@@ -59,4 +59,23 @@ export default class OrderDAO implements IDAO<Order> {
       relations: ["orderItems", "orderItems.book", "payment"],
     });
   }
+
+  async getSalesByCategory(startDate: Date, endDate: Date): Promise<any[]> {
+    return this.repository
+      .createQueryBuilder("order")
+      .innerJoin("order.orderItems", "item")
+      .innerJoin("item.book", "book")
+      .select("TO_CHAR(order.orderDate, 'YYYY-MM')", "month")
+      .addSelect("book.category", "category")
+      .addSelect("SUM(item.quantity)", "totalSold")
+      .where("order.orderDate BETWEEN :start AND :end", {
+        start: startDate,
+        end: endDate,
+      })
+      .andWhere("order.status != :status", { status: "cancelled" })
+      .groupBy("TO_CHAR(order.orderDate, 'YYYY-MM')")
+      .addGroupBy("book.category")
+      .orderBy("TO_CHAR(order.orderDate, 'YYYY-MM')", "ASC")
+      .getRawMany();
+  }
 }
