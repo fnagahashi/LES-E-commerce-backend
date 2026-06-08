@@ -79,22 +79,19 @@ Seja natural.
       const response = await this.ai.models.generateContent({
         model: "gemini-2.5-flash",
         contents: prompt,
+        config: {
+          thinkingConfig: { thinkingBudget: 0 },
+        },
       });
 
       return response.text ?? "Não consegui gerar recomendação.";
     } catch (error) {
       console.error("Erro Gemini:", error);
 
-      return `
-Não existem livros para recomendar. Mas encontrei alguns livros
-que podem combinar
-com você:
-
-${books
-  .slice(0, 3)
-  .map((book) => `• ${book.title} (${book.category})`)
-  .join("\n")}
-`;
+      return `Encontrei alguns livros que combinam com seu histórico de compras:\n\n${books
+        .slice(0, 3)
+        .map((book) => `• ${book.title} — ${book.category}`)
+        .join("\n")}`;
     }
   }
 
@@ -107,7 +104,10 @@ ${books
   }> {
     try {
       const response = await this.ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-2.5-flash-lite",
+        config: {
+          thinkingConfig: { thinkingBudget: 0 },
+        },
         contents: `
 Você é um classificador
 de intenção de uma
@@ -316,6 +316,9 @@ Saída:
     try {
       const response = await this.ai.models.generateContent({
         model: "gemini-2.5-flash",
+        config: {
+          thinkingConfig: { thinkingBudget: 0 },
+        },
         contents: `
 Você é um chatbot
 de uma livraria.
