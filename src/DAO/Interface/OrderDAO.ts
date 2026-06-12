@@ -65,7 +65,7 @@ export default class OrderDAO implements IDAO<Order> {
       .createQueryBuilder("order")
       .innerJoin("order.orderItems", "item")
       .innerJoin("item.book", "book")
-      .select("TO_CHAR(order.orderDate, 'YYYY-MM')", "month")
+      .select("TO_CHAR(order.orderDate, 'YYYY-MM-DD')", "month")
       .addSelect("book.category", "category")
       .addSelect("SUM(item.quantity)", "totalSold")
       .where("order.orderDate BETWEEN :start AND :end", {
@@ -73,9 +73,9 @@ export default class OrderDAO implements IDAO<Order> {
         end: endDate,
       })
       .andWhere("order.status != :status", { status: "cancelled" })
-      .groupBy("TO_CHAR(order.orderDate, 'YYYY-MM')")
+      .groupBy("TO_CHAR(order.orderDate, 'YYYY-MM-DD')")
       .addGroupBy("book.category")
-      .orderBy("TO_CHAR(order.orderDate, 'YYYY-MM')", "ASC")
+      .orderBy("TO_CHAR(order.orderDate, 'YYYY-MM-DD')", "ASC")
       .getRawMany();
   }
 }
